@@ -9,7 +9,6 @@ public class TEMPplayerAttack : MonoBehaviour
     private InputAction attackAction;
 
     private Rigidbody enemyRb;
-    private float timer = 0f;
     void Start()
     {
         attackAction = inputActionAsset.FindAction("Attack");
