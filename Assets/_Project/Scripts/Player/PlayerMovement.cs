@@ -98,25 +98,22 @@ public class PlayerMovement : MonoBehaviour
             float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running && hasSufficientStamina) ? _runSpeed : _walkSpeed;
             targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
-            if (_playerCombat.LockOnTarget != null)
+            float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
+            if (_mainCameraTransform != null)
             {
-                _currentMoveDirection = (transform.right * moveInput.x + transform.forward * moveInput.y).normalized;
+                targetAngle += _mainCameraTransform.eulerAngles.y;
             }
-            else
+            _currentMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+            if(_playerCombat.LockOnTarget == null)
             {
-                float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
-                if (_mainCameraTransform != null)
-                {
-                    targetAngle += _mainCameraTransform.eulerAngles.y;
-                }
-                _currentMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
                 transform.rotation = Quaternion.Euler(0f, angle, 0f);
             }
         }
-
-        _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, Time.deltaTime * _accelerationRate);
        
+        _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, Time.deltaTime * _accelerationRate);
+        
         if (_currentSpeed > 0.01f && _currentMoveDirection != Vector3.zero)
         {
             _characterController.Move(_currentMoveDirection * (_currentSpeed * Time.deltaTime));
