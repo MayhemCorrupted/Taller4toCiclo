@@ -1,9 +1,9 @@
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
+[RequireComponent(typeof(PlayerStats))]
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _walkSpeed = 5f;
@@ -14,11 +14,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _gravity = -9.81f;
 
     private float _turnSmoothVelocity;
+    private float _currentSpeed;
     private Vector3 _dashDirection;
     private Vector3 _velocity;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
+    private PlayerStats _playerStats;
     private PlayerFSM _playerFSM;
     private Transform _mainCameraTransform;
 
@@ -26,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _playerInputs = GetComponent<PlayerInputs>();
+        _playerStats = GetComponent<PlayerStats>();
         _playerFSM = GetComponent<PlayerFSM>();
         if (Camera.main != null) _mainCameraTransform = Camera.main.transform;
     }
@@ -68,27 +71,36 @@ public class PlayerMovement : MonoBehaviour
             _playerFSM.CurrentState != PlayerState.Running &&
             _playerFSM.CurrentState != PlayerState.Idle)
         {
+            _currentSpeed = Mathf.Lerp(_currentSpeed, 0, Time.deltaTime * (_accelerationRate * 2));
+
+            if (_currentSpeed > 0.01f)
+            {
+                _characterController.Move(transform.forward * (_currentSpeed * Time.deltaTime));
+            }
             Gravity();
             return;
         }
         Vector2 moveInput = _playerInputs.MoveInput;
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        float currentSpeed = (_playerFSM.CurrentState == PlayerState.Running) ? _runSpeed : _walkSpeed;
+        float targetSpeed = 0;
 
         if (moveDirection.magnitude >= 0.1f)
         {
-            float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
+            float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running) ? _runSpeed : _walkSpeed;
+            targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
+            float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
             if (_mainCameraTransform != null)
             {
                 targetAngle += _mainCameraTransform.eulerAngles.y;
             }
-
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
-
-            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            _characterController.Move(currentSpeed * Time.deltaTime * moveDir.normalized);
+        }
+        _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, Time.deltaTime * _accelerationRate);
+        if (_currentSpeed > 0.01f)
+        {
+            _characterController.Move(transform.forward * (_currentSpeed * Time.deltaTime));
         }
         Gravity();
     }

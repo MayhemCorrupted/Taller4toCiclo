@@ -8,7 +8,7 @@ public enum PlayerState
     Running,
     Dodging,
     Attacking,
-    SpecialSkill,
+    Skill,
     Blocking,
     Healing,
     Hurt
@@ -49,7 +49,7 @@ public class PlayerFSM : MonoBehaviour
     {
         if (CurrentState == PlayerState.Attacking ||
             CurrentState == PlayerState.Dodging ||
-            CurrentState == PlayerState.SpecialSkill ||
+            CurrentState == PlayerState.Skill ||
             CurrentState == PlayerState.Healing ||
             CurrentState == PlayerState.Hurt)
         {
@@ -78,7 +78,7 @@ public class PlayerFSM : MonoBehaviour
     }
     private void CallLightAttackRequest() => RequestAttackState(PlayerState.Attacking);
     private void CallHeavyAttackRequest() => RequestAttackState(PlayerState.Attacking);
-    private void CallSkillRequest() => RequestAttackState(PlayerState.SpecialSkill);
+    private void CallSkillRequest() => RequestAttackState(PlayerState.Skill);
     private void RequestAttackState(PlayerState attackState)
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running)

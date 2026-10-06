@@ -11,7 +11,6 @@ public class PlayerInputs : MonoBehaviour
     public event Action OnOpenInventory;
     public event Action OnLockOn;
     public event Action OnDodge;
-    public event Action OnBlock;
     public Vector2 MoveInput { get; private set; }
     public bool InputRun { get; private set; }
     public bool InputBlock { get; private set; }
@@ -40,8 +39,18 @@ public class PlayerInputs : MonoBehaviour
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();
     }
-    private void OnEnable() => _inputActions.Enable();
-    private void OnDisable() => _inputActions.Disable();
+    private void OnEnable()
+    {
+        _inputActions.Enable();
+    }
+    private void OnDisable()
+    {
+        _inputActions.Disable();
+    }
+    private void OnDestroy()
+    {
+        _inputActions.Dispose();
+    }
     private void Update()
     {
         DetectCurrentDevice();
