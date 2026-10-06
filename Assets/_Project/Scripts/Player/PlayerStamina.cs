@@ -8,7 +8,7 @@ public class PlayerStamina : MonoBehaviour
 
     private float _currentStamina;
     private float _staminaRegenDelay;
-    private float _staminaDrainRate = 15f;
+    readonly private float _staminaDrainRate = 15f;
 
     private PlayerStats _statsSystem;
     private PlayerFSM _playerFSM;
