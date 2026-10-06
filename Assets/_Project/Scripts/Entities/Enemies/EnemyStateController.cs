@@ -2,22 +2,23 @@ using UnityEngine;
 
 public class EnemyStateController : MonoBehaviour
 {
-    EnemyState currentState;
+    public EnemyDetection detector;
+	private EnemyState currentState;
 
-    private void Update()
+	private void Update()
     {
         RunStateMachine();
     }
 
     private void RunStateMachine()
     {
-        EnemyState nextState = currentState?.Run();
+        if (!currentState) return;
 
-        if (nextState != null)
-        {
+        EnemyState nextState = currentState.Run(this);
+
+        if (nextState && currentState != nextState)
             Next(nextState);
-        }
-    }
+	}
 
     private void Next(EnemyState nextState)
     {
