@@ -4,6 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(PlayerStamina))]
+[RequireComponent(typeof(PlayerCombat))]
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _walkSpeed = 5f;
@@ -17,11 +19,14 @@ public class PlayerMovement : MonoBehaviour
     private float _currentSpeed;
     private Vector3 _dashDirection;
     private Vector3 _velocity;
+    private Vector3 _currentMoveDirection;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
     private PlayerStats _playerStats;
     private PlayerFSM _playerFSM;
+    private PlayerStamina _playerStamina;
+    private PlayerCombat _playerCombat;
     private Transform _mainCameraTransform;
 
     private void Awake()
@@ -30,6 +35,8 @@ public class PlayerMovement : MonoBehaviour
         _playerInputs = GetComponent<PlayerInputs>();
         _playerStats = GetComponent<PlayerStats>();
         _playerFSM = GetComponent<PlayerFSM>();
+        _playerStamina = GetComponent<PlayerStamina>();
+        _playerCombat = GetComponent<PlayerCombat>();
         if (Camera.main != null) _mainCameraTransform = Camera.main.transform;
     }
     private void Update()
@@ -80,28 +87,41 @@ public class PlayerMovement : MonoBehaviour
             Gravity();
             return;
         }
+
         Vector2 moveInput = _playerInputs.MoveInput;
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         float targetSpeed = 0;
 
         if (moveDirection.magnitude >= 0.1f)
         {
-            float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running) ? _runSpeed : _walkSpeed;
+            bool hasSufficientStamina = _playerStamina.CurrentStamina > 0;
+            float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running && hasSufficientStamina) ? _runSpeed : _walkSpeed;
             targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
-            float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
-            if (_mainCameraTransform != null)
+            if (_playerCombat.LockOnTarget != null)
             {
-                targetAngle += _mainCameraTransform.eulerAngles.y;
+                _currentMoveDirection = (transform.right * moveInput.x + transform.forward * moveInput.y).normalized;
             }
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+            else
+            {
+                float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
+                if (_mainCameraTransform != null)
+                {
+                    targetAngle += _mainCameraTransform.eulerAngles.y;
+                }
+                _currentMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
+                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+            }
         }
+
         _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, Time.deltaTime * _accelerationRate);
-        if (_currentSpeed > 0.01f)
+       
+        if (_currentSpeed > 0.01f && _currentMoveDirection != Vector3.zero)
         {
-            _characterController.Move(transform.forward * (_currentSpeed * Time.deltaTime));
+            _characterController.Move(_currentMoveDirection * (_currentSpeed * Time.deltaTime));
         }
+
         Gravity();
     }
     private void Gravity()
@@ -110,7 +130,6 @@ public class PlayerMovement : MonoBehaviour
         {
             _velocity.y = -2f;
         }
-
         _velocity.y += _gravity * Time.deltaTime;
         _characterController.Move(_velocity * Time.deltaTime);
     }

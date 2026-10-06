@@ -17,6 +17,7 @@ public class PlayerCombat : MonoBehaviour
     private PlayerStats _playerStats;
     private Camera _mainCamera;
     private Collider[] _hitEnemiesBuffer = new Collider[15];
+    public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
@@ -71,30 +72,37 @@ public class PlayerCombat : MonoBehaviour
     }
     private void CombatRotation()
     {
-        if (_playerFSM.CurrentState != PlayerState.Attacking &&
-            _playerFSM.CurrentState != PlayerState.Skill &&
-            _playerFSM.CurrentState != PlayerState.Blocking)
-        {
-            return;
-        }
         if (_lockOnTarget != null)
         {
             Vector3 directionToTarget = _lockOnTarget.position - transform.position;
             directionToTarget.y = 0;
-            transform.rotation = Quaternion.LookRotation(directionToTarget);
-        }
-        else if (_playerInputs.CurrentDeviceMode == "PC_KeyboardMouse" && _mainCamera != null)
-        {
-            Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane groundPlane = new(Vector3.up, transform.position);
-            if (groundPlane.Raycast (ray, out float rayDistance))
+
+            if (directionToTarget.sqrMagnitude > 0.1f)
             {
-                Vector3 point = ray.GetPoint(rayDistance);
-                Vector3 directionToMouse = point - transform.position;
-                directionToMouse.y = 0;
-                if (directionToMouse.sqrMagnitude > 0.1f)
+                transform.rotation = Quaternion.LookRotation(directionToTarget);
+            }
+        }
+        else
+        {
+            if (_playerFSM.CurrentState != PlayerState.Attacking &&
+                _playerFSM.CurrentState != PlayerState.Skill &&
+                _playerFSM.CurrentState != PlayerState.Blocking)
+            {
+                return;
+            }
+            else if (_playerInputs.CurrentDeviceMode == "PC_KeyboardMouse" && _mainCamera != null)
+            {
+                Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+                Plane groundPlane = new(Vector3.up, transform.position);
+                if (groundPlane.Raycast (ray, out float rayDistance))
                 {
-                    transform.rotation = Quaternion.LookRotation(directionToMouse);
+                    Vector3 point = ray.GetPoint(rayDistance);
+                    Vector3 directionToMouse = point - transform.position;
+                    directionToMouse.y = 0;
+                    if (directionToMouse.sqrMagnitude > 0.1f)
+                    {
+                        transform.rotation = Quaternion.LookRotation(directionToMouse);
+                    }
                 }
             }
         }

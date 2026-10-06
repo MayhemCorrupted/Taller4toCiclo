@@ -1,18 +1,22 @@
 using System;
 using UnityEngine;
 [RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(PlayerFSM))]
 public class PlayerStamina : MonoBehaviour
 {
     public event Action OnStaminaChanged;
 
     private float _currentStamina;
     private float _staminaRegenDelay;
-    private PlayerStats _statsSystem;
+    private float _staminaDrainRate = 15f;
 
+    private PlayerStats _statsSystem;
+    private PlayerFSM _playerFSM;
     private void Awake()
     {
         _statsSystem = GetComponent<PlayerStats>();
         _statsSystem.OnStatsUpdated += SetStamina;
+        _playerFSM = GetComponent<PlayerFSM>();
     }
     private void Start()
     {
@@ -28,7 +32,15 @@ public class PlayerStamina : MonoBehaviour
     }
     private void Update()
     {
+        DrainStamina();
         StaminaRegeneration();
+    }
+    private void DrainStamina()
+    {
+        if (_playerFSM.CurrentState == PlayerState.Running)
+        {
+           UseStamina(_staminaDrainRate * Time.deltaTime);
+        }
     }
     public bool UseStamina(float amount)
     {
