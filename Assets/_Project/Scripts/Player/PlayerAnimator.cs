@@ -1,11 +1,10 @@
 using UnityEngine;
-[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerCombat))]
 public class PlayerAnimator : MonoBehaviour
 {
-    private Animator _animator;
+    [SerializeField] private Animator _animator;
     private PlayerFSM _playerFSM;
     private PlayerInputs _playerInputs;
     private PlayerCombat _playerCombat;
@@ -17,7 +16,6 @@ public class PlayerAnimator : MonoBehaviour
     private readonly int _isBlockingHash = Animator.StringToHash("IsBlocking");
     private void Awake()
     {
-        _animator = GetComponent<Animator>();
         _playerFSM = GetComponent<PlayerFSM>();
         _playerInputs = GetComponent<PlayerInputs>();
         _playerCombat = GetComponent<PlayerCombat>();

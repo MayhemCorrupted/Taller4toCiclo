@@ -16,7 +16,7 @@ public class PlayerCombat : MonoBehaviour
     private PlayerFSM _playerFSM;
     private PlayerStats _playerStats;
     private Camera _mainCamera;
-    private Collider[] _hitEnemiesBuffer = new Collider[15];
+    readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
     public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
     {

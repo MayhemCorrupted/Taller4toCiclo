@@ -105,6 +105,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "ToggleSkill",
+                    "type": "Button",
+                    "id": "d948b624-ef5e-4ea2-aaf1-1e3de4168bd3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -468,6 +478,17 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "Skill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f53462bf-627f-4893-b776-45c9d2ad52b9",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "ToggleSkill",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

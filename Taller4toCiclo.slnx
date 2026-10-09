@@ -1,5 +1,5 @@
 ﻿<Solution>
-  <Project Path="Unity.ProBuilder.Examples.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Unity.ProBuilder.Examples.Editor.csproj" />
   <Project Path="Unity.ProBuilder.Examples.csproj" />
 </Solution>
