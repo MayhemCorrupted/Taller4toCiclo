@@ -13,8 +13,8 @@ TagManager:
   - Enemy
   - Water
   - UI
-  - Interactable
-  - 
+  - Player
+  - Wall
   - 
   - 
   - 

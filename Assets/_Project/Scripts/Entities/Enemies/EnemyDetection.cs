@@ -41,19 +41,14 @@ public class EnemyDetection : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 #if UNITY_EDITOR
-		if (!canSeeTarget)
-		{
-			Gizmos.color = Color.white;
-			UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
-		}
-		else
-		{
-			Gizmos.color = Color.orange;
-			UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, loseTargetRadius);
+		Gizmos.color = Color.white;
+		UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
 
-			Gizmos.color = Color.red;
-			UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, attackRadius);
-		}
+		Gizmos.color = Color.orange;
+		UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, loseTargetRadius);
+
+		Gizmos.color = Color.red;
+		UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, attackRadius);
 #endif
 	}
 
