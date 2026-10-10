@@ -1512,7 +1512,6 @@ GameObject:
   - component: {fileID: 1751283152}
   - component: {fileID: 1751283149}
   - component: {fileID: 1751283142}
-  - component: {fileID: 1751283155}
   - component: {fileID: 1751283151}
   - component: {fileID: 1751283147}
   - component: {fileID: 1751283146}
@@ -1685,19 +1684,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   interactRange: 3
---- !u!114 &1751283155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1751283141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b10849d7d85dc694bb284e54542fae50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimator
-  _animator: {fileID: 1760190383783352156}
 --- !u!1 &1939642553
 GameObject:
   m_ObjectHideFlags: 0
@@ -2240,6 +2226,7 @@ GameObject:
   - component: {fileID: 1760190383783352157}
   - component: {fileID: 1760190383783352156}
   - component: {fileID: 1760190383783352155}
+  - component: {fileID: 1760190383783352158}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -2363,6 +2350,19 @@ MonoBehaviour:
   - {fileID: 2756043991239138833}
   - {fileID: 2079431461494864921}
   - {fileID: 7341444921883254406}
+--- !u!114 &1760190383783352158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1760190383783352154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10849d7d85dc694bb284e54542fae50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimator
+  _animator: {fileID: 1760190383783352156}
 --- !u!1 &1773666974371080535
 GameObject:
   m_ObjectHideFlags: 0

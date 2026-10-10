@@ -83,7 +83,7 @@ public class PlayerFSM : MonoBehaviour
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running)
         {
-            //ChangeState(attackState);
+            ChangeState(attackState);
         }
     }
     private void CallHealRequest()
