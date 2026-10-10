@@ -3,10 +3,15 @@ using UnityEngine;
 
 public class EnemyStateManager : MonoBehaviour
 {
-	[SerializeField] private EnemyState state = EnemyState.Idle;
-
 	[SerializeField] private EnemyDetection detector;
 	public event Action<EnemyState> OnStateChanged;
+
+	private EnemyState state = EnemyState.Patroling;
+
+	public EnemyState CurrentState
+	{
+		get => state;
+	}
 
 	private void Update()
 	{
@@ -15,7 +20,7 @@ public class EnemyStateManager : MonoBehaviour
 		else if (detector.CanSeeTarget)
 			ChangeState(EnemyState.Chasing);
 		else
-			ChangeState(EnemyState.Idle);
+			ChangeState(EnemyState.Patroling);
 	}
 
 	private void ChangeState(EnemyState newState)
