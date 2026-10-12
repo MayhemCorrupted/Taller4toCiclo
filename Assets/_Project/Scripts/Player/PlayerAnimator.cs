@@ -103,16 +103,24 @@ public class PlayerAnimator : MonoBehaviour
                _playerFSM.CurrentState == PlayerState.Walking ||
                _playerFSM.CurrentState == PlayerState.Running;
     }
+    private bool CanAttack()
+    {
+        return _playerFSM.CurrentState == PlayerState.Idle ||
+               _playerFSM.CurrentState == PlayerState.Walking ||
+               _playerFSM.CurrentState == PlayerState.Running ||
+               _playerFSM.CurrentState == PlayerState.Attacking;
+    }
+
     private void TriggerLightAttack()
     {
-        if (CanInterruptMovement())
+        if (CanAttack())
         {
             _animator.SetTrigger(_lightAttackHash);
         }
     }
     private void TriggerHeavyAttack()
     {
-        if (CanInterruptMovement())
+        if (CanAttack())
         {
             _animator.SetTrigger(_heavyAttackHash);
         }
@@ -128,7 +136,7 @@ public class PlayerAnimator : MonoBehaviour
     }
     private void TriggerSkill()
     {
-        if (CanInterruptMovement())
+        if (CanInterruptMovement() || _playerFSM.CurrentState == PlayerState.Skill)
         {
             int skillIdToUse = 0;
             _animator.SetInteger(_skillIDHash, skillIdToUse);

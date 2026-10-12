@@ -17,7 +17,19 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 9a5edb2a14d8b1142b46cb6fd703c931, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 349939284197376
+    m_Localized: Fuerza
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349939552632832
+    m_Localized: Estatua
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349939556827136
+    m_Localized: Nombre testeo
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

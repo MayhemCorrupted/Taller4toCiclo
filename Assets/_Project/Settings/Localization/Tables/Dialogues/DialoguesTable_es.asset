@@ -17,7 +17,15 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 87896db2562e33b4eb3af09bcb455886, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 354246607912960
+    m_Localized: Dialogo de testeo para saber si funciona esta cosa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 354246620495872
+    m_Localized: "Continuaci\xF3n del dialogo para saber si sirve a\xFAn esto wa"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

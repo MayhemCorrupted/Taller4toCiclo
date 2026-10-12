@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
   m_TableCollectionName: MiscTable
   m_TableCollectionNameGuidString: 9a5edb2a14d8b1142b46cb6fd703c931
-  m_Entries: []
+  m_Entries:
+  - m_Id: 349939284197376
+    m_Key: STRENGTH_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349939552632832
+    m_Key: STATUE_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349939556827136
+    m_Key: NAME_TEST
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

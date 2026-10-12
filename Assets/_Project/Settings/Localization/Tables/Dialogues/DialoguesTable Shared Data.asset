@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
   m_TableCollectionName: DialoguesTable
   m_TableCollectionNameGuidString: 87896db2562e33b4eb3af09bcb455886
-  m_Entries: []
+  m_Entries:
+  - m_Id: 354246607912960
+    m_Key: TEST_DIALOGUE1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 354246620495872
+    m_Key: TEST_DIALOGUE2
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
