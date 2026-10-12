@@ -15,8 +15,8 @@ public class PlayerStamina : MonoBehaviour
     private void Awake()
     {
         _statsSystem = GetComponent<PlayerStats>();
-        _statsSystem.OnStatsUpdated += SetStamina;
         _playerFSM = GetComponent<PlayerFSM>();
+        _statsSystem.OnStatsUpdated += SetStamina;
     }
     private void Start()
     {
@@ -29,6 +29,7 @@ public class PlayerStamina : MonoBehaviour
     private void SetStamina()
     {
         _currentStamina = _statsSystem.MaxStamina;
+        OnStaminaChanged?.Invoke();
     }
     private void Update()
     {

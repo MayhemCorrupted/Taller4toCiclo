@@ -7,7 +7,6 @@ public class PlayerHealth : HealthSystem
 {
     public event Action OnLifeLost;
     public event Action OnPermadeath;
-
     private int _currentLives = 3;
 
     private PlayerStats _statsSystem;
