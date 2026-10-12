@@ -30,8 +30,8 @@ MonoBehaviour:
         - rid: 5231756956340060432
         - rid: 5231756956340060433
         - rid: 5231756956340060434
-        m_ConnectedFile: C:/Users/alexa/Downloads/Tablas de texto Localization -
-          Misc.csv
+        m_ConnectedFile: C:/Users/alumnotlsch/Downloads/Tablas de texto Localization
+          - Misc.csv
     - rid: 5231756956340060432
       type: {class: KeyIdColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
       data:

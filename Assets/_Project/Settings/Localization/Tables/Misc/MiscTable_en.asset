@@ -23,11 +23,23 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 349939552632832
-    m_Localized: Statue
+    m_Localized: Lithoselle
     m_Metadata:
       m_Items: []
   - m_Id: 349939556827136
     m_Localized: Testing name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 521094765924352
+    m_Localized: Items
+    m_Metadata:
+      m_Items: []
+  - m_Id: 521094807867392
+    m_Localized: Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 521094807867393
+    m_Localized: statistics
     m_Metadata:
       m_Items: []
   references:

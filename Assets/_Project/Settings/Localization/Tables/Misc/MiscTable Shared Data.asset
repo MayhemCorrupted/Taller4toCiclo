@@ -27,6 +27,18 @@ MonoBehaviour:
     m_Key: NAME_TEST
     m_Metadata:
       m_Items: []
+  - m_Id: 521094765924352
+    m_Key: ITEM_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 521094807867392
+    m_Key: INVENTORY_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 521094807867393
+    m_Key: STAT_TITLE
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
