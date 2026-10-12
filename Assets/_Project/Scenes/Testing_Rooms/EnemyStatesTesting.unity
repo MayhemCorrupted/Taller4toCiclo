@@ -393,9 +393,9 @@ GameObject:
   m_Component:
   - component: {fileID: 545308770}
   - component: {fileID: 545308771}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: JugadorPrueba
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -568,9 +568,9 @@ GameObject:
   - component: {fileID: 1234820574}
   - component: {fileID: 1234820573}
   - component: {fileID: 1234820572}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Modelo
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
