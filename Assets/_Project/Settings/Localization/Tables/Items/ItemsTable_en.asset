@@ -18,24 +18,52 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 11018067132416
-    m_Localized: Redoma tear
+  - m_Id: 692790073376772
+    m_Localized: Iron sanctuary
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847616
-    m_Localized: Much info
+  - m_Id: 692790073376771
+    m_Localized: No idea
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847617
-    m_Localized: Memory water
+  - m_Id: 692790073376770
+    m_Localized: Fallen deacon's robe
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847618
+  - m_Id: 692790073376769
+    m_Localized: Clothing belonging to someone who is no longer alive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376768
+    m_Localized: Undead's rags
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689280808271872
+    m_Localized: Teardrop flask
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228224
+    m_Localized: A frask with a weird liquid
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228225
+    m_Localized: Water memory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422528
+    m_Localized: A liquid capable of restoring one's memories
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422529
     m_Localized: Carrion oil
     m_Metadata:
       m_Items: []
-  - m_Id: 12086809346048
-    m_Localized: Testing
+  - m_Id: 689281286422530
+    m_Localized: An oil with unique properties
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790081765376
+    m_Localized: Sacred armor made mostly of heavy metals.
     m_Metadata:
       m_Items: []
   references:

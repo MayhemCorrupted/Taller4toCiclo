@@ -21,10 +21,6 @@ public class PlayerHealth : HealthSystem
 
         _statsSystem.OnStatsUpdated += SetHealth;
     }
-    private void Start()
-    {
-        SetHealth();
-    }
     private void OnDestroy()
     {
         _statsSystem.OnStatsUpdated -= SetHealth;
@@ -67,6 +63,28 @@ public class PlayerHealth : HealthSystem
             _currentHealth -= finalDamage;
             OnTakingDamage(finalDamage);
         }
+
+        if (_currentHealth <= 0)
+        {
+            _currentHealth = 0;
+            Die();
+        }
+    }
+    public void Heal(float amount)
+    {
+        if (_currentHealth <= 0) return;
+
+        _currentHealth += amount;
+        if (_currentHealth > _maxHealth) _currentHealth = _maxHealth;
+
+        NotifyHealthChanged();
+    }
+    public void TakeDirectDamage(float amount)
+    {
+        if (_currentHealth <= 0) return;
+
+        _currentHealth -= amount;
+        NotifyHealthChanged();
 
         if (_currentHealth <= 0)
         {

@@ -42,6 +42,26 @@ MonoBehaviour:
     m_Localized: statistics
     m_Metadata:
       m_Items: []
+  - m_Id: 613668269735936
+    m_Localized: Life
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670278807552
+    m_Localized: Stamina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001856
+    m_Localized: Agility
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001857
+    m_Localized: Defense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001858
+    m_Localized: Health points
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

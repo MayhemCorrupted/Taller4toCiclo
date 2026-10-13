@@ -11,7 +11,7 @@ public class PlayerStats : MonoBehaviour
     [Range(1,10)] public int _agilityLevel = 1;
 
     [Range(1,4)] public int _vesaniaLevel = 1;
-    public float _armorDefense = 20;
+    public float _armorDefense = 0;
 
     public float MaxHealth { get; private set; }
     public float MaxStamina { get; private set; }
@@ -20,9 +20,15 @@ public class PlayerStats : MonoBehaviour
     public int Iframes { get; private set; }
     public float Defense { get; private set; }
     public float VesaniaDamageBonus { get; private set; }
+    public float ConsumableDamageBonus { get; private set; }
 
     private void Awake()
     {
+        RecalculateStats();
+    }
+    public void ApplyTemporaryDamageBoost(float amount)
+    {
+        ConsumableDamageBonus = amount;
         RecalculateStats();
     }
     public void RecalculateStats()
@@ -39,7 +45,7 @@ public class PlayerStats : MonoBehaviour
             strengthBonus = (6 * 0.05f) + ((_strengthLevel - 6) * 0.03f);
         }
 
-        DamageMultiplier = 1 + strengthBonus;
+        DamageMultiplier = 1 + strengthBonus + ConsumableDamageBonus;
 
         SpeedMultiplier = 1 + (_agilityLevel * 0.03f);
 

@@ -18,24 +18,53 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 11018067132416
-    m_Localized: Lagrima de Redoma
+  - m_Id: 692790073376772
+    m_Localized: Sagrario de Hierro
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847616
-    m_Localized: Mucha info
+  - m_Id: 692790073376771
+    m_Localized: Ni idea
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847617
+  - m_Id: 692790073376770
+    m_Localized: "Cota del Di\xE1cono Ca\xEDdo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376769
+    m_Localized: Vestimenta de alguien que ya no esta vivo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376768
+    m_Localized: Harapos del No-Muerto
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689280808271872
+    m_Localized: Lagrima de redoma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228224
+    m_Localized: "Un frasco con liquido extra\xF1o"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228225
     m_Localized: 'Agua de la memoria '
     m_Metadata:
       m_Items: []
-  - m_Id: 11018276847618
-    m_Localized: "Oleo de la carro\xF1a"
+  - m_Id: 689281286422528
+    m_Localized: Un liquido que contiene la capacidad de devolver los recuerdos de
+      uno
     m_Metadata:
       m_Items: []
-  - m_Id: 12086809346048
-    m_Localized: Testeo
+  - m_Id: 689281286422529
+    m_Localized: "\xD3leo de la carro\xF1a"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422530
+    m_Localized: "Un aceite con propiedades \xFAnicas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790081765376
+    m_Localized: Armadura sagrada hecha en su mayoria de metales pesados
     m_Metadata:
       m_Items: []
   references:

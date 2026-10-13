@@ -42,6 +42,26 @@ MonoBehaviour:
     m_Localized: Estadisticas
     m_Metadata:
       m_Items: []
+  - m_Id: 613668269735936
+    m_Localized: Vida
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670278807552
+    m_Localized: Estamina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001856
+    m_Localized: Agilidad
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001857
+    m_Localized: Defensa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001858
+    m_Localized: Puntos de salud
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

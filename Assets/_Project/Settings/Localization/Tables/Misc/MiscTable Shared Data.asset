@@ -15,10 +15,6 @@ MonoBehaviour:
   m_TableCollectionName: MiscTable
   m_TableCollectionNameGuidString: 9a5edb2a14d8b1142b46cb6fd703c931
   m_Entries:
-  - m_Id: 349939284197376
-    m_Key: STRENGTH_STAT
-    m_Metadata:
-      m_Items: []
   - m_Id: 349939552632832
     m_Key: STATUE_NAME
     m_Metadata:
@@ -37,6 +33,30 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 521094807867393
     m_Key: STAT_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613668269735936
+    m_Key: LIFE_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670278807552
+    m_Key: STAMINA_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 349939284197376
+    m_Key: STRENGTH_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001856
+    m_Key: AGILITY_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001857
+    m_Key: DEFENSE_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 613670283001858
+    m_Key: HP_STAT
     m_Metadata:
       m_Items: []
   m_Metadata:
