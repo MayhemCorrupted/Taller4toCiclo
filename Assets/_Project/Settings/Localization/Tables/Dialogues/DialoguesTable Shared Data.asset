@@ -23,6 +23,18 @@ MonoBehaviour:
     m_Key: TEST_DIALOGUE2
     m_Metadata:
       m_Items: []
+  - m_Id: 1020483465789440
+    m_Key: TEST_A_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483805528064
+    m_Key: TEST_B_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483813916672
+    m_Key: TEST_DIALOGUE3
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -7,6 +7,7 @@ public class InventoryPanelUI : MonoBehaviour
 {
     [SerializeField] private GameObject _inventoryPanel;
     [SerializeField] private GameObject _firstSelectedSlot;
+    [SerializeField] private GameObject _renderPreviewCamera;
 
     [SerializeField] private TextMeshProUGUI _titleInventoryText;
     [SerializeField] private TextMeshProUGUI _titleStatsText;
@@ -17,13 +18,10 @@ public class InventoryPanelUI : MonoBehaviour
     [SerializeField] private LocalizedString _statsLocalized;
     [SerializeField] private LocalizedString _objectsLocalized;
     [SerializeField] private LocalizedString _effectLocalized;
-
-    private PlayerInputs _playerInputs;
-    private bool _isOpen = false;
     private void Awake()
     {
-        _playerInputs = FindAnyObjectByType<PlayerInputs>();
         _inventoryPanel.SetActive(false);
+        _renderPreviewCamera.SetActive(false);
 
         _inventoryLocalized.StringChanged += (text) => { if (_titleInventoryText != null) _titleInventoryText.text = text; };
         _statsLocalized.StringChanged += (text) => { if (_titleStatsText != null) _titleStatsText.text = text; };
@@ -37,38 +35,20 @@ public class InventoryPanelUI : MonoBehaviour
         _objectsLocalized.StringChanged -= (text) => { if (_titleObjectsText != null) _titleObjectsText.text = text; };
         _effectLocalized.StringChanged -= (text) => { if (_titleEffectText != null) _titleEffectText.text = text; };
     }
-    private void OnEnable()
+    public void OpenInventory()
     {
-        if (_playerInputs != null)
+        _inventoryPanel.SetActive(true);
+        _renderPreviewCamera.SetActive(true);
+
+        if (_firstSelectedSlot != null)
         {
-            _playerInputs.OnOpenInventory += ToggleInventory;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_firstSelectedSlot);
         }
     }
-    private void OnDisable()
+    public void CloseInventory()
     {
-        if (_playerInputs != null)
-        {
-            _playerInputs.OnOpenInventory -= ToggleInventory;
-        }
-    }
-    private void ToggleInventory()
-    {
-        _isOpen = !_isOpen;
-
-        _inventoryPanel.SetActive(_isOpen);
-
-        if (_isOpen)
-        {
-            if (_firstSelectedSlot != null)
-            {
-                EventSystem.current.SetSelectedGameObject(null);
-                EventSystem.current.SetSelectedGameObject(_firstSelectedSlot);
-            }
-        }
-        if (_playerInputs.CurrentDeviceMode == "PC_KeyboardMouse")
-        {
-            Cursor.visible = _isOpen;
-            Cursor.lockState = _isOpen ? CursorLockMode.None : CursorLockMode.Confined;
-        }
+        _inventoryPanel.SetActive(false);
+        _renderPreviewCamera.SetActive(false);
     }
 }

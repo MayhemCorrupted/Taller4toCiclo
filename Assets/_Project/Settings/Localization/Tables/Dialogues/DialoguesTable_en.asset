@@ -26,6 +26,18 @@ MonoBehaviour:
     m_Localized: Continuation of the dialogue to know if this still works wa
     m_Metadata:
       m_Items: []
+  - m_Id: 1020483465789440
+    m_Localized: Option A to know if this works
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483805528064
+    m_Localized: Option B to know if this works
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483813916672
+    m_Localized: Dialogue ending
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

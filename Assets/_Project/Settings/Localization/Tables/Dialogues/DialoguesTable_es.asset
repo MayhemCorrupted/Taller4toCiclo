@@ -26,6 +26,18 @@ MonoBehaviour:
     m_Localized: "Continuaci\xF3n del dialogo para saber si sirve a\xFAn esto wa"
     m_Metadata:
       m_Items: []
+  - m_Id: 1020483465789440
+    m_Localized: "Opci\xF3n A para ver si funciona esto"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483805528064
+    m_Localized: "Opci\xF3n B para ver si funciona esto"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1020483813916672
+    m_Localized: "Finalizaci\xF3n del dialogo"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

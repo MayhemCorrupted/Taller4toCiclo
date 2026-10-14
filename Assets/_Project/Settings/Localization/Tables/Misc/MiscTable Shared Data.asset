@@ -59,8 +59,12 @@ MonoBehaviour:
     m_Key: HP_STAT
     m_Metadata:
       m_Items: []
-  - m_Id: 975181471956992
-    m_Key: TEST_NAME
+  - m_Id: 1076780030640128
+    m_Key: DIALOGUE_SKIP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1076780043223040
+    m_Key: DIALOGUE_NEXT
     m_Metadata:
       m_Items: []
   m_Metadata:
