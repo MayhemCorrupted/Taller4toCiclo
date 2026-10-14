@@ -19,10 +19,6 @@ MonoBehaviour:
     m_Key: STATUE_NAME
     m_Metadata:
       m_Items: []
-  - m_Id: 349939556827136
-    m_Key: NAME_TEST
-    m_Metadata:
-      m_Items: []
   - m_Id: 521094765924352
     m_Key: ITEM_TITLE
     m_Metadata:
@@ -33,6 +29,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 521094807867393
     m_Key: STAT_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 950394834010112
+    m_Key: EFFECT_TITLE
     m_Metadata:
       m_Items: []
   - m_Id: 613668269735936
@@ -57,6 +57,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 613670283001858
     m_Key: HP_STAT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 975181471956992
+    m_Key: TEST_NAME
     m_Metadata:
       m_Items: []
   m_Metadata:

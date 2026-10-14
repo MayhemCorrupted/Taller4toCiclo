@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Linq;
 
 [Serializable] public class InventorySlot
 {
@@ -18,15 +19,17 @@ public class InventoryManager : MonoBehaviour
     public event Action<ArmorItem> OnArmorEquipped;
     public event Action<ConsumableItem, int> OnConsumableEquipped;
     public event Action<InventorySlot[]> OnInventoryUpdated;
-
+    public event Action<InventorySlot[]> OnArmorInventoryUpdated;
     public InventorySlot[] GeneralSlots => _generalSlots;
+    public InventorySlot[] ArmorInventorySlots => _armorInventorySlots;
     public ArmorItem EquippedArmor => _equippedArmor;
     public ConsumableItem EquippedConsumable => _equippedConsumable;
-
+    public int ConsumableCount => _consumableCount;
     private ArmorItem _equippedArmor;
     private ConsumableItem _equippedConsumable;
     private int _consumableCount = 0;
     [SerializeField] private InventorySlot[] _generalSlots = new InventorySlot[6];
+    [SerializeField] private InventorySlot[] _armorInventorySlots = new InventorySlot[3];
 
     private PlayerInputs _playerInputs;
     private PlayerStats _playerStats;
@@ -44,89 +47,109 @@ public class InventoryManager : MonoBehaviour
         {
             _generalSlots[i] = new InventorySlot();
         }
+        for (int i = 0; i < _armorInventorySlots.Length; i++)
+        {
+            _armorInventorySlots[i] = new InventorySlot();
+        }
     }
     private void OnEnable()
     {
-        _playerInputs.OnHeal += UseEquippedConsumable;
+        _playerInputs.OnUseItem += UseEquippedConsumable;
     }
     private void OnDisable()
     {
-        _playerInputs.OnHeal -= UseEquippedConsumable;
+        _playerInputs.OnUseItem -= UseEquippedConsumable;
     }
     public void AddItemToInventory(ItemData item, int amount)
     {
-        for (int i = 0; i < _generalSlots.Length; i++)
+        if (item is ArmorItem)
         {
-            if (!_generalSlots[i].IsEmpty && _generalSlots[i].Item.ItemID == item.ItemID)
+            AddToSpecificArray(_armorInventorySlots, item, amount, OnArmorInventoryUpdated);
+        }
+        else if (item is ConsumableItem consumable)
+        {
+            if (_equippedConsumable != null && _equippedConsumable.ItemID == consumable.ItemID)
             {
-                _generalSlots[i].Quantity += amount;
-                OnInventoryUpdated?.Invoke(_generalSlots);
-                return;
+                _consumableCount += amount;
+                OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
+            }
+            else
+            {
+                AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated);
             }
         }
-
-        for (int i = 0; i < _generalSlots.Length; i++)
+        else
         {
-            if (_generalSlots[i].IsEmpty)
-            {
-                _generalSlots[i].Item = item;
-                _generalSlots[i].Quantity = amount;
-                OnInventoryUpdated?.Invoke(_generalSlots);
-                return;
-            }
+            AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated);
         }
     }
-    public void EquipFromSlot(int slotIndex)
+    private void AddToSpecificArray(InventorySlot[] slotArray, ItemData item, int amount, Action<InventorySlot[]> updateEvent)
+    {
+        InventorySlot existingSlot = slotArray.FirstOrDefault(s => !s.IsEmpty && s.Item.ItemID == item.ItemID);
+        if (existingSlot != null)
+        {
+            existingSlot.Quantity += amount;
+            updateEvent?.Invoke(slotArray);
+            return;
+        }
+
+        InventorySlot emptySlot = slotArray.FirstOrDefault(s => s.IsEmpty);
+        if (emptySlot != null)
+        {
+            emptySlot.Item = item;
+            emptySlot.Quantity = amount;
+            updateEvent?.Invoke(slotArray);
+        }
+    }
+    public void EquipArmorFromSlot(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _armorInventorySlots.Length) return;
+
+        InventorySlot slot = _armorInventorySlots[slotIndex];
+        if (slot.IsEmpty || slot.Item is not ArmorItem armor) return;
+
+        ArmorItem previousArmor = _equippedArmor;
+
+        _equippedArmor = armor;
+        _playerStats._armorDefense = armor.DefenseBonus;
+        _playerStats.RecalculateStats();
+
+        OnArmorEquipped?.Invoke(_equippedArmor);
+
+        if (previousArmor != null)
+        {
+            slot.Item = previousArmor;
+            slot.Quantity = 1;
+        }
+        else slot.Clear();
+
+        OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
+    }
+    public void EquipConsumableFromSlot(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= _generalSlots.Length) return;
 
         InventorySlot slot = _generalSlots[slotIndex];
-        if (slot.IsEmpty) return;
+        if (slot.IsEmpty || slot.Item is not ConsumableItem consumable) return;
 
-        if (slot.Item is ArmorItem armor)
+        ConsumableItem previousConsumable = _equippedConsumable;
+        int previousCount = _consumableCount;
+
+        _equippedConsumable = consumable;
+        _consumableCount = slot.Quantity;
+
+        OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
+
+        if (previousConsumable != null)
         {
-            ArmorItem previousArmor = _equippedArmor;
-
-            _equippedArmor = armor;
-            _playerStats._armorDefense = armor.DefenseBonus;
-            _playerStats.RecalculateStats();
-
-            OnArmorEquipped?.Invoke(_equippedArmor);
-
-            if (previousArmor != null)
-            {
-                slot.Item = previousArmor;
-                slot.Quantity = 1;
-            }
-            else
-            {
-                slot.Clear();
-            }
-
-            OnInventoryUpdated?.Invoke(_generalSlots);
+            slot.Item = previousConsumable;
+            slot.Quantity = previousCount;
         }
-        else if (slot.Item is ConsumableItem consumable)
+        else
         {
-            ConsumableItem previousConsumable = _equippedConsumable;
-            int previousCount = _consumableCount;
-
-            _equippedConsumable = consumable;
-            _consumableCount = slot.Quantity;
-
-            OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
-
-            if (previousConsumable != null)
-            {
-                slot.Item = previousConsumable;
-                slot.Quantity = previousCount;
-            }
-            else
-            {
-                slot.Clear();
-            }
-
-            OnInventoryUpdated?.Invoke(_generalSlots);
+            slot.Clear();
         }
+        OnInventoryUpdated?.Invoke(_generalSlots);
     }
     public void SwapGeneralSlots(int indexA, int indexB)
     {
@@ -135,20 +158,26 @@ public class InventoryManager : MonoBehaviour
         (_generalSlots[indexB], _generalSlots[indexA]) = (_generalSlots[indexA], _generalSlots[indexB]);
         OnInventoryUpdated?.Invoke(_generalSlots);
     }
+    public void SwapArmorInventorySlots(int indexA, int indexB)
+    {
+        if (indexA < 0 || indexA >= _armorInventorySlots.Length || indexB < 0 || indexB >= _armorInventorySlots.Length) return;
+        (_armorInventorySlots[indexB], _armorInventorySlots[indexA]) = (_armorInventorySlots[indexA], _armorInventorySlots[indexB]);
+        OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
+    }
     public void UnequipArmor(int targetSlotIndex)
     {
         if (_equippedArmor == null || targetSlotIndex < 0 || targetSlotIndex >= _generalSlots.Length) return;
         if (!_generalSlots[targetSlotIndex].IsEmpty) return;
 
-        _generalSlots[targetSlotIndex].Item = _equippedArmor;
-        _generalSlots[targetSlotIndex].Quantity = 1;
+        _armorInventorySlots[targetSlotIndex].Item = _equippedArmor;
+        _armorInventorySlots[targetSlotIndex].Quantity = 1;
 
         _equippedArmor = null;
         _playerStats._armorDefense = 0;
         _playerStats.RecalculateStats();
 
         OnArmorEquipped?.Invoke(null);
-        OnInventoryUpdated?.Invoke(_generalSlots);
+        OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
     }
     public void UnequipConsumable(int targetSlotIndex)
     {

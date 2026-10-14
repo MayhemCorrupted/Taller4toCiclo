@@ -26,10 +26,6 @@ MonoBehaviour:
     m_Localized: Lithoselle
     m_Metadata:
       m_Items: []
-  - m_Id: 349939556827136
-    m_Localized: Nombre testeo
-    m_Metadata:
-      m_Items: []
   - m_Id: 521094765924352
     m_Localized: Objetos
     m_Metadata:
@@ -60,6 +56,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 613670283001858
     m_Localized: Puntos de salud
+    m_Metadata:
+      m_Items: []
+  - m_Id: 950394834010112
+    m_Localized: Efecto
+    m_Metadata:
+      m_Items: []
+  - m_Id: 975181471956992
+    m_Localized: wa
     m_Metadata:
       m_Items: []
   references:

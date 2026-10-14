@@ -23,7 +23,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 692790073376771
-    m_Localized: Ni idea
+    m_Localized: "Necesita a\xFAn descripci\xF3n "
     m_Metadata:
       m_Items: []
   - m_Id: 692790073376770
@@ -65,6 +65,31 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 692790081765376
     m_Localized: Armadura sagrada hecha en su mayoria de metales pesados
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173350031360
+    m_Localized: Cura un total de 50 puntos de salud progresivamente durante 10 segundos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173358419968
+    m_Localized: Brinda un punto adicional para las estadisticas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614272
+    m_Localized: "Mejora el da\xF1o un 0.25% durante 25 segundos, pero a costa de
+      quitarte 2 puntos de salud progresivamente"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614273
+    m_Localized: Brinda +20 defensa adicional
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614274
+    m_Localized: Brinda +45 defensa adicional (Requiere minimo nivel 3 de stamina)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614275
+    m_Localized: Brinda +75 defensa adicional (Requiere minimo nivel 6 de stamina)
     m_Metadata:
       m_Items: []
   references:

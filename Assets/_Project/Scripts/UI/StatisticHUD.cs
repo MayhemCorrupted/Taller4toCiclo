@@ -30,9 +30,6 @@ public class StatisticHUD : MonoBehaviour
     private void Awake()
     {
         _playerStats = FindAnyObjectByType<PlayerStats>();
-    }
-    private void OnEnable()
-    {
         _playerStats.OnStatsUpdated += UpdateStatsValues;
 
         _lifeLocalizedText.StringChanged += UpdateLifeLabel;
@@ -42,11 +39,11 @@ public class StatisticHUD : MonoBehaviour
 
         _defenseLocalizedText.StringChanged += UpdateDefenseLabel;
         _healthPointsLocalizedText.StringChanged += UpdateHPLabel;
-        
+        UpdateStatsValues();
     }
-    private void OnDisable()
+    private void OnDestroy()
     {
-        _playerStats.OnStatsUpdated -= UpdateStatsValues;
+        if (_playerStats != null) _playerStats.OnStatsUpdated -= UpdateStatsValues;
 
         _lifeLocalizedText.StringChanged -= UpdateLifeLabel;
         _staminaLocalizedText.StringChanged -= UpdateStaminaLabel;
@@ -56,12 +53,9 @@ public class StatisticHUD : MonoBehaviour
         _defenseLocalizedText.StringChanged -= UpdateDefenseLabel;
         _healthPointsLocalizedText.StringChanged -= UpdateHPLabel;
     }
-    private void Start()
+     private void UpdateStatsValues()
     {
-        UpdateStatsValues();
-    }
-    private void UpdateStatsValues()
-    {
+        if (_playerStats == null) return;
         _lifeValueTMP.text = _playerStats._lifeLevel.ToString();
         _staminaValueTMP.text = _playerStats._staminaLevel.ToString();
         _strengthValueTMP.text = _playerStats._strengthLevel.ToString();

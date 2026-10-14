@@ -23,12 +23,20 @@ MonoBehaviour:
     m_Key: TEAR_DESC
     m_Metadata:
       m_Items: []
+  - m_Id: 955173350031360
+    m_Key: TEAR_EFFECT
+    m_Metadata:
+      m_Items: []
   - m_Id: 689281282228225
     m_Key: MEMORY_NAME
     m_Metadata:
       m_Items: []
   - m_Id: 689281286422528
     m_Key: MEMORY_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173358419968
+    m_Key: MEMORY_EFFECT
     m_Metadata:
       m_Items: []
   - m_Id: 689281286422529
@@ -39,12 +47,20 @@ MonoBehaviour:
     m_Key: CARRION_DESC
     m_Metadata:
       m_Items: []
+  - m_Id: 955173362614272
+    m_Key: CARRION_EFFECT
+    m_Metadata:
+      m_Items: []
   - m_Id: 692790073376768
     m_Key: RAG_NAME
     m_Metadata:
       m_Items: []
   - m_Id: 692790073376769
     m_Key: RAG_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614273
+    m_Key: RAG_EFFECT
     m_Metadata:
       m_Items: []
   - m_Id: 692790073376770
@@ -55,12 +71,20 @@ MonoBehaviour:
     m_Key: DEACON_DESC
     m_Metadata:
       m_Items: []
+  - m_Id: 955173362614274
+    m_Key: DEACON_EFFECT
+    m_Metadata:
+      m_Items: []
   - m_Id: 692790073376772
     m_Key: SANCTUARY_NAME
     m_Metadata:
       m_Items: []
   - m_Id: 692790081765376
     m_Key: SANCTUARY_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614275
+    m_Key: SANCTUARY_EFFECT
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -31,7 +31,7 @@ public class PlayerFSM : MonoBehaviour
         _playerInputs.OnLightAttack += CallLightAttackRequest;
         _playerInputs.OnHeavyAttack += CallHeavyAttackRequest;
         _playerInputs.OnSkill += CallSkillRequest;
-        _playerInputs.OnHeal += CallHealRequest;
+        _playerInputs.OnUseItem += CallHealRequest;
     }
     private void OnDisable()
     {
@@ -39,7 +39,7 @@ public class PlayerFSM : MonoBehaviour
         _playerInputs.OnLightAttack -= CallLightAttackRequest;
         _playerInputs.OnHeavyAttack -= CallHeavyAttackRequest;
         _playerInputs.OnSkill -= CallSkillRequest;
-        _playerInputs.OnHeal -= CallHealRequest;
+        _playerInputs.OnUseItem -= CallHealRequest;
     }
     private void Update()
     {

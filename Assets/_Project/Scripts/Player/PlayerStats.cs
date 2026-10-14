@@ -35,7 +35,7 @@ public class PlayerStats : MonoBehaviour
     {
         MaxHealth = 80 + (12 * _lifeLevel);
         MaxStamina = 60 + (8 * _staminaLevel);
-        float strengthBonus = 0;
+        float strengthBonus;
         if (_strengthLevel <=  6)
         {
             strengthBonus = _strengthLevel * 0.05f;

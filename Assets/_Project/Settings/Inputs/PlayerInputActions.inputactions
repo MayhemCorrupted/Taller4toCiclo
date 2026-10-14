@@ -87,7 +87,7 @@
                     "priority": 0
                 },
                 {
-                    "name": "Heal",
+                    "name": "UseItem",
                     "type": "Button",
                     "id": "0888b58b-136c-46f0-a59b-5fe6f5801481",
                     "expectedControlType": "",
@@ -313,7 +313,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";KeyboardMouse",
-                    "action": "Heal",
+                    "action": "UseItem",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -324,7 +324,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Heal",
+                    "action": "UseItem",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -335,7 +335,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
-                    "action": "Heal",
+                    "action": "UseItem",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
