@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 public class DialogueManager : MonoBehaviour
 {
     private DialogueUI _dialogueUI;

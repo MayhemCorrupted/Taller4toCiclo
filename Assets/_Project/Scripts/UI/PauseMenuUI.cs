@@ -44,12 +44,11 @@ public class PauseMenuUI : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(_resumeButton.gameObject);
         }
-
         Time.timeScale = 0f;
     }
     public void CloseMenu()
     {
-        if (_mainPausePanel != null) _mainPausePanel.SetActive(true);
+        if (_mainPausePanel != null) _mainPausePanel.SetActive(false);
         Time.timeScale = 1f;
     }
     private void ResumeGame()
@@ -91,7 +90,7 @@ public class PauseMenuUI : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-        Application.Quit();
+            Application.Quit();
 #endif
     }
 }

@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu }
 public class UIManager : MonoBehaviour
 {
@@ -14,6 +13,22 @@ public class UIManager : MonoBehaviour
         else Destroy(gameObject);
 
         _playerInputs = FindAnyObjectByType<PlayerInputs>();
+    }
+    private void OnEnable()
+    {
+        if (_playerInputs != null)
+        {
+            _playerInputs.OnOpenInventory += HandleInventoryToggle;
+            _playerInputs.OnPause += HandlePauseToggle;
+        }
+    }
+    private void OnDisable()
+    {
+        if (_playerInputs != null)
+        {
+            _playerInputs.OnOpenInventory -= HandleInventoryToggle;
+            _playerInputs.OnPause -= HandlePauseToggle;
+        }
     }
     public void SetGameState(GameState newState)
     {

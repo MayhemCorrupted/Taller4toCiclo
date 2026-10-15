@@ -2,7 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization;
-
 public class InventoryPanelUI : MonoBehaviour
 {
     [SerializeField] private GameObject _inventoryPanel;
@@ -20,8 +19,8 @@ public class InventoryPanelUI : MonoBehaviour
     [SerializeField] private LocalizedString _effectLocalized;
     private void Awake()
     {
-        _inventoryPanel.SetActive(false);
-        _renderPreviewCamera.SetActive(false);
+        if (_inventoryPanel != null) _inventoryPanel.SetActive(false);
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);
 
         _inventoryLocalized.StringChanged += (text) => { if (_titleInventoryText != null) _titleInventoryText.text = text; };
         _statsLocalized.StringChanged += (text) => { if (_titleStatsText != null) _titleStatsText.text = text; };
@@ -37,8 +36,8 @@ public class InventoryPanelUI : MonoBehaviour
     }
     public void OpenInventory()
     {
-        _inventoryPanel.SetActive(true);
-        _renderPreviewCamera.SetActive(true);
+        if (_inventoryPanel != null) _inventoryPanel.SetActive(true);
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(true);
 
         if (_firstSelectedSlot != null)
         {
@@ -48,7 +47,7 @@ public class InventoryPanelUI : MonoBehaviour
     }
     public void CloseInventory()
     {
-        _inventoryPanel.SetActive(false);
-        _renderPreviewCamera.SetActive(false);
+        if (_inventoryPanel != null) _inventoryPanel.SetActive(false);
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);
     }
 }

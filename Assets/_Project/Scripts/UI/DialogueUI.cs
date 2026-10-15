@@ -27,7 +27,6 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private float _nextPromptDelay = 0.2f;
 
     [SerializeField][Range(0.01f, 0.1f)] private float defaultTextSpeed = 0.03f;
-
     public bool IsTyping { get; private set; }
     private DialogueLine? _currentLine = null;
     private Coroutine _typingCoroutine;
@@ -78,7 +77,7 @@ public class DialogueUI : MonoBehaviour
     }
     public void OpenUI(Action onComplete)
     {
-        _playerHUD.SetActive(false);
+        if (_playerHUD != null) _playerHUD.SetActive(false);
         if (_dialoguePanel != null) _dialoguePanel.SetActive(true);
         HideAllOptions();
         onComplete?.Invoke();
@@ -250,7 +249,6 @@ public class DialogueUI : MonoBehaviour
         if (this == null || _interactionPromptTMP == null) return;
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-
         _interactionPromptTMP.gameObject.SetActive(false);
 
         float delay = IsTyping ? _skipPromptDelay : _nextPromptDelay;
@@ -261,8 +259,8 @@ public class DialogueUI : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         LocalizedString targetString = IsTyping ? _skipTypingLocalizedString : _nextLineLocalizedString;
-
         var asyncOperation = targetString.GetLocalizedStringAsync();
+
         yield return asyncOperation;
 
         if (this == null || _interactionPromptTMP == null) yield break;
