@@ -19,4 +19,4 @@ MonoBehaviour:
   detectionRadius: 8
   attackRadius: 2
   lossRadius: 14
-  attackType: 1
+  attackType: 0

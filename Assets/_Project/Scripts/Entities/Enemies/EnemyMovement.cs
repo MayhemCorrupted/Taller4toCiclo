@@ -3,19 +3,18 @@ using UnityEngine.AI;
 
 public class EnemyMovement : MonoBehaviour
 {
-	public float speed;
 	[SerializeField] private NavMeshAgent agent;
 	[SerializeField] private EnemyStateManager stateManager;
 	[SerializeField] private EnemyDetection detector;
 	[Min(0.0f)] public float patrolWaitingTime = 1.0f;
 	[Min(0.1f)] public float patrolRadius = 5.0f;
 
+	private float speed = 0.0f;
 	private float patrolWaitingTimer;
 	private bool isWaiting;
 
 	private void Start()
 	{
-		detector.Init();
 		stateManager.OnStateChanged += HandleStateChanged;
 
 		if (stateManager.CurrentState == EnemyState.Patroling)
@@ -43,6 +42,11 @@ public class EnemyMovement : MonoBehaviour
 				HandleAttacking();
 				break;
 		}
+	}
+
+	public void Init(float speed)
+	{
+		this.speed = speed;
 	}
 
 	private void SetRandomPatrolPoint()

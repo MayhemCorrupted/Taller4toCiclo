@@ -8,10 +8,7 @@ public class EnemyStateManager : MonoBehaviour
 
 	private EnemyState state = EnemyState.Patroling;
 
-	public EnemyState CurrentState
-	{
-		get => state;
-	}
+	public EnemyState CurrentState => state;
 
 	private void Update()
 	{
