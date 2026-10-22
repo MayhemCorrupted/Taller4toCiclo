@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   health: 60
   defense: 10
-  attack: 20
   speed: 5
   detectionRadius: 8
   attackRadius: 2
   lossRadius: 14
-  attackType: 0
+  attacks:
+  - {fileID: 11400000, guid: 547ccba26512c2948a2e63426dddf8a0, type: 2}

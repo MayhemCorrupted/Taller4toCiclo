@@ -9,7 +9,7 @@ public class EnemyManager : MonoBehaviour
 	[SerializeField] private EnemyDetection detector;
 	[SerializeField] private EnemyMovement movement;
 	[SerializeField] private EnemyStateManager stateManager;
-	[SerializeField] private EnemyAttack attacker;
+	[SerializeField] private EnemyAttackController attacker;
 
 	private void Awake()
 	{
@@ -21,6 +21,6 @@ public class EnemyManager : MonoBehaviour
 		health.Init(data.health, data.defense);
 		detector.Init(data.detectionRadius, data.attackRadius, data.lossRadius);
 		movement.Init(data.speed);
-		attacker.Init(data.attackType, data.attack);
+		attacker.Init(data.attacks);
 	}
 }
