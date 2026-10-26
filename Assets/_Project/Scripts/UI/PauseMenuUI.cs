@@ -1,110 +1,91 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 public class PauseMenuUI : MonoBehaviour, IPanel
 {
-    [Header("Conexiones de UI")]
-    [SerializeField] private OptionsMenuUI _optionsMenuUI; 
-    [Header("Contenedores")]
+    [SerializeField] private Animator _menuAnimator;
+
     [SerializeField] private GameObject _mainPauseContainer;
+    [SerializeField] private GameObject _optionsContainer;
     [SerializeField] private GameObject _quitContainer;
-    [Header("Botones Principales")]
+
     [SerializeField] private Button _resumeButton;
     [SerializeField] private Button _optionsButton;
     [SerializeField] private Button _quitButton;
-    [Header("Botones Salida")]
-    [SerializeField] private Button _confirmQuitButton;
-    [SerializeField] private Button _cancelQuitButton;
-    [Header("Animación")]
-    [SerializeField] private Animator _pauseAnimator;
+
     private readonly int _showHash = Animator.StringToHash("Show");
     private readonly int _hideHash = Animator.StringToHash("Hide");
     private void Awake()
     {
         if (_resumeButton != null) _resumeButton.onClick.AddListener(ResumeGame);
-        if (_optionsButton != null) _optionsButton.onClick.AddListener(OpenOptions);
-        if (_quitButton != null) _quitButton.onClick.AddListener(ShowQuitConfirmation);
+        if (_optionsButton != null) _optionsButton.onClick.AddListener(OpenOptionsContainer);
+        if (_quitButton != null) _quitButton.onClick.AddListener(OpenExitContainer);
 
-        if (_confirmQuitButton != null) _confirmQuitButton.onClick.AddListener(QuitGame);
-        if (_cancelQuitButton != null) _cancelQuitButton.onClick.AddListener(HideQuitConfirmation);
-
+        if (_optionsContainer != null) _optionsContainer.SetActive(false);
         if (_quitContainer != null) _quitContainer.SetActive(false);
-        if (_optionsMenuUI != null) _optionsMenuUI.gameObject.SetActive(false);
+        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(false);
     }
     private void OnDestroy()
     {
         if (_resumeButton != null) _resumeButton.onClick.RemoveAllListeners();
         if (_optionsButton != null) _optionsButton.onClick.RemoveAllListeners();
         if (_quitButton != null) _quitButton.onClick.RemoveAllListeners();
-        if (_confirmQuitButton != null) _confirmQuitButton.onClick.RemoveAllListeners();
-        if (_cancelQuitButton != null) _cancelQuitButton.onClick.RemoveAllListeners();
     }
     public void OpenPanel()
     {
-        gameObject.SetActive(true);
-        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(true);
-        if (_quitContainer != null) _quitContainer.SetActive(false);
-
-        if (_optionsMenuUI != null) _optionsMenuUI.ClosePanel();
-
-        if (_pauseAnimator != null) _pauseAnimator.SetTrigger(_showHash);
-
-        SelectButton(_resumeButton);
-        Time.timeScale = 0f;
+        StartCoroutine(OpeningPanel());
     }
     public void ClosePanel()
     {
-        if (_pauseAnimator != null) _pauseAnimator.SetTrigger(_hideHash);
-
-        gameObject.SetActive(false);
-        Time.timeScale = 1f;
+        StartCoroutine(ClosingPanel());
     }
-
     private void ResumeGame()
     {
         UIManager.Instance.SetGameState(GameState.Gameplay);
         ClosePanel();
     }
-
-    private void OpenOptions()
+    private void OpenExitContainer()
     {
-        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(false);
-        if (_optionsMenuUI != null) _optionsMenuUI.OpenPanel();
-    }
-    public void ReturnFromOptions()
-    {
-        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(true);
-        SelectButton(_optionsButton);
-    }
-    private void ShowQuitConfirmation()
-    {
-        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(false);
         if (_quitContainer != null) _quitContainer.SetActive(true);
-        SelectButton(_cancelQuitButton);
+        SetMainButtonsState(false);
     }
-    private void HideQuitConfirmation()
+    private void OpenOptionsContainer()
     {
-        if (_quitContainer != null) _quitContainer.SetActive(false);
-        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(true);
-        SelectButton(_quitButton);
+        if (_optionsContainer != null) _optionsContainer.SetActive(true);
+        SetMainButtonsState(false);
     }
-
-    private void QuitGame()
+    public void SetMainButtonsState(bool state)
     {
-        Time.timeScale = 1f;
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        if (_resumeButton != null) _resumeButton.interactable = state;
+        if (_optionsButton != null) _optionsButton.interactable = state;
+        if (_quitButton != null) _quitButton.interactable = state;
     }
-    private void SelectButton(Button btn)
+    private void FirstSelectButton(Button btn)
     {
         if (btn != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(btn.gameObject);
         }
+    }
+    private IEnumerator ClosingPanel()
+    {
+        _menuAnimator.SetTrigger(_hideHash);
+        yield return null;
+        AnimatorStateInfo stateInfo = _menuAnimator.GetCurrentAnimatorStateInfo(0);
+        yield return new WaitForSeconds(stateInfo.length);
+        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(false);
+    }
+    private IEnumerator OpeningPanel()
+    {
+        if (_optionsContainer != null) _optionsContainer.SetActive(false);
+        if (_quitContainer != null) _quitContainer.SetActive(false);
+        if (_mainPauseContainer != null) _mainPauseContainer.SetActive(true);
+        SetMainButtonsState(true);
+        _menuAnimator.SetTrigger(_showHash);
+        FirstSelectButton(_resumeButton);
+        yield return null;
     }
 }
