@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Names_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 41ff67ec690917d4da8f9970ffac9588, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 298424352768
+    m_Localized: Items
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285696
+    m_Localized: Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285697
+    m_Localized: Statistics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285698
+    m_Localized: Effect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480000
+    m_Localized: Life
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480001
+    m_Localized: Stamina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480002
+    m_Localized: Strength
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480003
+    m_Localized: Agility
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480004
+    m_Localized: Defense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480005
+    m_Localized: Health points
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

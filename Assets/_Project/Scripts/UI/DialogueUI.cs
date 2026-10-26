@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization;
 using UnityEngine.UI;
-
 public class DialogueUI : MonoBehaviour
 {
     [SerializeField] private GameObject _playerHUD;
@@ -33,24 +32,10 @@ public class DialogueUI : MonoBehaviour
     private Coroutine _promptCoroutine;
     private float _currentTextSpeed;
     private string _currentInteractKeyName = "";
-
-    private LocalizedString[] _activeOptionStrings;
-    private LocalizedString.ChangeHandler[] _activeOptionHandlers;
+    private float _typingPercentage = 0f;
     private void Awake()
     {
         if (_dialoguePanel != null) _dialoguePanel.SetActive(false);
-        _activeOptionStrings = new LocalizedString[_optionButtons.Length];
-        _activeOptionHandlers = new LocalizedString.ChangeHandler[_optionButtons.Length];
-
-        for (int i = 0; i < _optionButtons.Length; i++)
-        {
-            int index = i;
-            _activeOptionHandlers[i] = (text) =>
-            {
-                if (this == null || index >= _optionTMP.Length || _optionTMP[index] == null) return;
-                _optionTMP[index].text = text;
-            };
-        }
         HideAllOptions();
         if (_interactionPromptTMP != null) _interactionPromptTMP.gameObject.SetActive(false);
     }
@@ -62,18 +47,6 @@ public class DialogueUI : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeCurrentLine();
-
-        if (_activeOptionStrings != null)
-        {
-            for (int i = 0; i < _activeOptionStrings.Length; i++)
-            {
-                if (_activeOptionStrings[i] != null)
-                {
-                    _activeOptionStrings[i].StringChanged -= _activeOptionHandlers[i];
-                    _activeOptionStrings[i] = null;
-                }
-            }
-        }
     }
     public void OpenUI(Action onComplete)
     {
@@ -100,17 +73,16 @@ public class DialogueUI : MonoBehaviour
     }
     private void UnsubscribeCurrentLine()
     {
-        if (_currentLine.HasValue)
-        {
-            _currentLine.Value.SpeakerName.StringChanged -= UpdateSpeakerName;
-            _currentLine.Value.DialogueText.StringChanged -= UpdateDialogueText;
-            _currentLine = null;
-        }
+        LanguageManager.Instance.UnbindText(_speakerNameTMP);
+        LanguageManager.Instance.UnbindText(_dialogueTextTMP);
+        _currentLine = null;
     }
     public void ShowLine(DialogueLine line)
     {
         UnsubscribeCurrentLine();
         _currentLine = line;
+        _typingPercentage = 0f;
+        IsTyping = false;
 
         if (_speakerPortrait != null)
         {
@@ -120,54 +92,72 @@ public class DialogueUI : MonoBehaviour
 
         _currentTextSpeed = line.CustomTextSpeed > 0 ? line.CustomTextSpeed : defaultTextSpeed;
 
-        line.SpeakerName.StringChanged += UpdateSpeakerName;
-        line.DialogueText.StringChanged += UpdateDialogueText;
-    }
-    private void UpdateSpeakerName(string localizedName)
-    {
-        if (this == null || _speakerNameTMP == null) return;
-        _speakerNameTMP.text = localizedName;
-    }
-    private void UpdateDialogueText(string localizedText)
-    {
-        if (this == null || _dialogueTextTMP == null) return;
-        _dialogueTextTMP.text = localizedText;
+        LanguageManager.Instance.BindText(_speakerNameTMP, line.SpeakerName);
+        LanguageManager.Instance.BindText(_dialogueTextTMP, line.DialogueText, (text) =>
+        {
+            _dialogueTextTMP.ForceMeshUpdate();
 
-        if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-        _typingCoroutine = StartCoroutine(TypewriterRoutine());
+            if (!IsTyping && _typingPercentage >= 1f)
+            {
+                SkipTypingEffect();
+            }
+            else if (!IsTyping && _typingPercentage == 0f)
+            {
+                if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+                _typingCoroutine = StartCoroutine(TypewriterRoutine());
+            }
+        });
     }
     private IEnumerator TypewriterRoutine()
     {
         if (this == null || _dialogueTextTMP == null) yield break;
 
-        _dialogueTextTMP.ForceMeshUpdate();
-        TMP_TextInfo textInfo = _dialogueTextTMP.textInfo;
-
-        for (int i = 0; i < textInfo.characterCount; i++) SetCharAlpha(i, 0);
-        _dialogueTextTMP.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-
         IsTyping = true;
         UpdateInteractionPrompt();
 
-        for (int i = 0; i < textInfo.characterCount; i++)
+        while (_typingPercentage < 1f)
         {
-            if (!textInfo.characterInfo[i].isVisible) continue;
             if (this == null || _dialogueTextTMP == null) yield break;
 
-            SetCharAlpha(i, 255);
+            _dialogueTextTMP.ForceMeshUpdate();
+            TMP_TextInfo textInfo = _dialogueTextTMP.textInfo;
+
+            int totalVisibleChars = 0;
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (textInfo.characterInfo[i].isVisible) totalVisibleChars++;
+            }
+
+            int charsToShow = Mathf.FloorToInt(_typingPercentage * totalVisibleChars);
+            int visibleCount = 0;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible) continue;
+                SetCharAlpha(i, visibleCount < charsToShow ? (byte)255 : (byte)0);
+                visibleCount++;
+            }
+
             _dialogueTextTMP.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-            yield return new WaitForSeconds(_currentTextSpeed);
+
+            float totalTime = _currentTextSpeed * totalVisibleChars;
+            if (totalTime > 0) _typingPercentage += Time.deltaTime / totalTime;
+            else _typingPercentage = 1f;
+
+            yield return null;
         }
 
         IsTyping = false;
-        UpdateInteractionPrompt();
+        SkipTypingEffect();
     }
     public void SkipTypingEffect()
     {
         if (this == null || _dialogueTextTMP == null) return;
         if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
 
+        _typingPercentage = 1f;
         TMP_TextInfo textInfo = _dialogueTextTMP.textInfo;
+
         for (int i = 0; i < textInfo.characterCount; i++)
         {
             if (!textInfo.characterInfo[i].isVisible) continue;
@@ -208,9 +198,7 @@ public class DialogueUI : MonoBehaviour
             int index = i;
             _optionButtons[index].gameObject.SetActive(true);
 
-            var localizedRef = options[index].OptionText;
-            _activeOptionStrings[index] = localizedRef;
-            localizedRef.StringChanged += _activeOptionHandlers[index];
+            LanguageManager.Instance.BindText(_optionTMP[index], options[index].OptionText);
 
             _optionButtons[index].onClick.RemoveAllListeners();
             _optionButtons[index].onClick.AddListener(() =>
@@ -231,10 +219,9 @@ public class DialogueUI : MonoBehaviour
 
         for (int i = 0; i < _optionButtons.Length; i++)
         {
-            if (_activeOptionStrings != null && _activeOptionStrings[i] != null)
+            if (_optionTMP != null && i < _optionTMP.Length)
             {
-                _activeOptionStrings[i].StringChanged -= _activeOptionHandlers[i];
-                _activeOptionStrings[i] = null;
+                LanguageManager.Instance.UnbindText(_optionTMP[i]);
             }
 
             if (_optionButtons != null && i < _optionButtons.Length && _optionButtons[i] != null)
@@ -259,14 +246,11 @@ public class DialogueUI : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         LocalizedString targetString = IsTyping ? _skipTypingLocalizedString : _nextLineLocalizedString;
-        var asyncOperation = targetString.GetLocalizedStringAsync();
 
-        yield return asyncOperation;
-
-        if (this == null || _interactionPromptTMP == null) yield break;
-
-        string localizedText = asyncOperation.Result;
-        _interactionPromptTMP.text = localizedText.Replace("{key}", _currentInteractKeyName);
-        _interactionPromptTMP.gameObject.SetActive(true);
+        LanguageManager.Instance.BindText(_interactionPromptTMP, targetString, (text) =>
+        {
+            _interactionPromptTMP.text = text.Replace("{key}", _currentInteractKeyName);
+            _interactionPromptTMP.gameObject.SetActive(true);
+        });
     }
 }

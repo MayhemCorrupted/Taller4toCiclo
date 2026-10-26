@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Linq;
-
 [Serializable] public class InventorySlot
 {
     public ItemData Item;

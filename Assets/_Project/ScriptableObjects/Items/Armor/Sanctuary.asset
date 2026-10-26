@@ -32,6 +32,15 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  ItemEffect:
+    m_TableReference:
+      m_TableCollectionName: GUID:9933094644472b94eb07e34a3ffd2fe5
+    m_TableEntryReference:
+      m_KeyId: 955173362614275
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   DefenseBonus: 75
   StaminaRequirement: 6
   references:

@@ -18,48 +18,8 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 349939284197376
-    m_Localized: Strength
-    m_Metadata:
-      m_Items: []
   - m_Id: 349939552632832
     m_Localized: Lithoselle
-    m_Metadata:
-      m_Items: []
-  - m_Id: 521094765924352
-    m_Localized: Items
-    m_Metadata:
-      m_Items: []
-  - m_Id: 521094807867392
-    m_Localized: Inventory
-    m_Metadata:
-      m_Items: []
-  - m_Id: 521094807867393
-    m_Localized: Statistics
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613668269735936
-    m_Localized: Life
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670278807552
-    m_Localized: Stamina
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001856
-    m_Localized: Agility
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001857
-    m_Localized: Defense
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001858
-    m_Localized: Health points
-    m_Metadata:
-      m_Items: []
-  - m_Id: 950394834010112
-    m_Localized: Effect
     m_Metadata:
       m_Items: []
   - m_Id: 1076780030640128

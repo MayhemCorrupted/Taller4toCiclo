@@ -1,4 +1,9 @@
 using UnityEngine;
+public interface IPanel
+{
+    void OpenPanel();
+    void ClosePanel();
+}
 public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu }
 public class UIManager : MonoBehaviour
 {
@@ -47,12 +52,12 @@ public class UIManager : MonoBehaviour
         if (CurrentState == GameState.Gameplay)
         {
             SetGameState(GameState.Inventory);
-            _inventoryPanelUI.OpenInventory();
+            _inventoryPanelUI.OpenPanel();
         }
         else if (CurrentState == GameState.Inventory)
         {
             SetGameState(GameState.Gameplay);
-            _inventoryPanelUI.CloseInventory();
+            _inventoryPanelUI.ClosePanel();
         }
     }
     private void HandlePauseToggle()
@@ -62,12 +67,12 @@ public class UIManager : MonoBehaviour
         if (CurrentState == GameState.Gameplay)
         {
             SetGameState(GameState.PauseMenu);
-            _pauseMenuUI.OpenMenu();
+            _pauseMenuUI.OpenPanel();
         }
         else if (CurrentState == GameState.PauseMenu)
         {
             SetGameState(GameState.Gameplay);
-            _pauseMenuUI.CloseMenu();
+            _pauseMenuUI.ClosePanel();
         }
     }
 }

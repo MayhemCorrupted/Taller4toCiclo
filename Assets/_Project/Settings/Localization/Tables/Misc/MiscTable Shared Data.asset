@@ -19,46 +19,6 @@ MonoBehaviour:
     m_Key: STATUE_NAME
     m_Metadata:
       m_Items: []
-  - m_Id: 521094765924352
-    m_Key: ITEM_TITLE
-    m_Metadata:
-      m_Items: []
-  - m_Id: 521094807867392
-    m_Key: INVENTORY_TITLE
-    m_Metadata:
-      m_Items: []
-  - m_Id: 521094807867393
-    m_Key: STAT_TITLE
-    m_Metadata:
-      m_Items: []
-  - m_Id: 950394834010112
-    m_Key: EFFECT_TITLE
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613668269735936
-    m_Key: LIFE_STAT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670278807552
-    m_Key: STAMINA_STAT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 349939284197376
-    m_Key: STRENGTH_STAT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001856
-    m_Key: AGILITY_STAT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001857
-    m_Key: DEFENSE_STAT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 613670283001858
-    m_Key: HP_STAT
-    m_Metadata:
-      m_Items: []
   - m_Id: 1076780030640128
     m_Key: DIALOGUE_SKIP
     m_Metadata:

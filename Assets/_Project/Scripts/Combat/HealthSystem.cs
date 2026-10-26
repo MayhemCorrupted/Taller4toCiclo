@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-
 public class HealthSystem : MonoBehaviour
 {
     public event Action<float> OnTakeDamage;

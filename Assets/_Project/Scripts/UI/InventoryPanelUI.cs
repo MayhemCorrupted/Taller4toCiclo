@@ -1,40 +1,30 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Localization;
-public class InventoryPanelUI : MonoBehaviour
+
+public class InventoryPanelUI : MonoBehaviour, IPanel
 {
     [SerializeField] private GameObject _inventoryPanel;
     [SerializeField] private GameObject _firstSelectedSlot;
     [SerializeField] private GameObject _renderPreviewCamera;
 
-    [SerializeField] private TextMeshProUGUI _titleInventoryText;
-    [SerializeField] private TextMeshProUGUI _titleStatsText;
-    [SerializeField] private TextMeshProUGUI _titleObjectsText;
-    [SerializeField] private TextMeshProUGUI _titleEffectText;
-
-    [SerializeField] private LocalizedString _inventoryLocalized;
-    [SerializeField] private LocalizedString _statsLocalized;
-    [SerializeField] private LocalizedString _objectsLocalized;
-    [SerializeField] private LocalizedString _effectLocalized;
+    [SerializeField] private LocalizedTMP[] _localizedElements;
     private void Awake()
     {
         if (_inventoryPanel != null) _inventoryPanel.SetActive(false);
         if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);
-
-        _inventoryLocalized.StringChanged += (text) => { if (_titleInventoryText != null) _titleInventoryText.text = text; };
-        _statsLocalized.StringChanged += (text) => { if (_titleStatsText != null) _titleStatsText.text = text; };
-        _objectsLocalized.StringChanged += (text) => { if (_titleObjectsText != null) _titleObjectsText.text = text; };
-        _effectLocalized.StringChanged += (text) => { if (_titleEffectText != null) _titleEffectText.text = text; };
+    }
+    private void Start()
+    {
+        LanguageManager.Instance.RegisterElements(_localizedElements);
     }
     private void OnDestroy()
     {
-        _inventoryLocalized.StringChanged -= (text) => { if (_titleInventoryText != null) _titleInventoryText.text = text; };
-        _statsLocalized.StringChanged -= (text) => { if (_titleStatsText != null) _titleStatsText.text = text; };
-        _objectsLocalized.StringChanged -= (text) => { if (_titleObjectsText != null) _titleObjectsText.text = text; };
-        _effectLocalized.StringChanged -= (text) => { if (_titleEffectText != null) _titleEffectText.text = text; };
+        if (LanguageManager.Instance != null)
+        {
+            LanguageManager.Instance.UnregisterElements(_localizedElements);
+        }
     }
-    public void OpenInventory()
+    public void OpenPanel()
     {
         if (_inventoryPanel != null) _inventoryPanel.SetActive(true);
         if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(true);
@@ -45,7 +35,7 @@ public class InventoryPanelUI : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(_firstSelectedSlot);
         }
     }
-    public void CloseInventory()
+    public void ClosePanel()
     {
         if (_inventoryPanel != null) _inventoryPanel.SetActive(false);
         if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);

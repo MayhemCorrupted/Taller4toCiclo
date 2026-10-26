@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Localization;
-
 public abstract class ItemData : ScriptableObject
 {
     public string ItemID;

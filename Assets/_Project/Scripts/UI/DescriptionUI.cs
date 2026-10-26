@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-
 public class DescriptionUI : MonoBehaviour
 {
     private SlotsUI _slotsUI;
@@ -12,6 +11,7 @@ public class DescriptionUI : MonoBehaviour
     {
         _slotsUI = FindAnyObjectByType<SlotsUI>();
         _slotsUI.OnItemSelected += ShowItemInfo;
+        ShowItemInfo(null);
     }
     private void OnDestroy()
     {
@@ -20,37 +20,23 @@ public class DescriptionUI : MonoBehaviour
     }
     private void ShowItemInfo(ItemData item)
     {
-        if (_currentItemInfo != null)
-        {
-            _currentItemInfo.ItemName.StringChanged -= UpdateItemName;
-            _currentItemInfo.ItemDescription.StringChanged -= UpdateItemDescription;
-            _currentItemInfo.ItemEffect.StringChanged -= UpdateItemEffect;
-        }
+        LanguageManager.Instance.UnbindText(_itemNameText);
+        LanguageManager.Instance.UnbindText(_itemDescriptionText);
+        LanguageManager.Instance.UnbindText(_itemEffectText);
+
         _currentItemInfo = item;
 
         if (_currentItemInfo != null)
         {
-            _currentItemInfo.ItemName.StringChanged += UpdateItemName;
-            _currentItemInfo.ItemDescription.StringChanged += UpdateItemDescription;
-            _currentItemInfo.ItemEffect.StringChanged += UpdateItemEffect;
+            LanguageManager.Instance.BindText(_itemNameText, _currentItemInfo.ItemName);
+            LanguageManager.Instance.BindText(_itemDescriptionText, _currentItemInfo.ItemDescription);
+            LanguageManager.Instance.BindText(_itemEffectText, _currentItemInfo.ItemEffect);
         }
         else
         {
-            if (_itemNameText != null) _itemNameText.text = "";
-            if (_itemDescriptionText != null) _itemDescriptionText.text = "";
-            if (_itemEffectText != null) _itemEffectText.text = "";
+            if (_itemNameText != null) _itemNameText.text = "-";
+            if (_itemDescriptionText != null) _itemDescriptionText.text = "-";
+            if (_itemEffectText != null) _itemEffectText.text = "-";
         }
-    }
-    private void UpdateItemName(string localizedName)
-    {
-        if (_itemNameText != null) _itemNameText.text = localizedName;
-    }
-    private void UpdateItemDescription(string localizedDescription)
-    {
-        if (_itemDescriptionText != null) _itemDescriptionText.text = localizedDescription;
-    }
-    private void UpdateItemEffect(string text) 
-    {
-        if (_itemEffectText != null) _itemEffectText.text = text;
     }
 }
