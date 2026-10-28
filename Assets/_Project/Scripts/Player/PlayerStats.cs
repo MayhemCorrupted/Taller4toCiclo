@@ -36,14 +36,8 @@ public class PlayerStats : MonoBehaviour
         MaxHealth = 80 + (12 * _lifeLevel);
         MaxStamina = 60 + (8 * _staminaLevel);
         float strengthBonus;
-        if (_strengthLevel <=  6)
-        {
-            strengthBonus = _strengthLevel * 0.05f;
-        }
-        else
-        {
-            strengthBonus = (6 * 0.05f) + ((_strengthLevel - 6) * 0.03f);
-        }
+        if (_strengthLevel <=  6) strengthBonus = _strengthLevel * 0.05f;
+        else strengthBonus = (6 * 0.05f) + ((_strengthLevel - 6) * 0.03f);
 
         DamageMultiplier = 1 + strengthBonus + ConsumableDamageBonus;
 
@@ -55,18 +49,9 @@ public class PlayerStats : MonoBehaviour
         
         VesaniaDamageBonus = 0;
         
-        if (_vesaniaLevel == 2)
-        {
-            VesaniaDamageBonus = 0.10f;
-        }
-        else if (_vesaniaLevel == 3)
-        {
-            VesaniaDamageBonus = 0.20f;
-        }
-        else if (_vesaniaLevel == 4)
-        {
-            VesaniaDamageBonus = 0.30f;
-        }
+        if (_vesaniaLevel == 2) VesaniaDamageBonus = 0.10f;
+        else if (_vesaniaLevel == 3) VesaniaDamageBonus = 0.20f;
+        else if (_vesaniaLevel == 4) VesaniaDamageBonus = 0.30f;
 
         OnStatsUpdated?.Invoke();
     }

@@ -12,14 +12,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _runSpeed = 10f;
     [SerializeField] private float _dashSpeed = 12f;
     [SerializeField] private float _accelerationRate = 5f;
+    [SerializeField] private float _decelerationRate = 12f;
     [SerializeField] private float _turnSmoothTime = 0.1f;
     [SerializeField] private float _gravity = -9.81f;
 
     private float _turnSmoothVelocity;
-    private float _currentSpeed;
     private Vector3 _dashDirection;
-    private Vector3 _velocity;
-    private Vector3 _currentMoveDirection;
+    private Vector3 _verticalVelocity;
+    private Vector3 _currentVelocity;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
@@ -57,9 +57,7 @@ public class PlayerMovement : MonoBehaviour
                     float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
 
                     if (_mainCameraTransform != null)
-                    {
                         targetAngle += _mainCameraTransform.eulerAngles.y;
-                    }
 
                     _dashDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
                 }
@@ -68,8 +66,8 @@ public class PlayerMovement : MonoBehaviour
                     _dashDirection = transform.forward;
                 }
             }
-
-            _characterController.Move(_dashSpeed * Time.deltaTime * _dashDirection);
+            _characterController.Move(_dashSpeed * Time.deltaTime * _dashDirection + _verticalVelocity);
+            Gravity();
             return;
         }
         _dashDirection = Vector3.zero;
@@ -78,11 +76,11 @@ public class PlayerMovement : MonoBehaviour
             _playerFSM.CurrentState != PlayerState.Running &&
             _playerFSM.CurrentState != PlayerState.Idle)
         {
-            _currentSpeed = Mathf.Lerp(_currentSpeed, 0, Time.deltaTime * (_accelerationRate * 2));
+            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, Time.deltaTime * _decelerationRate);
 
-            if (_currentSpeed > 0.01f)
+            if (_currentVelocity.magnitude > 0.01f)
             {
-                _characterController.Move(transform.forward * (_currentSpeed * Time.deltaTime));
+                _characterController.Move(_currentVelocity * Time.deltaTime);
             }
             Gravity();
             return;
@@ -90,44 +88,47 @@ public class PlayerMovement : MonoBehaviour
 
         Vector2 moveInput = _playerInputs.MoveInput;
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        float targetSpeed = 0;
+
+        Vector3 targetVelocity = Vector3.zero;
 
         if (moveDirection.magnitude >= 0.1f)
         {
             bool hasSufficientStamina = _playerStamina.CurrentStamina > 0;
             float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running && hasSufficientStamina) ? _runSpeed : _walkSpeed;
-            targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
+            float targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
             float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
             if (_mainCameraTransform != null)
             {
                 targetAngle += _mainCameraTransform.eulerAngles.y;
             }
-            _currentMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            Vector3 adjustedDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            targetVelocity = adjustedDirection * targetSpeed;
 
-            if(_playerCombat.LockOnTarget == null)
+            if (_playerCombat.LockOnTarget == null)
             {
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
                 transform.rotation = Quaternion.Euler(0f, angle, 0f);
             }
         }
-       
-        _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, Time.deltaTime * _accelerationRate);
-        
-        if (_currentSpeed > 0.01f && _currentMoveDirection != Vector3.zero)
+
+        float currentRate = moveDirection.magnitude > 0.1f ? _accelerationRate : _decelerationRate;
+        _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, Time.deltaTime * currentRate);
+
+        if (_currentVelocity.magnitude > 0.01f)
         {
-            _characterController.Move(_currentMoveDirection * (_currentSpeed * Time.deltaTime));
+            _characterController.Move(_currentVelocity * Time.deltaTime);
         }
 
         Gravity();
     }
     private void Gravity()
     {
-        if (_characterController.isGrounded && _velocity.y < 0)
+        if (_characterController.isGrounded && _verticalVelocity.y < 0)
         {
-            _velocity.y = -2f;
+            _verticalVelocity.y = -2f;
         }
-        _velocity.y += _gravity * Time.deltaTime;
-        _characterController.Move(_velocity * Time.deltaTime);
+        _verticalVelocity.y += _gravity * Time.deltaTime;
+        _characterController.Move(_verticalVelocity * Time.deltaTime);
     }
 }
