@@ -2,86 +2,91 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-
-public class OptionsMenuUI : MonoBehaviour, IPanel
+using System;
+public enum OptionSelected { graphics, audio, controls, accessibility }
+public class OptionsPanelUI : MonoBehaviour
 {
     [SerializeField] private PauseMenuUI _pauseMenuUI;
+    [SerializeField] private ExitPanelUI _exitPanelUI;
+    [SerializeField] private ConfigPanelUI _configPanelUI;
 
-    [SerializeField] private GameObject _categoryContainer; 
-    [SerializeField] private GameObject _configContainer;
+    [SerializeField] private GameObject _optionsPanel;
 
-    [SerializeField] private Button _graphicsButton;
-    [SerializeField] private Button _audioButton;
-    [SerializeField] private Button _controlsButton;
-    [SerializeField] private Button _accessibilityButton;
-    [SerializeField] private Button _returnToMainPanelButton;
+    [SerializeField] private Button _graphicsSectionButton;
+    [SerializeField] private Button _audioSectionButton;
+    [SerializeField] private Button _controlsSectionButton;
+    [SerializeField] private Button _accessibilitySectionButton;
 
-    [SerializeField] private Button _returnToOptionsButton;
-
-    [SerializeField] private GameObject _graphicsSection;
-    [SerializeField] private GameObject _audioSection;
-    [SerializeField] private GameObject _controlsSection;
-    [SerializeField] private GameObject _accessibilitySection;
-
+    [SerializeField] private Button _optionsButton;
+    [SerializeField] private Button _returnButton; 
     [SerializeField] private Animator _optionsAnimator;
-    [SerializeField] private Animator _configAnimator;
+
+    public Action<bool> IsOpen;
+    private bool _isTransitioning = false;
 
     private readonly int _showHash = Animator.StringToHash("Show");
     private readonly int _hideHash = Animator.StringToHash("Hide");
-    private void Awake()
+    private void Start()
     {
         if (_pauseMenuUI == null) _pauseMenuUI = FindAnyObjectByType<PauseMenuUI>();
+        if (_exitPanelUI == null) _exitPanelUI = FindAnyObjectByType<ExitPanelUI>();
+        if (_configPanelUI == null) _configPanelUI = FindAnyObjectByType<ConfigPanelUI>();
 
-        if (_graphicsButton != null) _graphicsButton.onClick.AddListener(() => OpenSpecificConfig(_graphicsSection));
-        if (_audioButton != null) _audioButton.onClick.AddListener(() => OpenSpecificConfig(_audioSection));
-        if (_controlsButton != null) _controlsButton.onClick.AddListener(() => OpenSpecificConfig(_controlsSection));
-        if (_accessibilityButton != null) _accessibilityButton.onClick.AddListener(() => OpenSpecificConfig(_accessibilitySection));
+        if (_graphicsSectionButton != null) _graphicsSectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.graphics));
+        if (_audioSectionButton != null) _audioSectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.audio));
+        if (_controlsSectionButton != null) _controlsSectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.controls));
+        if (_accessibilitySectionButton != null) _accessibilitySectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.accessibility));
 
-        if (_returnToMainPanelButton != null) _returnToMainPanelButton.onClick.AddListener(ReturnToPauseMenu);
-        if (_returnToOptionsButton != null) _returnToOptionsButton.onClick.AddListener(ReturnToCategories);
+        if (_optionsButton != null) _optionsButton.onClick.AddListener(OpenPanel);
+        if (_returnButton != null) _returnButton.onClick.AddListener(ClosePanel);
     }
     private void OnEnable()
     {
-        StartCoroutine(OpeningPanel());
+        EnableOptionsButton(true);
+        if (_pauseMenuUI != null) _pauseMenuUI.IsOpen += EscapeClosePanel;
+    }
+    private void OnDisable()
+    {
+        if (_pauseMenuUI != null) _pauseMenuUI.IsOpen -= EscapeClosePanel;
     }
     private void OnDestroy()
     {
-        if (_graphicsButton != null) _graphicsButton.onClick.RemoveAllListeners();
-        if (_audioButton != null) _audioButton.onClick.RemoveAllListeners();
-        if (_controlsButton != null) _controlsButton.onClick.RemoveAllListeners();
-        if (_accessibilityButton != null) _accessibilityButton.onClick.RemoveAllListeners();
+        if (_graphicsSectionButton != null) _graphicsSectionButton.onClick.RemoveAllListeners();
+        if (_audioSectionButton != null) _audioSectionButton.onClick.RemoveAllListeners();
+        if (_controlsSectionButton != null) _controlsSectionButton.onClick.RemoveAllListeners();
+        if (_accessibilitySectionButton != null) _accessibilitySectionButton.onClick.RemoveAllListeners();
 
-        if (_returnToMainPanelButton != null) _returnToMainPanelButton.onClick.RemoveAllListeners();
-        if (_returnToOptionsButton != null) _returnToOptionsButton.onClick.RemoveAllListeners();
+        if (_returnButton != null) _returnButton.onClick.RemoveAllListeners();
+    }
+    private void EscapeClosePanel(bool isPauseOpen)
+    {
+        if (!isPauseOpen && _optionsPanel.activeInHierarchy && !_isTransitioning)
+        {
+            StartCoroutine(ClosingPanel());
+        }
     }
     public void OpenPanel()
     {
-        gameObject.SetActive(true);
+        if (_isTransitioning) return;
+        StartCoroutine(OpeningPanel());
     }
     public void ClosePanel()
     {
+        if (_isTransitioning) return;
         StartCoroutine(ClosingPanel());
     }
-    private void ReturnToPauseMenu()
+    private void OpenSpecificConfig(OptionSelected optionToOpen)
     {
-        ClosePanel();
+        if (_isTransitioning) return;
+        EnableReturnButton(false);
+        EnableSectionButtons(false);
+        EnableOptionsButton(false);
+        _configPanelUI.OpenConfigPanel(optionToOpen);
     }
-    private void OpenSpecificConfig(GameObject panelToOpen)
+    public void RestoreSelectedButton()
     {
-        StartCoroutine(OpeningConfigPanel(panelToOpen));
+        SelectButton(_graphicsSectionButton);
     }
-    private void ReturnToCategories()
-    {
-        StartCoroutine(ClosingConfigPanel());
-    }
-    private void HideAllSubPanels()
-    {
-        if (_graphicsSection != null) _graphicsSection.SetActive(false);
-        if (_audioSection != null) _audioSection.SetActive(false);
-        if (_controlsSection != null) _controlsSection.SetActive(false);
-        if (_accessibilitySection != null) _accessibilitySection.SetActive(false);
-    }
-
     private void SelectButton(Button btn)
     {
         if (btn != null)
@@ -90,19 +95,40 @@ public class OptionsMenuUI : MonoBehaviour, IPanel
             EventSystem.current.SetSelectedGameObject(btn.gameObject);
         }
     }
+    public void EnableReturnButton(bool state)
+    {
+        if (_returnButton != null) _returnButton.interactable = state;
+    }
+    public void EnableOptionsButton(bool state)
+    {
+        if (_optionsButton != null) _optionsButton.interactable = state;
+    }
+    public void EnableSectionButtons(bool state)
+    {
+        if (_audioSectionButton != null) _audioSectionButton.interactable = state;
+        if (_graphicsSectionButton != null) _graphicsSectionButton.interactable = state;
+        if (_accessibilitySectionButton != null) _accessibilitySectionButton.interactable = state;
+        if (_controlsSectionButton != null) _controlsSectionButton.interactable = state;
+    }
     private IEnumerator OpeningPanel()
     {
-        if (_categoryContainer != null) _categoryContainer.SetActive(true);
-        if (_configContainer != null) _configContainer.SetActive(false);
-        HideAllSubPanels();
-
-        if (_optionsAnimator != null) _optionsAnimator.SetTrigger(_showHash);
-
+        _isTransitioning = true;
+        IsOpen?.Invoke(true);
+        _optionsPanel.SetActive(true);
+        _optionsAnimator.SetTrigger(_showHash);
+        _pauseMenuUI.EnableResumeButton(false);
+        _exitPanelUI.EnableQuitButton(false);
+        EnableOptionsButton(false);
+        EnableReturnButton(true);
+        EnableSectionButtons(true);
+        SelectButton(_graphicsSectionButton);
         yield return null;
-        SelectButton(_graphicsButton);
+        _isTransitioning = false;
     }
     private IEnumerator ClosingPanel()
     {
+        _isTransitioning = true;
+        IsOpen?.Invoke(false);
         if (_optionsAnimator != null)
         {
             _optionsAnimator.SetTrigger(_hideHash);
@@ -112,40 +138,11 @@ public class OptionsMenuUI : MonoBehaviour, IPanel
             yield return new WaitForSecondsRealtime(stateInfo.length);
         }
 
-        if (_pauseMenuUI != null) _pauseMenuUI.SetMainButtonsState(true);
-        gameObject.SetActive(false);
-    }
-    private IEnumerator OpeningConfigPanel(GameObject panelToOpen)
-    {
-        if (_categoryContainer != null) _categoryContainer.SetActive(false);
-        if (_configContainer != null) _configContainer.SetActive(true);
-
-        HideAllSubPanels();
-        if (panelToOpen != null) panelToOpen.SetActive(true);
-
-        if (_configAnimator != null)
-        {
-            _configAnimator.SetTrigger(_showHash);
-            yield return null;
-        }
-
-        SelectButton(_returnToOptionsButton);
-    }
-    private IEnumerator ClosingConfigPanel()
-    {
-        if (_configAnimator != null)
-        {
-            _configAnimator.SetTrigger(_hideHash);
-            yield return null;
-
-            AnimatorStateInfo stateInfo = _configAnimator.GetCurrentAnimatorStateInfo(0);
-            yield return new WaitForSecondsRealtime(stateInfo.length);
-        }
-
-        if (_configContainer != null) _configContainer.SetActive(false);
-        HideAllSubPanels();
-        if (_categoryContainer != null) _categoryContainer.SetActive(true);
-
-        SelectButton(_graphicsButton);
+        EnableOptionsButton(true);
+        _pauseMenuUI.EnableResumeButton(true);
+        _exitPanelUI.EnableQuitButton(true);
+        EnableOptionsButton(true);
+        _optionsPanel.SetActive(false);
+        _isTransitioning = false;
     }
 }

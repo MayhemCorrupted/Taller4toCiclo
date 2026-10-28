@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-        HandleMovement();
+       if (UIManager.Instance.CurrentState == GameState.Gameplay) HandleMovement();
     }
     private void HandleMovement()
     {
