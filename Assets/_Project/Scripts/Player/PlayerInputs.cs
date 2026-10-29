@@ -6,11 +6,12 @@ public class PlayerInputs : MonoBehaviour
     public event Action OnLightAttack;
     public event Action OnHeavyAttack;
     public event Action OnSkill;
-    public event Action OnHeal;
+    public event Action OnUseItem;
     public event Action OnInteract;
     public event Action OnOpenInventory;
     public event Action OnLockOn;
     public event Action OnDodge;
+    public event Action OnPause;
     public Vector2 MoveInput { get; private set; }
     public bool InputRun { get; private set; }
     public bool InputBlock { get; private set; }
@@ -34,10 +35,11 @@ public class PlayerInputs : MonoBehaviour
         _inputActions.Gameplay.Skill.performed += ctx => OnSkill?.Invoke();
         _inputActions.Gameplay.Dodge.performed += ctx => OnDodge?.Invoke();
         _inputActions.Gameplay.Interact.performed += ctx => OnInteract?.Invoke();
-        _inputActions.Gameplay.Heal.performed += ctx => OnHeal?.Invoke();
+        _inputActions.Gameplay.UseItem.performed += ctx => OnUseItem?.Invoke();
         _inputActions.Gameplay.LockOn.performed += ctx => OnLockOn?.Invoke();
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();
+        _inputActions.UI.Pause.performed += ctx => OnPause?.Invoke();
     }
     private void OnEnable()
     {

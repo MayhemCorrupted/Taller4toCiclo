@@ -5,10 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/External/StarterAssets/ThirdPersonController/Scenes/Playground.unity
     guid: e9017d5f96b9f09489b4b37e1d6eb914
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 97c2476c5ca5687459222f0d41062135, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: ae91d96a64d3ea842b229a8028b542e7, type: 3}
+    com.unity.localization.settings: {fileID: 11400000, guid: 12b00b07aa216c34998f093c30752f40, type: 2}
   m_UseUCBPForAssetBundles: 0

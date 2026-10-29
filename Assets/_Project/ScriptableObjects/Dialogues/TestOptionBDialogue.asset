@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
+  m_Name: TestOptionBDialogue
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
+  Lines:
+  - SpeakerName:
+      m_TableReference:
+        m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
+      m_TableEntryReference:
+        m_KeyId: 975181471956992
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    DialogueText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 1020483813916672
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    SpeakerSprite: {fileID: 0}
+    CustomTextSpeed: 0
+  - SpeakerName:
+      m_TableReference:
+        m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
+      m_TableEntryReference:
+        m_KeyId: 975181471956992
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    DialogueText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 354246620495872
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    SpeakerSprite: {fileID: 0}
+    CustomTextSpeed: 0
+  Options: []
+  references:
+    version: 2
+    RefIds: []

@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: ItemsTable Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: ItemsTable
+  m_TableCollectionNameGuidString: 9933094644472b94eb07e34a3ffd2fe5
+  m_Entries:
+  - m_Id: 689280808271872
+    m_Key: TEAR_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228224
+    m_Key: TEAR_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173350031360
+    m_Key: TEAR_EFFECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228225
+    m_Key: MEMORY_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422528
+    m_Key: MEMORY_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173358419968
+    m_Key: MEMORY_EFFECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422529
+    m_Key: CARRION_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422530
+    m_Key: CARRION_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614272
+    m_Key: CARRION_EFFECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376768
+    m_Key: RAG_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376769
+    m_Key: RAG_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614273
+    m_Key: RAG_EFFECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376770
+    m_Key: DEACON_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376771
+    m_Key: DEACON_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614274
+    m_Key: DEACON_EFFECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376772
+    m_Key: SANCTUARY_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790081765376
+    m_Key: SANCTUARY_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614275
+    m_Key: SANCTUARY_EFFECT
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 5231756956340060402
+  references:
+    version: 2
+    RefIds:
+    - rid: 5231756956340060402
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1791702930762

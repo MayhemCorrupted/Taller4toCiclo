@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Names Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: Names
+  m_TableCollectionNameGuidString: 41ff67ec690917d4da8f9970ffac9588
+  m_Entries:
+  - m_Id: 298424352768
+    m_Key: ITEM_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285696
+    m_Key: INVENTORY_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285697
+    m_Key: STAT_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298768285698
+    m_Key: EFFECT_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480000
+    m_Key: LIFE_LABEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480001
+    m_Key: STAMINA_LABEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480002
+    m_Key: STRENGTH_LABEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480003
+    m_Key: AGILITY_LABEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480004
+    m_Key: DEFENSE_LABEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 298772480005
+    m_Key: HP_LABEL
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 5231757207773380684
+  references:
+    version: 2
+    RefIds:
+    - rid: 5231757207773380684
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1792662627645

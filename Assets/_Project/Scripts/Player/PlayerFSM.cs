@@ -19,27 +19,25 @@ public class PlayerFSM : MonoBehaviour
     public PlayerState CurrentState { get; private set; }
 
     private PlayerInputs _playerInputs;
+    private PlayerStamina _playerStamina;
     private readonly float DASH_DURATION = 0.5f;
 
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
+        _playerStamina = GetComponent<PlayerStamina>();
     }
     private void OnEnable()
     {
         _playerInputs.OnDodge += HandleDodgeRequest;
-        _playerInputs.OnLightAttack += CallLightAttackRequest;
-        _playerInputs.OnHeavyAttack += CallHeavyAttackRequest;
         _playerInputs.OnSkill += CallSkillRequest;
-        _playerInputs.OnHeal += CallHealRequest;
+        _playerInputs.OnUseItem += CallHealRequest;
     }
     private void OnDisable()
     {
         _playerInputs.OnDodge -= HandleDodgeRequest;
-        _playerInputs.OnLightAttack -= CallLightAttackRequest;
-        _playerInputs.OnHeavyAttack -= CallHeavyAttackRequest;
         _playerInputs.OnSkill -= CallSkillRequest;
-        _playerInputs.OnHeal -= CallHealRequest;
+        _playerInputs.OnUseItem -= CallHealRequest;
     }
     private void Update()
     {
@@ -73,17 +71,18 @@ public class PlayerFSM : MonoBehaviour
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running || CurrentState == PlayerState.Blocking)
         {
-            StartCoroutine(DodgeRoutine());
+            if (_playerStamina.TryConsumeDodgeStamina())
+            {
+                StartCoroutine(DodgeRoutine());
+            }
         }
     }
-    private void CallLightAttackRequest() => RequestAttackState(PlayerState.Attacking);
-    private void CallHeavyAttackRequest() => RequestAttackState(PlayerState.Attacking);
     private void CallSkillRequest() => RequestAttackState(PlayerState.Skill);
     private void RequestAttackState(PlayerState attackState)
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running)
         {
-            //ChangeState(attackState);
+            ChangeState(attackState);
         }
     }
     private void CallHealRequest()

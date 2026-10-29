@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: ItemsTable_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 9933094644472b94eb07e34a3ffd2fe5, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 692790073376772
+    m_Localized: Iron sanctuary
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376771
+    m_Localized: Still needs description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376770
+    m_Localized: Fallen deacon's robe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376769
+    m_Localized: Clothing belonging to someone who is no longer alive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790073376768
+    m_Localized: Undead's rags
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689280808271872
+    m_Localized: Teardrop flask
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228224
+    m_Localized: A frask with a weird liquid
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281282228225
+    m_Localized: Water memory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422528
+    m_Localized: A liquid capable of restoring one's memories
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422529
+    m_Localized: Carrion oil
+    m_Metadata:
+      m_Items: []
+  - m_Id: 689281286422530
+    m_Localized: An oil with unique properties
+    m_Metadata:
+      m_Items: []
+  - m_Id: 692790081765376
+    m_Localized: Sacred armor made mostly of heavy metals.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173350031360
+    m_Localized: Heals a total of 50 health points progressively over 10 seconds.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173358419968
+    m_Localized: Give an extra point for the stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614272
+    m_Localized: Increases damage by 0.25% for 25 seconds, at the cost of draining
+      2 health points progressively.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614273
+    m_Localized: Grants +20 extra defense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614274
+    m_Localized: Grants +45 extra defense (Requires stamina level 3 or higher)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 955173362614275
+    m_Localized: Grants +75 extra defense (Requires stamina level 6 or higher)
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
