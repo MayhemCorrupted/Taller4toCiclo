@@ -13,6 +13,7 @@ public enum PlayerState
     Healing,
     Hurt
 }
+[RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInputs))]
 public class PlayerFSM : MonoBehaviour
 {

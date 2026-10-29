@@ -27,7 +27,8 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9933094644472b94eb07e34a3ffd2fe5
-    m_Address: Assets/_Project/Settings/Localization/ItemsTable Shared Data.asset
+    m_Address: Assets/_Project/Settings/Localization/Tables/Items/ItemsTable Shared
+      Data.asset
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

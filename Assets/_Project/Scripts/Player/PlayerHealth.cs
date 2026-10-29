@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerFSM))]
-public class PlayerHealth : HealthSystem
+public class PlayerHealth : Health
 {
     public event Action OnLifeLost;
     public event Action OnPermadeath;

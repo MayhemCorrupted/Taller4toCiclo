@@ -12,7 +12,6 @@ public class PlayerStats : MonoBehaviour
 
     [Range(1,4)] public int _vesaniaLevel = 1;
     public float _armorDefense = 0;
-
     public float MaxHealth { get; private set; }
     public float MaxStamina { get; private set; }
     public float DamageMultiplier { get; private set; }

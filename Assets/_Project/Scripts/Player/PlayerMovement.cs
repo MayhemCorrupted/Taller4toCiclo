@@ -28,11 +28,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerStamina _playerStamina;
     private PlayerCombat _playerCombat;
     private Transform _mainCameraTransform;
-
-    public Vector2 CurrentMoveDirection => _currentMoveDirection;
-    public float CurrentSpeed => _currentSpeed;
     public Vector3 CurrentVelocity => _characterController.velocity;
-
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();

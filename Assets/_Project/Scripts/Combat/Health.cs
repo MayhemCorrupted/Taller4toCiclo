@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-public class HealthSystem : MonoBehaviour
+public class Health : MonoBehaviour
 {
     public event Action<float> OnTakeDamage;
     public event Action OnDeath;
@@ -12,12 +12,10 @@ public class HealthSystem : MonoBehaviour
     protected float _currentHealth;
     public float MaxHealth => _maxHealth;
     public float CurrentHealth => _currentHealth;
-
     protected virtual void Awake()
     {
         _currentHealth = _maxHealth;
     }
-
     public virtual void TakeDamage(float amount)
     {
         if (_currentHealth <= 0) return;

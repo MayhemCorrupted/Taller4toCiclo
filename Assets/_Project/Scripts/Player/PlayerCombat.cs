@@ -35,12 +35,12 @@ public class PlayerCombat : MonoBehaviour
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
-        if (_weaponHitbox != null) _weaponHitbox.OnEnemyHit += HandleEnemyHit;
+        if (_weaponHitbox != null) _weaponHitbox.OnEntityHit += HandleEnemyHit;
     }
     private void OnDisable()
     {
         _playerInputs.OnLockOn -= ToggleLockOn;
-        if (_weaponHitbox != null) _weaponHitbox.OnEnemyHit -= HandleEnemyHit;
+        if (_weaponHitbox != null) _weaponHitbox.OnEntityHit -= HandleEnemyHit;
     }
     private void Update()
     {
