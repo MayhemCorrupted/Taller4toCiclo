@@ -8,8 +8,8 @@ public class PlayerStamina : MonoBehaviour
 
     private float _currentStamina;
     private float _staminaRegenDelay;
-    readonly private float _staminaDrainRate = 15f;
-
+    readonly private float _staminaDrainRate = 15;
+    [SerializeField] private float _baseDodgeCost = 15;
     private PlayerStats _statsSystem;
     private PlayerFSM _playerFSM;
     private void Awake()
@@ -34,7 +34,7 @@ public class PlayerStamina : MonoBehaviour
     private void Update()
     {
         DrainStamina();
-        StaminaRegeneration();
+        if (_playerFSM.CurrentState != PlayerState.Blocking) StaminaRegeneration();
     }
     private void DrainStamina()
     {
@@ -42,6 +42,15 @@ public class PlayerStamina : MonoBehaviour
         {
            UseStamina(_staminaDrainRate * Time.deltaTime);
         }
+    }
+    public bool TryConsumeDodgeStamina()
+    {
+        if (HasEnoughStamina(_baseDodgeCost))
+        {
+            UseStamina(_baseDodgeCost);
+            return true;
+        }
+        return false;
     }
     public bool UseStamina(float amount)
     {

@@ -25,6 +25,10 @@ public class PlayerHealth : HealthSystem
     {
         _statsSystem.OnStatsUpdated -= SetHealth;
     }
+    private void Start()
+    {
+        SetHealth();
+    }
     private void SetHealth()
     {
         _maxHealth = _statsSystem.MaxHealth;
@@ -32,6 +36,7 @@ public class PlayerHealth : HealthSystem
         if (_currentHealth <= 0)
         {
             _currentHealth = _maxHealth;
+            NotifyHealthChanged();
         }
     }
     public override void TakeDamage(float incomingDamage)

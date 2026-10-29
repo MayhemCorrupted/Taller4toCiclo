@@ -1,4 +1,5 @@
 using UnityEngine;
+
 public class PlayerAnimator : MonoBehaviour
 {
     public bool HasWeapon { get; set; } = true;
@@ -14,13 +15,17 @@ public class PlayerAnimator : MonoBehaviour
     private readonly int _inputYHash = Animator.StringToHash("InputY");
     private readonly int _isLockedOnHash = Animator.StringToHash("IsLockedOn");
     private readonly int _hasWeaponHash = Animator.StringToHash("HasWeapon");
+
     private readonly int _lightAttackHash = Animator.StringToHash("LightAttack");
     private readonly int _heavyAttackHash = Animator.StringToHash("HeavyAttack");
+    private readonly int _lightComboHash = Animator.StringToHash("LightCombo");
+    private readonly int _heavyComboHash = Animator.StringToHash("HeavyCombo");
+
     private readonly int _dodgeHash = Animator.StringToHash("Dodge");
     private readonly int _isBlockingHash = Animator.StringToHash("IsBlocking");
     private readonly int _skillTriggerHash = Animator.StringToHash("SkillTrigger");
     private readonly int _skillIDHash = Animator.StringToHash("SkillID");
-    
+
     private float _currentInputX;
     private float _currentInputY;
     private void Awake()
@@ -110,19 +115,26 @@ public class PlayerAnimator : MonoBehaviour
                _playerFSM.CurrentState == PlayerState.Running ||
                _playerFSM.CurrentState == PlayerState.Attacking;
     }
-
     private void TriggerLightAttack()
     {
         if (CanAttack())
         {
-            _animator.SetTrigger(_lightAttackHash);
+            if (_playerCombat.TryLightAttack(out int comboIndex))
+            {
+                _animator.SetInteger(_lightComboHash, comboIndex);
+                _animator.SetTrigger(_lightAttackHash);
+            }
         }
     }
     private void TriggerHeavyAttack()
     {
         if (CanAttack())
         {
-            _animator.SetTrigger(_heavyAttackHash);
+            if (_playerCombat.TryHeavyAttack(out int comboIndex))
+            {
+                _animator.SetInteger(_heavyComboHash, comboIndex);
+                _animator.SetTrigger(_heavyAttackHash);
+            }
         }
     }
     private void TriggerDodge()
@@ -151,12 +163,13 @@ public class PlayerAnimator : MonoBehaviour
     {
         _playerCombat.ActivateWeapon(true);
     }
-    public void AE_DeactivatetHitbox()
+    public void AE_DeactivateHitbox()
     {
         _playerCombat.DeactivateWeapon();
-    }   
+    }
     public void AE_FinishAction()
     {
         _playerFSM.ChangeState(PlayerState.Idle);
+        _playerCombat.EndAttackRoutine();
     }
 }

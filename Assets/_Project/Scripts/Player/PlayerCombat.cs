@@ -8,6 +8,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private WeaponHitbox _weaponHitbox;
     [SerializeField] private float _baseLightDamage = 21;
     [SerializeField] private float _baseHeavyDamage = 46.2f;
+    [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _lockOnRadius = 15;
     [SerializeField] private LayerMask _enemyLayer;
 
@@ -17,6 +18,12 @@ public class PlayerCombat : MonoBehaviour
     private PlayerStats _playerStats;
     private Camera _mainCamera;
     readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
+
+    private int _lightComboState = 0;
+    private int _heavyComboState = 0;
+    private bool _canContinueCombo = false;
+    private float _currentCooldown = 0f;
+
     public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
     {
@@ -28,15 +35,92 @@ public class PlayerCombat : MonoBehaviour
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
+        if (_weaponHitbox != null) _weaponHitbox.OnEnemyHit += HandleEnemyHit;
     }
     private void OnDisable()
     {
         _playerInputs.OnLockOn -= ToggleLockOn;
+        if (_weaponHitbox != null) _weaponHitbox.OnEnemyHit -= HandleEnemyHit;
     }
     private void Update()
     {
         CheckLockDistance();
         CombatRotation();
+
+        if (_currentCooldown > 0)
+        {
+            _currentCooldown -= Time.deltaTime;
+        }
+    }
+    private void HandleEnemyHit()
+    {
+        _canContinueCombo = true;
+    }
+    public bool TryLightAttack(out int comboState)
+    {
+        comboState = 0;
+        if (_currentCooldown > 0) return false;
+
+        if (_playerFSM.CurrentState == PlayerState.Attacking)
+        {
+            if (!_canContinueCombo || _lightComboState >= 2) return false;
+            _lightComboState++;
+        }
+        else
+        {
+            _lightComboState = 0;
+            _heavyComboState = 0;
+            _playerFSM.ChangeState(PlayerState.Attacking);
+        }
+
+        _canContinueCombo = false;
+        comboState = _lightComboState;
+        return true;
+    }
+    public bool TryHeavyAttack(out int comboState)
+    {
+        comboState = 0;
+        if (_currentCooldown > 0) return false;
+
+        if (_playerFSM.CurrentState == PlayerState.Attacking)
+        {
+            if (!_canContinueCombo || _heavyComboState >= 1) return false;
+            _heavyComboState++;
+        }
+        else
+        {
+            _lightComboState = 0;
+            _heavyComboState = 0;
+            _playerFSM.ChangeState(PlayerState.Attacking);
+        }
+
+        _canContinueCombo = false;
+        comboState = _heavyComboState;
+        return true;
+    }
+    public void EndAttackRoutine()
+    {
+        DeactivateWeapon();
+        _currentCooldown = _attackCooldown;
+        _canContinueCombo = false;
+        _lightComboState = 0;
+        _heavyComboState = 0;
+    }
+    public void ActivateWeapon(bool isHeavyAttack)
+    {
+        float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
+        float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
+        float grossDamage = baseDamage * _playerStats.DamageMultiplier * (1 * vesaniaMultiplier);
+
+        if (_weaponHitbox != null)
+        {
+            _weaponHitbox.SetDamage(grossDamage);
+            _weaponHitbox.EnableHitbox();
+        }
+    }
+    public void DeactivateWeapon()
+    {
+        if (_weaponHitbox != null) _weaponHitbox.DisableHitbox();
     }
     private void ToggleLockOn()
     {
@@ -94,7 +178,7 @@ public class PlayerCombat : MonoBehaviour
             {
                 Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
                 Plane groundPlane = new(Vector3.up, transform.position);
-                if (groundPlane.Raycast (ray, out float rayDistance))
+                if (groundPlane.Raycast(ray, out float rayDistance))
                 {
                     Vector3 point = ray.GetPoint(rayDistance);
                     Vector3 directionToMouse = point - transform.position;
@@ -106,16 +190,5 @@ public class PlayerCombat : MonoBehaviour
                 }
             }
         }
-    }
-    public void ActivateWeapon(bool isHeavyAttack)
-    {
-        float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
-        float grossDamage = (baseDamage * _playerStats.DamageMultiplier) + _playerStats.VesaniaDamageBonus;
-        _weaponHitbox.SetDamage(grossDamage);
-        _weaponHitbox.EnableHitbox();
-    }
-    public void DeactivateWeapon()
-    {
-        _weaponHitbox.DisableHitbox();
     }
 }
