@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [Serializable]
-public struct ObjectEvent
+public struct EntityHealthEvent
 {
     public UnityEvent OnHealthReached;
     public float requiredHealth;
@@ -17,7 +17,7 @@ public class BreakableObject : MonoBehaviour
     [SerializeField] private float _dashDamageAmount = 999f; 
 
     private Health _health;
-    [SerializeField] private ObjectEvent[] _objectEvents;
+    [SerializeField] private EntityHealthEvent[] _objectEvents;
 
     private bool[] _eventTriggeredState;
     private void Awake()

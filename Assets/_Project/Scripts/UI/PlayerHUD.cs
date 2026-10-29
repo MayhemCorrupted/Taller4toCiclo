@@ -8,8 +8,8 @@ public class PlayerHUD : MonoBehaviour
     private PlayerHealth _playerHealth;
     private PlayerStamina _playerStamina;
     private PlayerStats _playerStats;
-    private float _targetHealthFill = 1;
-    private float _targetStaminaFill = 1;
+    private float _targetHealthFill;
+    private float _targetStaminaFill;
     private void Awake()
     {
         _playerHealth = FindAnyObjectByType<PlayerHealth>();

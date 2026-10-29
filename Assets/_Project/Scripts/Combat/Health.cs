@@ -12,6 +12,7 @@ public class Health : MonoBehaviour
     protected float _currentHealth;
     public float MaxHealth => _maxHealth;
     public float CurrentHealth => _currentHealth;
+    public float Defense => _defense;
     protected virtual void Awake()
     {
         _currentHealth = _maxHealth;
@@ -29,9 +30,19 @@ public class Health : MonoBehaviour
             Die();
         }
     }
+    public void Init(float maxHealth, float defense)
+    {
+        _maxHealth = maxHealth;
+        _defense = defense;
+        _currentHealth = _maxHealth;
+        NotifyHealthChanged();
+    }
     protected void OnTakingDamage(float damage)
     {
         OnTakeDamage?.Invoke(damage);
+#if UNITY_EDITOR
+        Debug.Log($"Vida actual de {gameObject.name}: {_currentHealth}");
+#endif
     }
     protected void NotifyHealthChanged()
     {

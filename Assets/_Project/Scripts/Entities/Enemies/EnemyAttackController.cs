@@ -46,7 +46,7 @@ public class EnemyAttackController : MonoBehaviour
 			atkCountdown = 0.0f;
 		}
 	}
-
+#if UNITY_EDITOR
 	private void OnDrawGizmos()
 	{
 		Gizmos.matrix = transform.localToWorldMatrix;
@@ -56,9 +56,7 @@ public class EnemyAttackController : MonoBehaviour
 			if (attacks[currentAtkIdx] is EnemyMeleeAtk meleeAtk)
 			{
 				if (meleeAtk.isRadial)
-#if UNITY_EDITOR
 					Handles.DrawWireDisc(transform.position, Vector3.up, meleeAtk.radius);
-#endif
 				else
 					Gizmos.DrawWireCube(Vector3.forward * meleeAtk.radius + Vector3.up * meleeAtk.verticalOffset, meleeAtk.hitboxMeasurements);
 			}
@@ -70,7 +68,7 @@ public class EnemyAttackController : MonoBehaviour
 
 		Gizmos.matrix = Matrix4x4.identity;
 	}
-
+#endif
 	private int SelectAndAttack()
 	{
 		if (!detector.TargetTransform)

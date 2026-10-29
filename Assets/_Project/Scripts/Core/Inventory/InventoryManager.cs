@@ -53,11 +53,11 @@ public class InventoryManager : MonoBehaviour
     }
     private void OnEnable()
     {
-        _playerInputs.OnUseItem += UseEquippedConsumable;
+      //  _playerInputs.OnUseItem += UseEquippedConsumable;
     }
     private void OnDisable()
     {
-        _playerInputs.OnUseItem -= UseEquippedConsumable;
+       // _playerInputs.OnUseItem -= UseEquippedConsumable;
     }
     public void AddItemToInventory(ItemData item, int amount)
     {

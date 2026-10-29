@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CinemachineTarget
   - Enemy
+  - Errante
   layers:
   - Default
   - TransparentFX

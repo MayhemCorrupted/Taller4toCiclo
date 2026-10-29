@@ -36,11 +36,14 @@ public class WeaponHitbox : MonoBehaviour
     {
         if (_alreadyHitEntities.Contains(other)) return;
 
-        if (other.TryGetComponent(out Health targetHealth))
+        if (other.TryGetComponent(out Health targetHealth) && targetHealth is not PlayerHealth)
         {
             targetHealth.TakeDamage(_currentDamage);
             _alreadyHitEntities.Add(other);
             OnEntityHit?.Invoke();
+#if UNITY_EDITOR
+            Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
+#endif
         }
     }
 }

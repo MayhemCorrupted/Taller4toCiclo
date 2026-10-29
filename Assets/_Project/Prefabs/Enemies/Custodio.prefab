@@ -9,12 +9,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 286214160551052845}
+  - component: {fileID: 5908760045266151595}
   - component: {fileID: 1464935189677312426}
   - component: {fileID: 4145787807553318968}
-  - component: {fileID: 2952457140016404812}
   - component: {fileID: 6494206959046434773}
   - component: {fileID: 8989345671068890793}
   - component: {fileID: 5029796264230123990}
+  - component: {fileID: 7021249630795405969}
   - component: {fileID: 2186865537323872393}
   - component: {fileID: 6822739953257626708}
   m_Layer: 3
@@ -40,6 +41,29 @@ Transform:
   - {fileID: 5505327467520877677}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &5908760045266151595
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2914017662329648622}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1464935189677312426
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -66,7 +90,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!114 &4145787807553318968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,25 +104,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
   data: {fileID: 11400000, guid: a0f9737067b333b44bcef0d0b2dde4e9, type: 2}
-  health: {fileID: 2952457140016404812}
+  health: {fileID: 7021249630795405969}
   detector: {fileID: 6494206959046434773}
   movement: {fileID: 5029796264230123990}
   stateManager: {fileID: 8989345671068890793}
   attacker: {fileID: 2186865537323872393}
---- !u!114 &2952457140016404812
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2914017662329648622}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea225d4242b85a34bad1954d20bf522b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  _maxHealth: 0
-  _defense: 0
 --- !u!114 &6494206959046434773
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +158,20 @@ MonoBehaviour:
   detector: {fileID: 6494206959046434773}
   patrolWaitingTime: 1
   patrolRadius: 5
+--- !u!114 &7021249630795405969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2914017662329648622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  _maxHealth: 0
+  _defense: 0
 --- !u!114 &2186865537323872393
 MonoBehaviour:
   m_ObjectHideFlags: 0

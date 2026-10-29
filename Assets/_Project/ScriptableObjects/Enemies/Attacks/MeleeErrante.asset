@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 20
   knockback: 0.5
-  cooldown: 0.5
+  cooldown: 4
   isRadial: 0
   radius: 2
   hitboxMeasurements: {x: 2, y: 2, z: 0.5}

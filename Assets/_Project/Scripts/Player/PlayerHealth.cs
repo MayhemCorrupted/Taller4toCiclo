@@ -68,7 +68,7 @@ public class PlayerHealth : Health
             _currentHealth -= finalDamage;
             OnTakingDamage(finalDamage);
         }
-
+        NotifyHealthChanged();
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;

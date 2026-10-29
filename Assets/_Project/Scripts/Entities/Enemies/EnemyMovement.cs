@@ -48,7 +48,6 @@ public class EnemyMovement : MonoBehaviour
 	{
 		this.speed = speed;
 	}
-
 	private void SetRandomPatrolPoint()
 	{
 		Vector3 randomPoint = transform.position + Random.insideUnitSphere * patrolRadius;

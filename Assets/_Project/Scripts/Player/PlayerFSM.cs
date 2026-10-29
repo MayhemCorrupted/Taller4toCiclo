@@ -32,13 +32,13 @@ public class PlayerFSM : MonoBehaviour
     {
         _playerInputs.OnDodge += HandleDodgeRequest;
         _playerInputs.OnSkill += CallSkillRequest;
-        _playerInputs.OnUseItem += CallHealRequest;
+        //_playerInputs.OnUseItem += CallHealRequest;
     }
     private void OnDisable()
     {
         _playerInputs.OnDodge -= HandleDodgeRequest;
         _playerInputs.OnSkill -= CallSkillRequest;
-        _playerInputs.OnUseItem -= CallHealRequest;
+        //_playerInputs.OnUseItem -= CallHealRequest;
     }
     private void Update()
     {
