@@ -23,6 +23,8 @@ public class EnemyDetection : MonoBehaviour
 	public bool IsInAttackRange => isInAttackRange;
 
 	public Vector3 TargetLocation => target ? target.position : Vector3.positiveInfinity;
+	public Transform TargetTransform => target;
+
 	public float DetectionRadius => detectionRadius;
 	public float AttackRadius => attackRadius;
 	public float LoseTargetRadius => loseTargetRadius;

@@ -12,6 +12,10 @@ public class EnemyMeleeAtk : EnemyAttack
 
 	public override void Execute(Transform origin, Transform target)
 	{
-		// ...
+		if (target.gameObject.CompareTag("Player"))
+		{
+			PlayerHealth playerHealth = target.gameObject.GetComponent<PlayerHealth>();
+			playerHealth.TakeDamage(damage);
+		}
 	}
 }
