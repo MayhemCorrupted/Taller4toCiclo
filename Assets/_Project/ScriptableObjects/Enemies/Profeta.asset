@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb07f7ab27696cb408e0e295a3b983f2, type: 3}
   m_Name: Profeta
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  health: 140
-  defense: 40
-  attack: 45
+  health: 800
+  defense: 50
   speed: 5
-  detectionRadius: 8
-  attackRadius: 11
-  lossRadius: 14
-  attackType: 2
+  detectionRadius: 1000
+  attackRadius: 1000
+  lossRadius: 1000
+  attacks:
+  - {fileID: 11400000, guid: 75f0bcf60d9385a418c16d55481941e2, type: 2}
+  - {fileID: 11400000, guid: b06610753d117754b804b7550b881d45, type: 2}

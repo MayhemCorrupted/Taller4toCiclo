@@ -10,12 +10,15 @@ GameObject:
   m_Component:
   - component: {fileID: 286214160551052845}
   - component: {fileID: 1464935189677312426}
+  - component: {fileID: 4145787807553318968}
+  - component: {fileID: 2952457140016404812}
   - component: {fileID: 6494206959046434773}
   - component: {fileID: 8989345671068890793}
   - component: {fileID: 5029796264230123990}
+  - component: {fileID: 2186865537323872393}
   - component: {fileID: 6822739953257626708}
   m_Layer: 3
-  m_Name: EnemigoPrueba
+  m_Name: Custodio
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -64,6 +67,38 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &4145787807553318968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2914017662329648622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb1e8322b624875419b1923310d09c47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
+  data: {fileID: 11400000, guid: a0f9737067b333b44bcef0d0b2dde4e9, type: 2}
+  health: {fileID: 2952457140016404812}
+  detector: {fileID: 6494206959046434773}
+  movement: {fileID: 5029796264230123990}
+  stateManager: {fileID: 8989345671068890793}
+  attacker: {fileID: 2186865537323872393}
+--- !u!114 &2952457140016404812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2914017662329648622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea225d4242b85a34bad1954d20bf522b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  _maxHealth: 0
+  _defense: 0
 --- !u!114 &6494206959046434773
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,9 +111,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9108069d40aaa741a42abb2770f6c62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDetection
-  detectionRadius: 8
-  attackRadius: 1.5
-  loseTargetRadius: 14
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -111,12 +143,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3fb08e94b2a7b24fa1e140c97d074b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
-  speed: 5
   agent: {fileID: 6822739953257626708}
   stateManager: {fileID: 8989345671068890793}
   detector: {fileID: 6494206959046434773}
   patrolWaitingTime: 1
   patrolRadius: 5
+--- !u!114 &2186865537323872393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2914017662329648622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e14e5b612d50f57439de2d24c6c5842e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
 --- !u!195 &6822739953257626708
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -206,7 +249,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6d522539607d76c459b219ba4bbce9f6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

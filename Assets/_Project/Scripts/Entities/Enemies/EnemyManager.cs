@@ -2,15 +2,25 @@ using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+	[Header("Entry point")]
+	[SerializeField] private EnemyData data;
+	[Header("Sub-components")]
+	[SerializeField] private EnemyHealth health;
+	[SerializeField] private EnemyDetection detector;
+	[SerializeField] private EnemyMovement movement;
+	[SerializeField] private EnemyStateManager stateManager;
+	[SerializeField] private EnemyAttackController attacker;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	private void Awake()
+	{
+		Init();
+	}
+
+	private void Init()
+	{
+		health.Init(data.health, data.defense);
+		detector.Init(data.detectionRadius, data.attackRadius, data.lossRadius);
+		movement.Init(data.speed);
+		attacker.Init(data.attacks);
+	}
 }

@@ -3,35 +3,31 @@ using UnityEngine;
 
 public class EnemyDetection : MonoBehaviour
 {
-	[Min(0.01f)] public float detectionRadius = 10.0f;
-	[Min(0.01f)] public float attackRadius = 4.0f;
-	[Min(0.01f)] public float loseTargetRadius = 15.0f;
-
 	[SerializeField] private LayerMask targetLayer;
 	[SerializeField] private LayerMask wallLayer;
 
 	[SerializeField] private float checkInterval = 0.1f;
 
-	private Transform target = null;
+    private float detectionRadius;
+    private float attackRadius;
+    private float loseTargetRadius;
+
+    private Transform target = null;
 	private bool canSeeTarget = false;
 	private bool isInAttackRange = false;
 	private WaitForSeconds rangeEvalInterval;
 
 
-	public bool CanSeeTarget
-	{
-		get => canSeeTarget;
-	}
+	public bool CanSeeTarget => canSeeTarget;
 
-	public bool IsInAttackRange
-	{
-		get => isInAttackRange;
-	}
+	public bool IsInAttackRange => isInAttackRange;
 
-	public Vector3 TargetLocation
-	{
-		get => target ? target.position : Vector3.positiveInfinity;
-	}
+	public Vector3 TargetLocation => target ? target.position : Vector3.positiveInfinity;
+	public Transform TargetTransform => target;
+
+	public float DetectionRadius => detectionRadius;
+	public float AttackRadius => attackRadius;
+	public float LoseTargetRadius => loseTargetRadius;
 
 	private void Awake()
 	{
@@ -52,8 +48,12 @@ public class EnemyDetection : MonoBehaviour
 #endif
 	}
 
-	public void Init()
+	public void Init(float detRadius, float atkRadius, float losRadius)
 	{
+		detectionRadius = detRadius;
+		attackRadius = atkRadius;
+		loseTargetRadius = losRadius;
+
 		StartCoroutine(CRDetection());
 	}
 
