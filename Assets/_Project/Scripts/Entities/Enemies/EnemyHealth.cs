@@ -13,9 +13,11 @@ public class EnemyHealth : Health
 			return;
 
 		_currentHealth -= CalculateIncomingDamage(amount);
+		Debug.Log($"Vida enemigo: {_currentHealth}");
 
 		if (_currentHealth <= 0)
 		{
+			Debug.Log("Enemigo muere!");
 			_currentHealth = 0;
 			Die();
 		}
@@ -23,5 +25,11 @@ public class EnemyHealth : Health
 	private float CalculateIncomingDamage(float atk)
 	{
 		return atk * (1.0f - (_defense / (_defense + 100.0f)));
+	}
+
+	protected override void Die()
+	{
+		base.Die();
+		Destroy(gameObject);
 	}
 }
