@@ -7,17 +7,24 @@ public class WeaponHitbox : MonoBehaviour
 {
     public event Action OnEntityHit;
     private float _currentDamage;
+    private float _currentKnockback;
+    private Transform _owner;
     private Collider _hitboxCollider;
-    private readonly List<Collider> _alreadyHitEntities = new();
+    private readonly List<Health> _alreadyHitEntities = new();
     private void Awake()
     {
         _hitboxCollider = GetComponent<Collider>();
         _hitboxCollider.isTrigger = true;
         _hitboxCollider.enabled = false;
+        _owner = GetComponentInParent<PlayerCombat>()?.transform ?? transform.root;
     }
     public void SetDamage(float damage)
     {
         _currentDamage = damage;
+    }
+    public void SetKnockback(float knockback)
+    {
+        _currentKnockback = knockback;
     }
     public void EnableHitbox()
     {
@@ -34,16 +41,29 @@ public class WeaponHitbox : MonoBehaviour
     }
     private void TryHit(Collider other)
     {
-        if (_alreadyHitEntities.Contains(other)) return;
+        Health targetHealth = other.GetComponentInParent<Health>();
+        if (targetHealth == null || targetHealth is PlayerHealth) return;
+        if (_alreadyHitEntities.Contains(targetHealth)) return;
 
-        if (other.TryGetComponent(out Health targetHealth) && targetHealth is not PlayerHealth)
-        {
-            targetHealth.TakeDamage(_currentDamage);
-            _alreadyHitEntities.Add(other);
-            OnEntityHit?.Invoke();
+        if (!targetHealth.TakeDamage(_currentDamage)) return;
+
+        _alreadyHitEntities.Add(targetHealth);
+        ApplyHitKnockback(targetHealth);
+        OnEntityHit?.Invoke();
 #if UNITY_EDITOR
-            Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
+        Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
 #endif
-        }
+    }
+    private void ApplyHitKnockback(Health targetHealth)
+    {
+        if (_currentKnockback <= 0f) return;
+
+        IKnockbackReceiver receiver = targetHealth.GetComponent<IKnockbackReceiver>()
+            ?? targetHealth.GetComponentInParent<IKnockbackReceiver>();
+        if (receiver == null) return;
+
+        Vector3 origin = _owner != null ? _owner.position : transform.position;
+        Vector3 knockbackDir = targetHealth.transform.position - origin;
+        receiver.ApplyKnockback(knockbackDir, _currentKnockback);
     }
 }

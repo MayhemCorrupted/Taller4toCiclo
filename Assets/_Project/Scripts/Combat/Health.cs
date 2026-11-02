@@ -17,18 +17,20 @@ public class Health : MonoBehaviour
     {
         _currentHealth = _maxHealth;
     }
-    public virtual void TakeDamage(float amount)
+    public virtual bool TakeDamage(float amount)
     {
-        if (_currentHealth <= 0) return;
+        if (_currentHealth <= 0) return false;
         float damage = (amount * 100) / (100 + _defense);
         _currentHealth -= damage;
         OnTakeDamage?.Invoke(damage);
         NotifyHealthChanged();
+        Debug.Log($"{gameObject.name} Recibió {damage} daño. Vida actual: {_currentHealth}/{_maxHealth}");
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
             Die();
         }
+        return true;
     }
     public void Init(float maxHealth, float defense)
     {
@@ -40,9 +42,6 @@ public class Health : MonoBehaviour
     protected void OnTakingDamage(float damage)
     {
         OnTakeDamage?.Invoke(damage);
-#if UNITY_EDITOR
-        Debug.Log($"Vida actual de {gameObject.name}: {_currentHealth}");
-#endif
     }
     protected void NotifyHealthChanged()
     {

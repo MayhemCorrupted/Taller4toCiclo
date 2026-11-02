@@ -5,13 +5,15 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
 	private float damage;
+	private float knockback;
 	private Rigidbody rb;
 
-	public void Init(Vector3 velocity, float dmg, float lifetime)
+	public void Init(Vector3 velocity, float dmg, float lifetime, float knockbackForce = 0f)
 	{
 		rb = GetComponent<Rigidbody>();
 		rb.linearVelocity = velocity;
 		damage = dmg;
+		knockback = knockbackForce;
 		StartCoroutine(PendingDestruction(lifetime));
 	}
 
@@ -22,8 +24,12 @@ public class Projectile : MonoBehaviour
 
 		if (collider.CompareTag("Player"))
 		{
-			PlayerHealth health = collider.gameObject.GetComponent<PlayerHealth>();
-			health.TakeDamage(damage);
+			PlayerHealth health = collider.GetComponentInParent<PlayerHealth>();
+			if (health != null && health.TakeDamage(damage) && knockback > 0f)
+			{
+				IKnockbackReceiver receiver = collider.GetComponentInParent<IKnockbackReceiver>();
+				receiver?.ApplyKnockback(collider.transform.position - transform.position, knockback);
+			}
 		}
 
 		Destroy(gameObject);

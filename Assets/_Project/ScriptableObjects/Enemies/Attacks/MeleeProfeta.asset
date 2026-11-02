@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MeleeProfeta
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 75
-  knockback: 3
+  knockback: 11
   cooldown: 0.5
   isRadial: 0
   radius: 2

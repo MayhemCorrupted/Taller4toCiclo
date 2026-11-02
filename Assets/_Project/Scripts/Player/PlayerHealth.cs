@@ -7,8 +7,10 @@ public class PlayerHealth : Health
 {
     public event Action OnLifeLost;
     public event Action OnPermadeath;
+    public event Action OnBlockHit;
     private int _currentLives = 3;
-
+    [SerializeField] private float _invulnerabilityDuration = 0.5f;
+    private float _invulnerabilityTimer = 0f;
     private PlayerStats _statsSystem;
     private PlayerStamina _staminaSystem;
     private PlayerFSM _playerFSM;
@@ -29,6 +31,13 @@ public class PlayerHealth : Health
     {
         SetHealth();
     }
+    private void Update()
+    {
+        if (_invulnerabilityTimer > 0)
+        {
+            _invulnerabilityTimer -= Time.deltaTime;
+        }
+    }
     private void SetHealth()
     {
         _maxHealth = _statsSystem.MaxHealth;
@@ -39,9 +48,9 @@ public class PlayerHealth : Health
             NotifyHealthChanged();
         }
     }
-    public override void TakeDamage(float incomingDamage)
+    public override bool TakeDamage(float incomingDamage)
     {
-        if (_currentHealth <= 0) return;
+        if (_currentHealth <= 0 || _invulnerabilityTimer > 0) return false;
 
         float unmitigatedDamage = (incomingDamage * 100) / (100 + _defense);
         float finalDamage = unmitigatedDamage;
@@ -55,6 +64,7 @@ public class PlayerHealth : Health
                 _staminaSystem.UseStamina(blockStaminaCost);
                 _currentHealth -= finalDamage;
                 OnTakingDamage(finalDamage);
+                OnBlockHit?.Invoke();
             }
             else
             {
@@ -68,12 +78,14 @@ public class PlayerHealth : Health
             _currentHealth -= finalDamage;
             OnTakingDamage(finalDamage);
         }
+        _invulnerabilityTimer = _invulnerabilityDuration;
         NotifyHealthChanged();
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
             Die();
         }
+        return true;
     }
     public void Heal(float amount)
     {
@@ -102,11 +114,13 @@ public class PlayerHealth : Health
         if (_currentLives > 1)
         {
             _currentLives--;
+            _playerFSM.ChangeState(PlayerState.Hurt);
             OnLifeLost?.Invoke();
         }
         else
         {
             _currentLives--;
+            _playerFSM.ChangeState(PlayerState.Hurt);
             OnPermadeath?.Invoke();
         }
     }

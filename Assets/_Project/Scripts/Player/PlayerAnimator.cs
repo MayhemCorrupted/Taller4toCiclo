@@ -8,6 +8,7 @@ public class PlayerAnimator : MonoBehaviour
     private PlayerFSM _playerFSM;
     private PlayerInputs _playerInputs;
     private PlayerCombat _playerCombat;
+    private PlayerHealth _playerHealth;
     private Transform _mainCameraTransform;
 
     private readonly int _speedHash = Animator.StringToHash("Speed");
@@ -25,15 +26,22 @@ public class PlayerAnimator : MonoBehaviour
     private readonly int _isBlockingHash = Animator.StringToHash("IsBlocking");
     private readonly int _skillTriggerHash = Animator.StringToHash("SkillTrigger");
     private readonly int _skillIDHash = Animator.StringToHash("SkillID");
+    private readonly int _blockHitHash = Animator.StringToHash("BlockHit");
+    private readonly int _knockoutHash = Animator.StringToHash("Knockout");
+    private readonly int _permadeathHash = Animator.StringToHash("Permadeath");
 
     private float _currentInputX;
     private float _currentInputY;
+    private Transform _playerRoot;
     private void Awake()
     {
         _playerFSM = GetComponentInParent<PlayerFSM>();
         _playerInputs = GetComponentInParent<PlayerInputs>();
         _playerCombat = GetComponentInParent<PlayerCombat>();
+        _playerHealth = GetComponentInParent<PlayerHealth>();
+        _playerRoot = _playerFSM != null ? _playerFSM.transform : transform;
         if (Camera.main != null) _mainCameraTransform = Camera.main.transform;
+        if (_animator != null) _animator.SetBool(_hasWeaponHash, HasWeapon);
     }
     private void OnEnable()
     {
@@ -41,6 +49,13 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnHeavyAttack += TriggerHeavyAttack;
         _playerInputs.OnDodge += TriggerDodge;
         _playerInputs.OnSkill += TriggerSkill;
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnLifeLost += TriggerKnockout;
+            _playerHealth.OnPermadeath += TriggerPermadeath;
+            _playerHealth.OnBlockHit += TriggerBlockHit;
+        }
     }
     private void OnDisable()
     {
@@ -48,6 +63,13 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnHeavyAttack -= TriggerHeavyAttack;
         _playerInputs.OnDodge -= TriggerDodge;
         _playerInputs.OnSkill -= TriggerSkill;
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnLifeLost -= TriggerKnockout;
+            _playerHealth.OnPermadeath -= TriggerPermadeath;
+            _playerHealth.OnBlockHit -= TriggerBlockHit;
+        }
     }
     private void Update()
     {
@@ -84,8 +106,8 @@ public class PlayerAnimator : MonoBehaviour
 
                 Vector3 worldMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
-                targetX = Vector3.Dot(worldMoveDirection, transform.right) * currentSpeed;
-                targetY = Vector3.Dot(worldMoveDirection, transform.forward) * currentSpeed;
+                targetX = Vector3.Dot(worldMoveDirection, _playerRoot.right) * currentSpeed;
+                targetY = Vector3.Dot(worldMoveDirection, _playerRoot.forward) * currentSpeed;
             }
 
             _currentInputX = Mathf.Lerp(_currentInputX, targetX, Time.deltaTime * 10f);
@@ -144,6 +166,7 @@ public class PlayerAnimator : MonoBehaviour
             _playerFSM.CurrentState != PlayerState.Hurt)
         {
             _animator.SetTrigger(_dodgeHash);
+            _playerFSM.ChangeState(PlayerState.Dodging);
         }
     }
     private void TriggerSkill()
@@ -155,18 +178,12 @@ public class PlayerAnimator : MonoBehaviour
             _animator.SetTrigger(_skillTriggerHash);
         }
     }
-    public void AE_ActivateLightHitbox()
-    {
-        _playerCombat.ActivateWeapon(false);
-    }
-    public void AE_ActivateHeavyHitbox()
-    {
-        _playerCombat.ActivateWeapon(true);
-    }
-    public void AE_DeactivateHitbox()
-    {
-        _playerCombat.DeactivateWeapon();
-    }
+    private void TriggerKnockout() => _animator.SetTrigger(_knockoutHash);
+    private void TriggerPermadeath() => _animator.SetTrigger(_permadeathHash);
+    private void TriggerBlockHit() => _animator.SetTrigger(_blockHitHash);
+    public void AE_ActivateLightHitbox() => _playerCombat.ActivateWeapon(false);
+    public void AE_ActivateHeavyHitbox() => _playerCombat.ActivateWeapon(true);
+    public void AE_DeactivateHitbox() => _playerCombat.DeactivateWeapon();
     public void AE_FinishAction()
     {
         _playerFSM.ChangeState(PlayerState.Idle);

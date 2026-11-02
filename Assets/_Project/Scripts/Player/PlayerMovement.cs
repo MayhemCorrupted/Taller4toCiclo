@@ -1,5 +1,4 @@
 using UnityEngine;
-
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
@@ -15,11 +14,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _decelerationRate = 12f;
     [SerializeField] private float _turnSmoothTime = 0.1f;
     [SerializeField] private float _gravity = -9.81f;
+    [SerializeField] private float _combatFriction = 15f;
+    [SerializeField] private float _blockedKnockbackMultiplier = 0.35f;
 
     private float _turnSmoothVelocity;
     private Vector3 _dashDirection;
     private Vector3 _verticalVelocity;
     private Vector3 _currentVelocity;
+    private Vector3 _impulseVelocity;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
@@ -41,7 +43,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-       if (UIManager.Instance.CurrentState == GameState.Gameplay) HandleMovement();
+        if (UIManager.Instance.CurrentState == GameState.Gameplay) HandleMovement();
     }
     private void HandleMovement()
     {
@@ -70,31 +72,29 @@ public class PlayerMovement : MonoBehaviour
             Gravity();
             return;
         }
+
         _dashDirection = Vector3.zero;
+        DecayImpulse();
 
         if (_playerFSM.CurrentState != PlayerState.Walking &&
             _playerFSM.CurrentState != PlayerState.Running &&
             _playerFSM.CurrentState != PlayerState.Idle)
         {
-            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, Time.deltaTime * _decelerationRate);
-
-            if (_currentVelocity.magnitude > 0.01f)
-            {
-                _characterController.Move(_currentVelocity * Time.deltaTime);
-            }
+            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, _decelerationRate * Time.deltaTime);
+            MoveHorizontal(_currentVelocity + _impulseVelocity);
             Gravity();
             return;
         }
 
         Vector2 moveInput = _playerInputs.MoveInput;
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-
         Vector3 targetVelocity = Vector3.zero;
 
         if (moveDirection.magnitude >= 0.1f)
         {
             bool hasSufficientStamina = _playerStamina.CurrentStamina > 0;
             float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running && hasSufficientStamina) ? _runSpeed : _walkSpeed;
+
             float targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
             float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
@@ -114,13 +114,45 @@ public class PlayerMovement : MonoBehaviour
 
         float currentRate = moveDirection.magnitude > 0.1f ? _accelerationRate : _decelerationRate;
         _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, Time.deltaTime * currentRate);
-
-        if (_currentVelocity.magnitude > 0.01f)
+        MoveHorizontal(_currentVelocity + _impulseVelocity);
+        Gravity();
+    }
+    public void ApplyCombatImpulse(float force)
+    {
+        Vector3 lunge = transform.forward * force;
+        lunge.y = 0f;
+        _impulseVelocity = lunge;
+    }
+    public void ApplyKnockback(Vector3 direction, float force)
+    {
+        if (_playerFSM.CurrentState == PlayerState.Dodging ||
+            _playerFSM.CurrentState == PlayerState.Hurt)
         {
-            _characterController.Move(_currentVelocity * Time.deltaTime);
+            return;
         }
 
-        Gravity();
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f) return;
+
+        float appliedForce = force;
+        if (_playerFSM.CurrentState == PlayerState.Blocking)
+        {
+            appliedForce *= _blockedKnockbackMultiplier;
+        }
+
+        _impulseVelocity = direction.normalized * appliedForce;
+    }
+    private void DecayImpulse()
+    {
+        _impulseVelocity = Vector3.Lerp(_impulseVelocity, Vector3.zero, _combatFriction * Time.deltaTime);
+    }
+    private void MoveHorizontal(Vector3 planarVelocity)
+    {
+        planarVelocity.y = 0f;
+        if (planarVelocity.sqrMagnitude > 0.0001f)
+        {
+            _characterController.Move(planarVelocity * Time.deltaTime);
+        }
     }
     private void Gravity()
     {

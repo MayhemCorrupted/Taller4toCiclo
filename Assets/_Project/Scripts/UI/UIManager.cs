@@ -4,7 +4,7 @@ public interface IPanel
     void OpenPanel();
     void ClosePanel();
 }
-public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu }
+public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu, Stadistics }
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }

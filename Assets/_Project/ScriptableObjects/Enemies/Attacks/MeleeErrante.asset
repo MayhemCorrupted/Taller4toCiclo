@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MeleeErrante
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 20
-  knockback: 0.5
+  knockback: 7
   cooldown: 4
   isRadial: 0
   radius: 2

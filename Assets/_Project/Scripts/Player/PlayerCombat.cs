@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(PlayerMovement))]
 public class PlayerCombat : MonoBehaviour
 {
     [SerializeField] private WeaponHitbox _weaponHitbox;
@@ -10,12 +11,17 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float _baseHeavyDamage = 46.2f;
     [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _lockOnRadius = 15;
+
+    [Header("Game Feel: Impulsos de Ataque")]
+    [SerializeField] private float _lightAttackImpulse = 3f;
+    [SerializeField] private float _heavyAttackImpulse = 4.5f;
     [SerializeField] private LayerMask _enemyLayer;
 
     private Transform _lockOnTarget;
     private PlayerInputs _playerInputs;
     private PlayerFSM _playerFSM;
     private PlayerStats _playerStats;
+    private PlayerMovement _playerMovement;
     private Camera _mainCamera;
     readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
 
@@ -30,6 +36,7 @@ public class PlayerCombat : MonoBehaviour
         _playerInputs = GetComponent<PlayerInputs>();
         _playerFSM = GetComponent<PlayerFSM>();
         _playerStats = GetComponent<PlayerStats>();
+        _playerMovement = GetComponent<PlayerMovement>();
         _mainCamera = Camera.main;
     }
     private void OnEnable()
@@ -44,8 +51,11 @@ public class PlayerCombat : MonoBehaviour
     }
     private void Update()
     {
-        CheckLockDistance();
-        CombatRotation();
+        if (UIManager.Instance.CurrentState == GameState.Gameplay)
+        {
+            CheckLockDistance();
+            CombatRotation();
+        }
 
         if (_currentCooldown > 0)
         {
@@ -59,6 +69,7 @@ public class PlayerCombat : MonoBehaviour
     public bool TryLightAttack(out int comboState)
     {
         comboState = 0;
+        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
         if (_currentCooldown > 0) return false;
 
         if (_playerFSM.CurrentState == PlayerState.Attacking)
@@ -80,6 +91,7 @@ public class PlayerCombat : MonoBehaviour
     public bool TryHeavyAttack(out int comboState)
     {
         comboState = 0;
+        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
         if (_currentCooldown > 0) return false;
 
         if (_playerFSM.CurrentState == PlayerState.Attacking)
@@ -105,18 +117,23 @@ public class PlayerCombat : MonoBehaviour
         _canContinueCombo = false;
         _lightComboState = 0;
         _heavyComboState = 0;
+        _playerFSM.ChangeState(PlayerState.Idle);
     }
     public void ActivateWeapon(bool isHeavyAttack)
     {
         float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
         float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
-        float grossDamage = baseDamage * _playerStats.DamageMultiplier * (1 * vesaniaMultiplier);
+
+        float grossDamage = (baseDamage * _playerStats.DamageMultiplier) * (1f * vesaniaMultiplier);
 
         if (_weaponHitbox != null)
         {
             _weaponHitbox.SetDamage(grossDamage);
             _weaponHitbox.EnableHitbox();
         }
+
+        float impulseForce = isHeavyAttack ? _heavyAttackImpulse : _lightAttackImpulse;
+        _playerMovement.ApplyCombatImpulse(impulseForce);
     }
     public void DeactivateWeapon()
     {

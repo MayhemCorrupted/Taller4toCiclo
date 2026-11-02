@@ -10,7 +10,7 @@ public enum PlayerState
     Attacking,
     Skill,
     Blocking,
-    Healing,
+    UsingItem,
     Hurt
 }
 [RequireComponent(typeof(PlayerStamina))]
@@ -21,7 +21,7 @@ public class PlayerFSM : MonoBehaviour
 
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
-    private readonly float DASH_DURATION = 0.5f;
+    private readonly float DASH_DURATION = 1f;
 
     private void Awake()
     {
@@ -49,7 +49,7 @@ public class PlayerFSM : MonoBehaviour
         if (CurrentState == PlayerState.Attacking ||
             CurrentState == PlayerState.Dodging ||
             CurrentState == PlayerState.Skill ||
-            CurrentState == PlayerState.Healing ||
+            CurrentState == PlayerState.UsingItem ||
             CurrentState == PlayerState.Hurt)
         {
             return;
@@ -61,7 +61,7 @@ public class PlayerFSM : MonoBehaviour
         }
         else if (_playerInputs.MoveInput.magnitude > 0.1f)
         {
-            ChangeState(_playerInputs.InputRun ? PlayerState.Running : PlayerState.Walking);
+            ChangeState(_playerInputs.InputRun && _playerStamina.CurrentStamina > 0 ? PlayerState.Running : PlayerState.Walking);
         }
         else
         {
@@ -90,7 +90,7 @@ public class PlayerFSM : MonoBehaviour
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking)
         {
-            ChangeState(PlayerState.Healing);
+            ChangeState(PlayerState.UsingItem);
         }
     }
     private IEnumerator DodgeRoutine()
