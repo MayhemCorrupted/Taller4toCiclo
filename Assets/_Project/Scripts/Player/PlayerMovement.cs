@@ -21,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _dashDirection;
     private Vector3 _verticalVelocity;
     private Vector3 _currentVelocity;
-    private Vector3 _impulseVelocity;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
@@ -57,7 +56,6 @@ public class PlayerMovement : MonoBehaviour
                 if (inputDirection.magnitude >= 0.1f)
                 {
                     float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-
                     if (_mainCameraTransform != null)
                         targetAngle += _mainCameraTransform.eulerAngles.y;
 
@@ -68,20 +66,22 @@ public class PlayerMovement : MonoBehaviour
                     _dashDirection = transform.forward;
                 }
             }
-            _characterController.Move(_dashSpeed * Time.deltaTime * _dashDirection + _verticalVelocity);
+            _characterController.Move((_dashSpeed * _dashDirection + _verticalVelocity) * Time.deltaTime);
             Gravity();
             return;
         }
 
         _dashDirection = Vector3.zero;
-        DecayImpulse();
 
         if (_playerFSM.CurrentState != PlayerState.Walking &&
             _playerFSM.CurrentState != PlayerState.Running &&
             _playerFSM.CurrentState != PlayerState.Idle)
         {
-            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, _decelerationRate * Time.deltaTime);
-            MoveHorizontal(_currentVelocity + _impulseVelocity);
+            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, _combatFriction * Time.deltaTime);
+            if (_currentVelocity.magnitude > 0.01f)
+            {
+                _characterController.Move(_currentVelocity * Time.deltaTime);
+            }
             Gravity();
             return;
         }
@@ -94,7 +94,6 @@ public class PlayerMovement : MonoBehaviour
         {
             bool hasSufficientStamina = _playerStamina.CurrentStamina > 0;
             float baseSpeed = (_playerFSM.CurrentState == PlayerState.Running && hasSufficientStamina) ? _runSpeed : _walkSpeed;
-
             float targetSpeed = baseSpeed * _playerStats.SpeedMultiplier;
 
             float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
@@ -114,19 +113,21 @@ public class PlayerMovement : MonoBehaviour
 
         float currentRate = moveDirection.magnitude > 0.1f ? _accelerationRate : _decelerationRate;
         _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, Time.deltaTime * currentRate);
-        MoveHorizontal(_currentVelocity + _impulseVelocity);
+
+        if (_currentVelocity.magnitude > 0.01f)
+        {
+            _characterController.Move(_currentVelocity * Time.deltaTime);
+        }
+
         Gravity();
     }
     public void ApplyCombatImpulse(float force)
     {
-        Vector3 lunge = transform.forward * force;
-        lunge.y = 0f;
-        _impulseVelocity = lunge;
+        _currentVelocity = transform.forward * force;
     }
     public void ApplyKnockback(Vector3 direction, float force)
     {
-        if (_playerFSM.CurrentState == PlayerState.Dodging ||
-            _playerFSM.CurrentState == PlayerState.Hurt)
+        if (_playerFSM.CurrentState == PlayerState.Dodging || _playerFSM.CurrentState == PlayerState.Hurt)
         {
             return;
         }
@@ -140,19 +141,7 @@ public class PlayerMovement : MonoBehaviour
             appliedForce *= _blockedKnockbackMultiplier;
         }
 
-        _impulseVelocity = direction.normalized * appliedForce;
-    }
-    private void DecayImpulse()
-    {
-        _impulseVelocity = Vector3.Lerp(_impulseVelocity, Vector3.zero, _combatFriction * Time.deltaTime);
-    }
-    private void MoveHorizontal(Vector3 planarVelocity)
-    {
-        planarVelocity.y = 0f;
-        if (planarVelocity.sqrMagnitude > 0.0001f)
-        {
-            _characterController.Move(planarVelocity * Time.deltaTime);
-        }
+        _currentVelocity = direction.normalized * appliedForce;
     }
     private void Gravity()
     {

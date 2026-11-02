@@ -11,8 +11,6 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float _baseHeavyDamage = 46.2f;
     [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _lockOnRadius = 15;
-
-    [Header("Game Feel: Impulsos de Ataque")]
     [SerializeField] private float _lightAttackImpulse = 3f;
     [SerializeField] private float _heavyAttackImpulse = 4.5f;
     [SerializeField] private LayerMask _enemyLayer;
@@ -123,8 +121,7 @@ public class PlayerCombat : MonoBehaviour
     {
         float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
         float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
-
-        float grossDamage = (baseDamage * _playerStats.DamageMultiplier) * (1f * vesaniaMultiplier);
+        float grossDamage = (baseDamage * _playerStats.DamageMultiplier) * vesaniaMultiplier;
 
         if (_weaponHitbox != null)
         {
@@ -133,7 +130,10 @@ public class PlayerCombat : MonoBehaviour
         }
 
         float impulseForce = isHeavyAttack ? _heavyAttackImpulse : _lightAttackImpulse;
-        _playerMovement.ApplyCombatImpulse(impulseForce);
+        if (_playerMovement != null)
+        {
+            _playerMovement.ApplyCombatImpulse(impulseForce);
+        }
     }
     public void DeactivateWeapon()
     {

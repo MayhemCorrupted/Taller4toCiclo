@@ -23,7 +23,7 @@ public class EnemyRangedAtk : EnemyAttack
 
 			GameObject projectile = Instantiate(projectileInstance, origin.position + Vector3.up * verticalOffset, Quaternion.LookRotation(shootDirection));
 			Projectile projectileComp = projectile.GetComponent<Projectile>();
-			projectileComp.Init(shootDirection * projectileSpeed, damage, lifetime, knockback);
+			projectileComp.Init(shootDirection * projectileSpeed, damage, lifetime);
 		}
 	}
 

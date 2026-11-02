@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-
 public enum PlayerState
 {
     Idle,
@@ -22,7 +21,7 @@ public class PlayerFSM : MonoBehaviour
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
     private readonly float DASH_DURATION = 1f;
-
+    private Coroutine _activeRoutine;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
@@ -32,13 +31,11 @@ public class PlayerFSM : MonoBehaviour
     {
         _playerInputs.OnDodge += HandleDodgeRequest;
         _playerInputs.OnSkill += CallSkillRequest;
-        //_playerInputs.OnUseItem += CallHealRequest;
     }
     private void OnDisable()
     {
         _playerInputs.OnDodge -= HandleDodgeRequest;
         _playerInputs.OnSkill -= CallSkillRequest;
-        //_playerInputs.OnUseItem -= CallHealRequest;
     }
     private void Update()
     {
@@ -74,7 +71,8 @@ public class PlayerFSM : MonoBehaviour
         {
             if (_playerStamina.TryConsumeDodgeStamina())
             {
-                StartCoroutine(DodgeRoutine());
+                if (_activeRoutine != null) StopCoroutine(_activeRoutine);
+                _activeRoutine = StartCoroutine(DodgeRoutine());
             }
         }
     }
@@ -86,20 +84,12 @@ public class PlayerFSM : MonoBehaviour
             ChangeState(attackState);
         }
     }
-    private void CallHealRequest()
-    {
-        if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking)
-        {
-            ChangeState(PlayerState.UsingItem);
-        }
-    }
     private IEnumerator DodgeRoutine()
     {
         ChangeState(PlayerState.Dodging);
-
         yield return new WaitForSeconds(DASH_DURATION);
-
         ChangeState(PlayerState.Idle);
+        _activeRoutine = null;
     }
     public void ChangeState(PlayerState newState)
     {

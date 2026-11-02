@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class PlayerAnimator : MonoBehaviour
 {
     public bool HasWeapon { get; set; } = true;
@@ -88,6 +87,15 @@ public class PlayerAnimator : MonoBehaviour
         bool isLockedOn = _playerCombat.LockOnTarget != null;
         _animator.SetBool(_isLockedOnHash, isLockedOn);
 
+        bool inCombatAction = _playerFSM.CurrentState == PlayerState.Attacking ||
+                              _playerFSM.CurrentState == PlayerState.Dodging ||
+                              _playerFSM.CurrentState == PlayerState.Skill ||
+                              _playerFSM.CurrentState == PlayerState.Blocking ||
+                              _playerFSM.CurrentState == PlayerState.Hurt;
+
+        float targetWeight = inCombatAction ? 1f : 0f;
+
+        _animator.SetLayerWeight(1, Mathf.Lerp(_animator.GetLayerWeight(1), targetWeight, Time.deltaTime * 15f));
         if (isLockedOn)
         {
             Vector2 moveInput = _playerInputs.MoveInput;
@@ -98,7 +106,6 @@ public class PlayerAnimator : MonoBehaviour
             if (inputDirection.magnitude >= 0.1f)
             {
                 float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-
                 if (_mainCameraTransform != null)
                 {
                     targetAngle += _mainCameraTransform.eulerAngles.y;
@@ -106,8 +113,8 @@ public class PlayerAnimator : MonoBehaviour
 
                 Vector3 worldMoveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
-                targetX = Vector3.Dot(worldMoveDirection, _playerRoot.right) * currentSpeed;
-                targetY = Vector3.Dot(worldMoveDirection, _playerRoot.forward) * currentSpeed;
+                targetX = Vector3.Dot(worldMoveDirection, _playerRoot.right) * (currentSpeed > 0 ? currentSpeed : 0.5f);
+                targetY = Vector3.Dot(worldMoveDirection, _playerRoot.forward) * (currentSpeed > 0 ? currentSpeed : 0.5f);
             }
 
             _currentInputX = Mathf.Lerp(_currentInputX, targetX, Time.deltaTime * 10f);
@@ -123,12 +130,6 @@ public class PlayerAnimator : MonoBehaviour
             _animator.SetFloat(_inputXHash, _currentInputX);
             _animator.SetFloat(_inputYHash, _currentInputY);
         }
-    }
-    private bool CanInterruptMovement()
-    {
-        return _playerFSM.CurrentState == PlayerState.Idle ||
-               _playerFSM.CurrentState == PlayerState.Walking ||
-               _playerFSM.CurrentState == PlayerState.Running;
     }
     private bool CanAttack()
     {
@@ -166,12 +167,11 @@ public class PlayerAnimator : MonoBehaviour
             _playerFSM.CurrentState != PlayerState.Hurt)
         {
             _animator.SetTrigger(_dodgeHash);
-            _playerFSM.ChangeState(PlayerState.Dodging);
         }
     }
     private void TriggerSkill()
     {
-        if (CanInterruptMovement() || _playerFSM.CurrentState == PlayerState.Skill)
+        if (_playerFSM.CurrentState == PlayerState.Idle || _playerFSM.CurrentState == PlayerState.Walking || _playerFSM.CurrentState == PlayerState.Running)
         {
             int skillIdToUse = 0;
             _animator.SetInteger(_skillIDHash, skillIdToUse);

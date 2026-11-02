@@ -48,22 +48,9 @@ public class WeaponHitbox : MonoBehaviour
         if (!targetHealth.TakeDamage(_currentDamage)) return;
 
         _alreadyHitEntities.Add(targetHealth);
-        ApplyHitKnockback(targetHealth);
         OnEntityHit?.Invoke();
 #if UNITY_EDITOR
         Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
 #endif
-    }
-    private void ApplyHitKnockback(Health targetHealth)
-    {
-        if (_currentKnockback <= 0f) return;
-
-        IKnockbackReceiver receiver = targetHealth.GetComponent<IKnockbackReceiver>()
-            ?? targetHealth.GetComponentInParent<IKnockbackReceiver>();
-        if (receiver == null) return;
-
-        Vector3 origin = _owner != null ? _owner.position : transform.position;
-        Vector3 knockbackDir = targetHealth.transform.position - origin;
-        receiver.ApplyKnockback(knockbackDir, _currentKnockback);
     }
 }
