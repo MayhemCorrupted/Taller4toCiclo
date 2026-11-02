@@ -1,49 +1,56 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Health))]
 public class EnemyMovement : MonoBehaviour
 {
-    [SerializeField] private NavMeshAgent agent;
-    [SerializeField] private EnemyStateManager stateManager;
-    [SerializeField] private EnemyDetection detector;
-    [SerializeField] private Health health; 
+    private NavMeshAgent _NavAgent;
+    private Health _health;
+    [SerializeField] private EnemyBrain _brain;    
+    [SerializeField] private EnemyCombat _combat;  
 
     [Header("Patrol Settings")]
-    [Min(0.0f)] public float patrolWaitingTime = 1.0f;
-    [Min(0.1f)] public float patrolRadius = 5.0f;
+    [Min(0.0f)] public float _patrolWaitingTime = 1.0f;
+    [Min(0.1f)] public float _patrolRadius = 5.0f;
 
     [Header("Hit Reaction & Game Feel")]
-    [SerializeField] private bool canBeStunned = true; 
-    [SerializeField] private float stunDuration = 0.5f;
-    [SerializeField] private float knockbackForce = 15f;
-    [SerializeField] private float knockbackFriction = 8f;
+    [SerializeField] private bool _canBeStunned = true; 
+    [SerializeField] private float _stunDuration = 0.5f;
+    [SerializeField] private float _knockbackForce = 15f;
+    [SerializeField] private float _knockbackFriction = 8f;
 
-    private float speed = 0.0f;
-    private float patrolWaitingTimer;
-    private bool isWaiting;
-    private Coroutine stunCoroutine;
-
+    private float _speed = 0.0f;
+    private float _patrolWaitingTimer;
+    private bool _isWaiting;
+    private Coroutine _stunCoroutine;
+    private void Awake()
+    {
+        _NavAgent = GetComponent<NavMeshAgent>();
+        _health = GetComponent<Health>();
+    }
     private void Start()
     {
-        stateManager.OnStateChanged += HandleStateChanged;
-        if (health != null) health.OnTakeDamage += HandleDamageTaken;
-
-        if (stateManager.CurrentState == EnemyState.Patroling)
-            SetRandomPatrolPoint();
+        if (_brain != null) 
+        {
+            if (_brain.CurrentState == EnemyState.Patroling)
+            _brain.OnStateChanged += HandleStateChanged;
+                SetRandomPatrolPoint();
+        }
+        _health.OnTakeDamage += HandleDamageTaken;
     }
-
     private void OnDestroy()
     {
-        stateManager.OnStateChanged -= HandleStateChanged;
-        if (health != null) health.OnTakeDamage -= HandleDamageTaken;
+        if (_brain != null) _brain.OnStateChanged -= HandleStateChanged;
+        _health.OnTakeDamage -= HandleDamageTaken;
     }
-
     void Update()
     {
-        agent.speed = speed;
+        _NavAgent.speed = _speed;
 
-        switch (stateManager.CurrentState)
+        if (_brain == null) return; 
+
+        switch (_brain.CurrentState)
         {
             case EnemyState.Patroling:
                 HandlePatroling();
@@ -59,92 +66,84 @@ public class EnemyMovement : MonoBehaviour
                 break;
         }
     }
-
-    public void Init(float speed)
+    public void SetSpeed(float speed)
     {
-        this.speed = speed;
+        this._speed = speed;
     }
-
     private void SetRandomPatrolPoint()
     {
-        Vector3 randomPoint = transform.position + Random.insideUnitSphere * patrolRadius;
+        Vector3 randomPoint = transform.position + Random.insideUnitSphere * _patrolRadius;
 
-        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, patrolRadius, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, _patrolRadius, NavMesh.AllAreas))
         {
-            agent.isStopped = false;
-            agent.SetDestination(hit.position);
+            _NavAgent.isStopped = false;
+            _NavAgent.SetDestination(hit.position);
         }
     }
-
     private void HandleStateChanged(EnemyState newState)
     {
         if (newState == EnemyState.Patroling)
         {
-            isWaiting = false;
+            _isWaiting = false;
             SetRandomPatrolPoint();
         }
         else if (newState == EnemyState.Chasing)
         {
-            agent.isStopped = false;
+            _NavAgent.isStopped = false;
         }
     }
-
     private void HandlePatroling()
     {
-        if (isWaiting)
+        if (_isWaiting)
         {
-            patrolWaitingTimer -= Time.deltaTime;
-            if (patrolWaitingTimer <= 0.0f)
+            _patrolWaitingTimer -= Time.deltaTime;
+            if (_patrolWaitingTimer <= 0.0f)
             {
-                isWaiting = false;
+                _isWaiting = false;
                 SetRandomPatrolPoint();
             }
             return;
         }
-
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        if (!_NavAgent.pathPending && _NavAgent.remainingDistance <= _NavAgent.stoppingDistance)
         {
-            if (!agent.hasPath || agent.velocity.sqrMagnitude == 0.0f)
+            if (!_NavAgent.hasPath || _NavAgent.velocity.sqrMagnitude == 0.0f)
             {
-                isWaiting = true;
-                patrolWaitingTimer = patrolWaitingTime;
+                _isWaiting = true;
+                _patrolWaitingTimer = _patrolWaitingTime;
             }
         }
     }
-
     private void HandleDamageTaken(float damage)
     {
-        if (!canBeStunned) return;
+        if (!_canBeStunned || _brain == null) return;
 
-        if (stunCoroutine != null) StopCoroutine(stunCoroutine);
-        stunCoroutine = StartCoroutine(StunAndKnockbackRoutine());
+        if (_stunCoroutine != null) StopCoroutine(_stunCoroutine);
+        _stunCoroutine = StartCoroutine(StunAndKnockbackRoutine());
     }
-
     private void HandleChasing()
     {
-        agent.isStopped = false;
+        _NavAgent.isStopped = false;
 
-        if (detector.TargetLocation != Vector3.positiveInfinity)
-            agent.SetDestination(detector.TargetLocation);
+        if (_combat != null && _combat.TargetLocation != Vector3.positiveInfinity)
+        {
+            _NavAgent.SetDestination(_combat.TargetLocation);
+        }
     }
-
     private void HandleAttacking()
     {
-        agent.isStopped = true;
-        agent.velocity = Vector3.zero;
+        _NavAgent.isStopped = true;
+        _NavAgent.velocity = Vector3.zero;
     }
-
     private void HandleHurt()
     {
-        agent.isStopped = true;
-        agent.velocity = Vector3.zero;
+        _NavAgent.isStopped = true;
+        _NavAgent.velocity = Vector3.zero;
     }
-
     private IEnumerator StunAndKnockbackRoutine()
     {
-        stateManager.ChangeState(EnemyState.Hurt);
-        agent.isStopped = true;
-        agent.velocity = Vector3.zero;
+        _brain.ChangeState(EnemyState.Hurt);
+        _NavAgent.isStopped = true;
+        _NavAgent.velocity = Vector3.zero;
 
         PlayerMovement player = FindAnyObjectByType<PlayerMovement>();
         Vector3 knockbackDir = Vector3.zero;
@@ -155,19 +154,18 @@ public class EnemyMovement : MonoBehaviour
             knockbackDir.y = 0;
         }
 
-        Vector3 currentKnockbackVelocity = knockbackDir * knockbackForce;
+        Vector3 currentKnockbackVelocity = knockbackDir * _knockbackForce;
 
         float timer = 0f;
-        while (timer < stunDuration)
+        while (timer < _stunDuration)
         {
-            agent.Move(currentKnockbackVelocity * Time.deltaTime);
-
-            currentKnockbackVelocity = Vector3.Lerp(currentKnockbackVelocity, Vector3.zero, Time.deltaTime * knockbackFriction);
+            _NavAgent.Move(currentKnockbackVelocity * Time.deltaTime);
+            currentKnockbackVelocity = Vector3.Lerp(currentKnockbackVelocity, Vector3.zero, Time.deltaTime * _knockbackFriction);
 
             timer += Time.deltaTime;
             yield return null;
         }
 
-        stateManager.ChangeState(EnemyState.Chasing);
+        _brain.ChangeState(EnemyState.Chasing);
     }
 }

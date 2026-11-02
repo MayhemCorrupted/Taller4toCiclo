@@ -12510,18 +12510,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemigo Errante
       objectReference: {fileID: 0}
-    - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: health
+    - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _data
+      value: 
+      objectReference: {fileID: 11400000, guid: 30568c9f0fecfef42831966cc87f4270, type: 2}
+    - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _combat
+      value: 
+      objectReference: {fileID: 1147760581}
+    - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _health
       value: 
       objectReference: {fileID: 423661205}
+    - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _movement
+      value: 
+      objectReference: {fileID: 1147760575}
+    - target: {fileID: 5530654851005637174, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f2211403b93c33d40abb0d0979e04368, type: 2}
     - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: stunDuration
-      value: 1
-      objectReference: {fileID: 0}
+      propertyPath: _brain
+      value: 
+      objectReference: {fileID: 1147760576}
     - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: knockbackForce
-      value: 7
-      objectReference: {fileID: 0}
+      propertyPath: _combat
+      value: 
+      objectReference: {fileID: 1147760581}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -18550,9 +18566,12 @@ GameObject:
   - component: {fileID: 1053689693}
   - component: {fileID: 1053689692}
   - component: {fileID: 1053689691}
+  - component: {fileID: 1053689688}
+  - component: {fileID: 1053689694}
+  - component: {fileID: 1053689696}
   - component: {fileID: 1053689690}
   - component: {fileID: 1053689689}
-  - component: {fileID: 1053689688}
+  - component: {fileID: 1053689695}
   m_Layer: 3
   m_Name: EnemyDummy
   m_TagString: Untagged
@@ -18690,12 +18709,70 @@ Transform:
   m_GameObject: {fileID: 1053689687}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.19697, y: 2.49, z: -18.72675}
+  m_LocalPosition: {x: 88.08, y: 0.47, z: -87.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1053689694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053689687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb1e8322b624875419b1923310d09c47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBrain
+  _data: {fileID: 11400000, guid: 7416b3558b3bad3429caa46e75044e91, type: 2}
+  _health: {fileID: 1053689688}
+  _combat: {fileID: 0}
+  _movement: {fileID: 1053689696}
+--- !u!195 &1053689695
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053689687}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &1053689696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053689687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3fb08e94b2a7b24fa1e140c97d074b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+  _brain: {fileID: 1053689694}
+  _combat: {fileID: 0}
+  _patrolWaitingTime: 1
+  _patrolRadius: 5
+  _canBeStunned: 1
+  _stunDuration: 0.5
+  _knockbackForce: 15
+  _knockbackFriction: 8
 --- !u!1 &1055457614
 GameObject:
   m_ObjectHideFlags: 0
@@ -20218,6 +20295,39 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!114 &1147760575 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+  m_PrefabInstance: {fileID: 584436299}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3fb08e94b2a7b24fa1e140c97d074b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+--- !u!114 &1147760576 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+  m_PrefabInstance: {fileID: 584436299}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb1e8322b624875419b1923310d09c47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
+--- !u!114 &1147760581 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2981225711452780749, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+  m_PrefabInstance: {fileID: 584436299}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09c47e7f32d469f41ac438d5e7375cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombat
 --- !u!1 &1148370447
 GameObject:
   m_ObjectHideFlags: 0
@@ -25011,7 +25121,7 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 75
-    OrthographicSize: 7
+    OrthographicSize: 6.5
     NearClipPlane: -35.4
     FarClipPlane: 25.8
     Dutch: 0
@@ -31829,7 +31939,7 @@ Camera:
   far clip plane: 25.8
   field of view: 75
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 6.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -32608,7 +32718,7 @@ MonoBehaviour:
   _turnSmoothTime: 0.15
   _gravity: -9.81
   _combatFriction: 15
-  _blockedKnockbackMultiplier: 0.35
+  _blockedKnockbackMultiplier: 1.35
 --- !u!114 &1751283149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32672,8 +32782,8 @@ MonoBehaviour:
   _baseHeavyDamage: 46.2
   _attackCooldown: 0.5
   _lockOnRadius: 15
-  _lightAttackImpulse: 7
-  _heavyAttackImpulse: 8
+  _lightAttackImpulse: 10
+  _heavyAttackImpulse: 12
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 520

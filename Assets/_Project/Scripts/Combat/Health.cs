@@ -32,7 +32,7 @@ public class Health : MonoBehaviour
         }
         return true;
     }
-    public void Init(float maxHealth, float defense)
+    public void SetHealthValues(float maxHealth, float defense)
     {
         _maxHealth = maxHealth;
         _defense = defense;

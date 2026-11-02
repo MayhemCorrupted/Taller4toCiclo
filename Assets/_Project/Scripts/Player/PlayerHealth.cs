@@ -27,10 +27,6 @@ public class PlayerHealth : Health
     {
         _statsSystem.OnStatsUpdated -= SetHealth;
     }
-    private void Start()
-    {
-        SetHealth();
-    }
     private void Update()
     {
         if (_invulnerabilityTimer > 0)
@@ -38,7 +34,7 @@ public class PlayerHealth : Health
             _invulnerabilityTimer -= Time.deltaTime;
         }
     }
-    private void SetHealth()
+    public void SetHealth()
     {
         _maxHealth = _statsSystem.MaxHealth;
         _defense = _statsSystem.Defense;

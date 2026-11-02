@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class StatsUI : MonoBehaviour, IPanel
 {
     PlayerStats _stats;
+    PlayerHealth _health;
     [SerializeField] private GameObject _statsContainer;
     [SerializeField] private TextMeshProUGUI _availablePointsText;
 
@@ -21,6 +22,7 @@ public class StatsUI : MonoBehaviour, IPanel
     private void Awake()
     {
         _stats = FindAnyObjectByType<PlayerStats>();
+        _health = FindAnyObjectByType<PlayerHealth>();
 
         for (int i = 0; i < 4; i++)
         {
@@ -94,7 +96,7 @@ public class StatsUI : MonoBehaviour, IPanel
         _stats._agilityLevel = _tempStats[3];
 
         _stats.RecalculateStats();
-
+        _health.SetHealth();
         ClosePanel();
     }
     private void UpdateUI()

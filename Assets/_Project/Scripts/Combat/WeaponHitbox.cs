@@ -7,8 +7,6 @@ public class WeaponHitbox : MonoBehaviour
 {
     public event Action OnEntityHit;
     private float _currentDamage;
-    private float _currentKnockback;
-    private Transform _owner;
     private Collider _hitboxCollider;
     private readonly List<Health> _alreadyHitEntities = new();
     private void Awake()
@@ -16,15 +14,10 @@ public class WeaponHitbox : MonoBehaviour
         _hitboxCollider = GetComponent<Collider>();
         _hitboxCollider.isTrigger = true;
         _hitboxCollider.enabled = false;
-        _owner = GetComponentInParent<PlayerCombat>()?.transform ?? transform.root;
     }
     public void SetDamage(float damage)
     {
         _currentDamage = damage;
-    }
-    public void SetKnockback(float knockback)
-    {
-        _currentKnockback = knockback;
     }
     public void EnableHitbox()
     {

@@ -14,10 +14,8 @@ GameObject:
   - component: {fileID: 8717549765142134006}
   - component: {fileID: 3258037438040142475}
   - component: {fileID: 1202830902662934329}
+  - component: {fileID: 2981225711452780749}
   - component: {fileID: 6756939468450792380}
-  - component: {fileID: 827072626548724634}
-  - component: {fileID: 762406806694076542}
-  - component: {fileID: 6783997453762949088}
   - component: {fileID: 1940082226952018290}
   - component: {fileID: 6204997315890622434}
   - component: {fileID: 1409534704617941714}
@@ -76,7 +74,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: f2211403b93c33d40abb0d0979e04368, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -153,12 +151,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb1e8322b624875419b1923310d09c47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
-  data: {fileID: 11400000, guid: 30568c9f0fecfef42831966cc87f4270, type: 2}
-  health: {fileID: 8717549765142134006}
-  detector: {fileID: 827072626548724634}
-  movement: {fileID: 6756939468450792380}
-  stateManager: {fileID: 762406806694076542}
-  attacker: {fileID: 6783997453762949088}
+  _data: {fileID: 11400000, guid: 30568c9f0fecfef42831966cc87f4270, type: 2}
+  _health: {fileID: 8717549765142134006}
+  _combat: {fileID: 2981225711452780749}
+  _movement: {fileID: 6756939468450792380}
+--- !u!114 &2981225711452780749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 530528606437522973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09c47e7f32d469f41ac438d5e7375cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombat
+  _targetLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _checkInterval: 0.1
 --- !u!114 &6756939468450792380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,55 +186,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3fb08e94b2a7b24fa1e140c97d074b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
-  agent: {fileID: 1409534704617941714}
-  stateManager: {fileID: 762406806694076542}
-  detector: {fileID: 827072626548724634}
-  patrolWaitingTime: 1
-  patrolRadius: 5
---- !u!114 &827072626548724634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 530528606437522973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9108069d40aaa741a42abb2770f6c62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDetection
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  checkInterval: 0.1
---- !u!114 &762406806694076542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 530528606437522973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98c70c6b9771e1644878258a3bbcd953, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyStateManager
-  detector: {fileID: 827072626548724634}
---- !u!114 &6783997453762949088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 530528606437522973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e14e5b612d50f57439de2d24c6c5842e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackController
+  _brain: {fileID: 1202830902662934329}
+  _combat: {fileID: 2981225711452780749}
+  _patrolWaitingTime: 1
+  _patrolRadius: 5
+  _canBeStunned: 1
+  _stunDuration: 0.5
+  _knockbackForce: 15
+  _knockbackFriction: 8
 --- !u!136 &1940082226952018290
 CapsuleCollider:
   m_ObjectHideFlags: 0
