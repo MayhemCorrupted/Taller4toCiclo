@@ -101,14 +101,24 @@ public class DialogueManager : MonoBehaviour
     }
     private void UpdateUIInteractKey()
     {
-        if (_playerInputs != null && _dialogueUI != null)
+        if (_playerInputs == null || _playerInputs.InputSystemAsset == null || _dialogueUI == null) return;
+
+        InputAction interactAction = _playerInputs.InputSystemAsset.Gameplay.Interact;
+        string controlScheme = _playerInputs.CurrentDeviceMode switch
         {
-            InputAction interactAction = _playerInputs.InputSystemAsset.FindAction("Interact");
-            if (interactAction != null)
+            "Mobile_Touch" => "Touch",
+            "PC_Gamepad" => "Gamepad",
+            _ => "KeyboardMouse",
+        };
+        string finalKeyName = "E"; 
+        for (int i = 0; i < interactAction.bindings.Count; i++)
+        {
+            if (interactAction.bindings[i].groups.Contains(controlScheme))
             {
-                string keyName = interactAction.GetBindingDisplayString(InputBinding.DisplayStringOptions.DontIncludeInteractions);
-                _dialogueUI.UpdateInteractKeyName(keyName);
+                finalKeyName = interactAction.GetBindingDisplayString(i);
+                break;
             }
         }
+        _dialogueUI.UpdateInteractKeyName(finalKeyName);
     }
 }

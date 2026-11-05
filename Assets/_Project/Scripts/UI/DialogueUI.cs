@@ -31,7 +31,7 @@ public class DialogueUI : MonoBehaviour
     private Coroutine _typingCoroutine;
     private Coroutine _promptCoroutine;
     private float _currentTextSpeed;
-    private string _currentInteractKeyName = "";
+    private string _currentInteractKeyName = "E";
     private float _typingPercentage = 0f;
     private void Awake()
     {
