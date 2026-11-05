@@ -24,12 +24,8 @@ public class PlayerCombat : MonoBehaviour
     private Camera _mainCamera;
     readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
 
-    private int _lightComboState = 0;
-    private int _heavyComboState = 0;
-    private bool _canContinueCombo = false;
     private float _currentCooldown = 0f;
     private bool _isWeaponActive = false;
-
     public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
     {
@@ -42,18 +38,16 @@ public class PlayerCombat : MonoBehaviour
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
-        if (_weaponHitbox != null) _weaponHitbox.OnEntityHit += HandleEnemyHit;
     }
     private void OnDisable()
     {
         _playerInputs.OnLockOn -= ToggleLockOn;
-        if (_weaponHitbox != null) _weaponHitbox.OnEntityHit -= HandleEnemyHit;
     }
     private void Update()
     {
         if (UIManager.Instance.CurrentState == GameState.Gameplay)
         {
-            CheckLockDistance();
+            CheckLockTargetValid();
             CombatRotation();
         }
 
@@ -62,61 +56,38 @@ public class PlayerCombat : MonoBehaviour
             _currentCooldown -= Time.deltaTime;
         }
     }
-    private void HandleEnemyHit()
+    public bool TryLightAttack()
     {
-        _canContinueCombo = true;
-    }
-    public bool TryLightAttack(out int comboState)
-    {
-        comboState = 0;
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
         if (_currentCooldown > 0) return false;
 
-        if (_playerFSM.CurrentState == PlayerState.Attacking)
-        {
-            if (!_canContinueCombo || _lightComboState >= 2) return false;
-            _lightComboState++;
-        }
-        else
-        {
-            _lightComboState = 0;
-            _heavyComboState = 0;
-            _playerFSM.ChangeState(PlayerState.Attacking);
-        }
+        if (_playerFSM.CurrentState != PlayerState.Idle &&
+            _playerFSM.CurrentState != PlayerState.Walking &&
+            _playerFSM.CurrentState != PlayerState.Running) return false;
 
-        _canContinueCombo = false;
-        comboState = _lightComboState;
+        if (_lockOnTarget == null) SnapToMouse();
+
+        _playerFSM.ChangeState(PlayerState.Attacking);
         return true;
     }
-    public bool TryHeavyAttack(out int comboState)
+    public bool TryHeavyAttack()
     {
-        comboState = 0;
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
         if (_currentCooldown > 0) return false;
 
-        if (_playerFSM.CurrentState == PlayerState.Attacking)
-        {
-            if (!_canContinueCombo || _heavyComboState >= 1) return false;
-            _heavyComboState++;
-        }
-        else
-        {
-            _lightComboState = 0;
-            _heavyComboState = 0;
-            _playerFSM.ChangeState(PlayerState.Attacking);
-        }
+        if (_playerFSM.CurrentState != PlayerState.Idle &&
+            _playerFSM.CurrentState != PlayerState.Walking &&
+            _playerFSM.CurrentState != PlayerState.Running) return false;
 
-        _canContinueCombo = false;
-        comboState = _heavyComboState;
+        if (_lockOnTarget == null) SnapToMouse();
+
+        _playerFSM.ChangeState(PlayerState.Attacking);
         return true;
     }
     public void EndAttackRoutine()
     {
         DeactivateWeapon();
         _currentCooldown = _attackCooldown;
-        _canContinueCombo = false;
-        _lightComboState = 0;
-        _heavyComboState = 0;
 
         if (_playerFSM.CurrentState == PlayerState.Attacking)
         {
@@ -172,15 +143,40 @@ public class PlayerCombat : MonoBehaviour
         }
         _lockOnTarget = closestEnemy;
     }
-    private void CheckLockDistance()
+    private void CheckLockTargetValid()
     {
         if (_lockOnTarget == null) return;
+
+        Health targetHealth = _lockOnTarget.GetComponent<Health>();
+        if (targetHealth != null && targetHealth.CurrentHealth <= 0)
+        {
+            _lockOnTarget = null;
+            return;
+        }
+
         if (Vector3.Distance(transform.position, _lockOnTarget.position) > _lockOnRadius)
         {
             _lockOnTarget = null;
         }
     }
-
+    private void SnapToMouse()
+    {
+        if (_playerInputs.CurrentDeviceMode == "PC_KeyboardMouse" && _mainCamera != null)
+        {
+            Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Plane groundPlane = new(Vector3.up, transform.position);
+            if (groundPlane.Raycast(ray, out float rayDistance))
+            {
+                Vector3 point = ray.GetPoint(rayDistance);
+                Vector3 directionToMouse = point - transform.position;
+                directionToMouse.y = 0;
+                if (directionToMouse.sqrMagnitude > 0.1f)
+                {
+                    transform.rotation = Quaternion.LookRotation(directionToMouse);
+                }
+            }
+        }
+    }
     private void CombatRotation()
     {
         if (_lockOnTarget != null)
@@ -195,26 +191,9 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            if (_playerFSM.CurrentState != PlayerState.Attacking &&
-                _playerFSM.CurrentState != PlayerState.Skill &&
-                _playerFSM.CurrentState != PlayerState.Blocking)
+            if (_playerFSM.CurrentState == PlayerState.Skill || _playerFSM.CurrentState == PlayerState.Blocking)
             {
-                return;
-            }
-            else if (_playerInputs.CurrentDeviceMode == "PC_KeyboardMouse" && _mainCamera != null)
-            {
-                Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-                Plane groundPlane = new(Vector3.up, transform.position);
-                if (groundPlane.Raycast(ray, out float rayDistance))
-                {
-                    Vector3 point = ray.GetPoint(rayDistance);
-                    Vector3 directionToMouse = point - transform.position;
-                    directionToMouse.y = 0;
-                    if (directionToMouse.sqrMagnitude > 0.1f)
-                    {
-                        transform.rotation = Quaternion.LookRotation(directionToMouse);
-                    }
-                }
+                SnapToMouse();
             }
         }
     }

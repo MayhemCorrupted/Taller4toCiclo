@@ -128,7 +128,10 @@ public class PlayerMovement : MonoBehaviour
     }
     public void ApplyKnockback(Vector3 direction, float force)
     {
-        if (_playerFSM.CurrentState == PlayerState.Dodging || _playerFSM.CurrentState == PlayerState.Hurt)
+        if (_playerFSM.CurrentState == PlayerState.Dodging ||
+            _playerFSM.CurrentState == PlayerState.Hurt ||
+            _playerFSM.CurrentState == PlayerState.Knockout ||
+            _playerFSM.CurrentState == PlayerState.Death)
         {
             return;
         }

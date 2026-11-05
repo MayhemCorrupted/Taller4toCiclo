@@ -7,7 +7,7 @@ public interface IPanel
 public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu, Stadistics }
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    public static UIManager Instance { get; private set; }  
     public GameState CurrentState { get; private set; } = GameState.Gameplay;
     [SerializeField] private PauseMenuUI _pauseMenuUI;
     [SerializeField] private InventoryPanelUI _inventoryPanelUI;

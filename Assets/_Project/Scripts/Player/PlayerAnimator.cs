@@ -18,14 +18,14 @@ public class PlayerAnimator : MonoBehaviour
 
     private readonly int _lightAttackHash = Animator.StringToHash("LightAttack");
     private readonly int _heavyAttackHash = Animator.StringToHash("HeavyAttack");
-    private readonly int _lightComboHash = Animator.StringToHash("LightCombo");
-    private readonly int _heavyComboHash = Animator.StringToHash("HeavyCombo");
 
     private readonly int _dodgeHash = Animator.StringToHash("Dodge");
     private readonly int _isBlockingHash = Animator.StringToHash("IsBlocking");
     private readonly int _skillTriggerHash = Animator.StringToHash("SkillTrigger");
     private readonly int _skillIDHash = Animator.StringToHash("SkillID");
     private readonly int _blockHitHash = Animator.StringToHash("BlockHit");
+
+    private readonly int _hurtHash = Animator.StringToHash("Hurt");
     private readonly int _knockoutHash = Animator.StringToHash("Knockout");
     private readonly int _permadeathHash = Animator.StringToHash("Permadeath");
 
@@ -50,6 +50,7 @@ public class PlayerAnimator : MonoBehaviour
 
         if (_playerHealth != null)
         {
+            _playerHealth.OnHurt += TriggerHurt;
             _playerHealth.OnLifeLost += TriggerKnockout;
             _playerHealth.OnPermadeath += TriggerPermadeath;
             _playerHealth.OnBlockHit += TriggerBlockHit;
@@ -63,6 +64,7 @@ public class PlayerAnimator : MonoBehaviour
 
         if (_playerHealth != null)
         {
+            _playerHealth.OnHurt -= TriggerHurt;
             _playerHealth.OnLifeLost -= TriggerKnockout;
             _playerHealth.OnPermadeath -= TriggerPermadeath;
             _playerHealth.OnBlockHit -= TriggerBlockHit;
@@ -92,7 +94,9 @@ public class PlayerAnimator : MonoBehaviour
                               _playerFSM.CurrentState == PlayerState.Dodging ||
                               _playerFSM.CurrentState == PlayerState.Skill ||
                               _playerFSM.CurrentState == PlayerState.Blocking ||
-                              _playerFSM.CurrentState == PlayerState.Hurt;
+                              _playerFSM.CurrentState == PlayerState.Hurt ||
+                              _playerFSM.CurrentState == PlayerState.Knockout ||
+                              _playerFSM.CurrentState == PlayerState.Death;
 
         float targetWeight = inCombatAction ? 1f : 0f;
 
@@ -148,31 +152,23 @@ public class PlayerAnimator : MonoBehaviour
     {
         return _playerFSM.CurrentState == PlayerState.Idle ||
                _playerFSM.CurrentState == PlayerState.Walking ||
-               _playerFSM.CurrentState == PlayerState.Running ||
-               _playerFSM.CurrentState == PlayerState.Attacking;
+               _playerFSM.CurrentState == PlayerState.Running;
     }
     private void TriggerLightAttack()
     {
         if (CanAttack())
         {
-            if (_playerCombat.TryLightAttack(out int comboIndex))
-            {
-                _animator.SetInteger(_lightComboHash, comboIndex);
-                _animator.SetTrigger(_lightAttackHash);
-            }
+            if (_playerCombat.TryLightAttack()) _animator.SetTrigger(_lightAttackHash);
         }
     }
     private void TriggerHeavyAttack()
     {
         if (CanAttack())
         {
-            if (_playerCombat.TryHeavyAttack(out int comboIndex))
-            {
-                _animator.SetInteger(_heavyComboHash, comboIndex);
-                _animator.SetTrigger(_heavyAttackHash);
-            }
+            if (_playerCombat.TryHeavyAttack()) _animator.SetTrigger(_heavyAttackHash);
         }
     }
+    private void TriggerHurt() => _animator.SetTrigger(_hurtHash);
     private void TriggerKnockout() => _animator.SetTrigger(_knockoutHash);
     private void TriggerPermadeath() => _animator.SetTrigger(_permadeathHash);
     private void TriggerBlockHit() => _animator.SetTrigger(_blockHitHash);
@@ -192,6 +188,7 @@ public class PlayerAnimator : MonoBehaviour
 
                 _animator.ResetTrigger(_dodgeHash);
                 _animator.ResetTrigger(_skillTriggerHash);
+                _animator.ResetTrigger(_hurtHash);
 
                 if (_playerFSM.CurrentState == PlayerState.Dodging ||
                     _playerFSM.CurrentState == PlayerState.Skill ||

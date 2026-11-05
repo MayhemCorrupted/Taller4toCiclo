@@ -23,6 +23,20 @@ public class EnemyCombat : MonoBehaviour
     {
         _brain = GetComponent<EnemyBrain>();
     }
+    private void OnEnable()
+    {
+        if (_brain != null)
+        {
+            _brain.OnStateChanged += HandleBrainStateChanged;
+        }
+    }
+    private void OnDisable()
+    {
+        if (_brain != null)
+        {
+            _brain.OnStateChanged -= HandleBrainStateChanged;
+        }
+    }
     public void SetValues(float detRadius, float atkRadius, float losRadius, List<EnemyAttack> attacks)
     {
         _detectionRadius = detRadius;
@@ -51,6 +65,20 @@ public class EnemyCombat : MonoBehaviour
             else
             {
                 _atkCountdown = Mathf.Max(_atkCountdown - Time.deltaTime, 0.0f);
+            }
+        }
+    }
+    private void HandleBrainStateChanged(EnemyState newState)
+    {
+        if (newState == EnemyState.Hurt)
+        {
+            if (_attacks.Count > 0)
+            {
+                _atkCountdown = _attacks[0].cooldown;
+            }
+            else
+            {
+                _atkCountdown = 1.0f;
             }
         }
     }

@@ -9,6 +9,7 @@ public class StatsUI : MonoBehaviour, IPanel
     PlayerHealth _health;
     [SerializeField] private GameObject _statsContainer;
     [SerializeField] private TextMeshProUGUI _availablePointsText;
+    [SerializeField] private GameObject _renderPreviewCamera;
 
     [Header("Orden: 0=Vida, 1=Fuerza, 2=Stamina, 3=Agilidad")]
     [SerializeField] private TextMeshProUGUI[] _statsText;
@@ -35,6 +36,8 @@ public class StatsUI : MonoBehaviour, IPanel
                 _decreaseStatButton[index].onClick.AddListener(() => DecreaseStat(index));
         }
 
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);
+
         if (_confirmButton != null)
             _confirmButton.onClick.AddListener(ConfirmStats);
     }
@@ -51,6 +54,7 @@ public class StatsUI : MonoBehaviour, IPanel
     public void OpenPanel()
     {
         if (_statsContainer != null) _statsContainer.SetActive(true);
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(true);
         UIManager.Instance.SetGameState(GameState.Stadistics);
 
         LoadCurrentStats();
@@ -59,6 +63,7 @@ public class StatsUI : MonoBehaviour, IPanel
     public void ClosePanel()
     {
         if (_statsContainer != null) _statsContainer.SetActive(false);
+        if (_renderPreviewCamera != null) _renderPreviewCamera.SetActive(false);
         UIManager.Instance.SetGameState(GameState.Gameplay);
     }
     private void LoadCurrentStats()

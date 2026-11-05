@@ -5,7 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerFSM))]
 public class PlayerHealth : Health
 {
+    public event Action OnHurt;
     public event Action OnLifeLost;
+    public event Action OnHealed;
     public event Action OnPermadeath;
     public event Action OnBlockHit;
     private int _currentLives = 3;
@@ -67,19 +69,29 @@ public class PlayerHealth : Health
                 _staminaSystem.ExhaustStamina();
                 _currentHealth -= unmitigatedDamage;
                 OnTakingDamage(unmitigatedDamage);
+                if (_currentHealth > 0)
+                {
+                    _playerFSM.ChangeState(PlayerState.Hurt);
+                    OnHurt?.Invoke();
+                }
             }   
         }
         else
         {
             _currentHealth -= finalDamage;
             OnTakingDamage(finalDamage);
+            if (_currentHealth > 0)
+            {
+                _playerFSM.ChangeState(PlayerState.Hurt);
+                OnHurt?.Invoke();
+            }
         }
         _invulnerabilityTimer = _invulnerabilityDuration;
         NotifyHealthChanged();
         if (_currentHealth <= 0)
         {
-            _currentHealth = 0;
             Die();
+            _currentHealth = 0;
         }
         return true;
     }
@@ -90,7 +102,7 @@ public class PlayerHealth : Health
         _currentHealth += amount;
         if (_currentHealth > _maxHealth) _currentHealth = _maxHealth;
 
-        NotifyHealthChanged();
+        OnHealed?.Invoke();
     }
     public void TakeDirectDamage(float amount)
     {
@@ -101,8 +113,13 @@ public class PlayerHealth : Health
 
         if (_currentHealth <= 0)
         {
-            _currentHealth = 0;
             Die();
+            _currentHealth = 0;
+        }
+        else
+        {
+            _playerFSM.ChangeState(PlayerState.Hurt);
+            OnHurt?.Invoke();
         }
     }
     protected override void Die()
@@ -110,13 +127,12 @@ public class PlayerHealth : Health
         if (_currentLives > 1)
         {
             _currentLives--;
-            _playerFSM.ChangeState(PlayerState.Hurt);
+            _playerFSM.ChangeState(PlayerState.Knockout);
             OnLifeLost?.Invoke();
         }
         else
         {
-            _currentLives--;
-            _playerFSM.ChangeState(PlayerState.Hurt);
+            _playerFSM.ChangeState(PlayerState.Death);
             OnPermadeath?.Invoke();
         }
     }

@@ -10,7 +10,9 @@ public enum PlayerState
     Skill,
     Blocking,
     UsingItem,
-    Hurt
+    Hurt,
+    Knockout,
+    Death,
 }
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInputs))]
