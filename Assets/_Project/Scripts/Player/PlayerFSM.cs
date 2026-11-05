@@ -1,5 +1,5 @@
+using System;
 using UnityEngine;
-using System.Collections;
 public enum PlayerState
 {
     Idle,
@@ -17,11 +17,9 @@ public enum PlayerState
 public class PlayerFSM : MonoBehaviour
 {
     public PlayerState CurrentState { get; private set; }
-
+    public event Action<PlayerState> OnStateChanged;
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
-    private readonly float DASH_DURATION = 1f;
-    private Coroutine _activeRoutine;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
@@ -29,12 +27,12 @@ public class PlayerFSM : MonoBehaviour
     }
     private void OnEnable()
     {
-        _playerInputs.OnDodge += HandleDodgeRequest;
+        _playerInputs.OnDodge += CallDodgeRequest;
         _playerInputs.OnSkill += CallSkillRequest;
     }
     private void OnDisable()
     {
-        _playerInputs.OnDodge -= HandleDodgeRequest;
+        _playerInputs.OnDodge -= CallDodgeRequest;
         _playerInputs.OnSkill -= CallSkillRequest;
     }
     private void Update()
@@ -65,14 +63,16 @@ public class PlayerFSM : MonoBehaviour
             ChangeState(PlayerState.Idle);
         }
     }
-    private void HandleDodgeRequest()
+    private void CallDodgeRequest()
     {
-        if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running || CurrentState == PlayerState.Blocking)
+        if (CurrentState == PlayerState.Idle ||
+            CurrentState == PlayerState.Walking ||
+            CurrentState == PlayerState.Running ||
+            CurrentState == PlayerState.Blocking)
         {
             if (_playerStamina.TryConsumeDodgeStamina())
             {
-                if (_activeRoutine != null) StopCoroutine(_activeRoutine);
-                _activeRoutine = StartCoroutine(DodgeRoutine());
+                ChangeState(PlayerState.Dodging);
             }
         }
     }
@@ -84,16 +84,10 @@ public class PlayerFSM : MonoBehaviour
             ChangeState(attackState);
         }
     }
-    private IEnumerator DodgeRoutine()
-    {
-        ChangeState(PlayerState.Dodging);
-        yield return new WaitForSeconds(DASH_DURATION);
-        ChangeState(PlayerState.Idle);
-        _activeRoutine = null;
-    }
     public void ChangeState(PlayerState newState)
     {
         if (CurrentState == newState) return;
         CurrentState = newState;
+        OnStateChanged?.Invoke(newState);
     }
 }

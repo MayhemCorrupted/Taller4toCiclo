@@ -46,8 +46,7 @@ public class PlayerAnimator : MonoBehaviour
     {
         _playerInputs.OnLightAttack += TriggerLightAttack;
         _playerInputs.OnHeavyAttack += TriggerHeavyAttack;
-        _playerInputs.OnDodge += TriggerDodge;
-        _playerInputs.OnSkill += TriggerSkill;
+        _playerFSM.OnStateChanged += HandleFSMStateChanged;
 
         if (_playerHealth != null)
         {
@@ -60,8 +59,7 @@ public class PlayerAnimator : MonoBehaviour
     {
         _playerInputs.OnLightAttack -= TriggerLightAttack;
         _playerInputs.OnHeavyAttack -= TriggerHeavyAttack;
-        _playerInputs.OnDodge -= TriggerDodge;
-        _playerInputs.OnSkill -= TriggerSkill;
+        _playerFSM.OnStateChanged -= HandleFSMStateChanged;
 
         if (_playerHealth != null)
         {
@@ -72,7 +70,10 @@ public class PlayerAnimator : MonoBehaviour
     }
     private void Update()
     {
-        SyncMovement();
+        if (UIManager.Instance.CurrentState == GameState.Gameplay)
+        {
+            SyncMovement();
+        }
     }
     private void SyncMovement()
     {
@@ -131,6 +132,18 @@ public class PlayerAnimator : MonoBehaviour
             _animator.SetFloat(_inputYHash, _currentInputY);
         }
     }
+    private void HandleFSMStateChanged(PlayerState newState)
+    {
+        if (newState == PlayerState.Dodging)
+        {
+            _animator.SetTrigger(_dodgeHash);
+        }
+        else if (newState == PlayerState.Skill)
+        {
+            _animator.SetInteger(_skillIDHash, 0);
+            _animator.SetTrigger(_skillTriggerHash);
+        }
+    }
     private bool CanAttack()
     {
         return _playerFSM.CurrentState == PlayerState.Idle ||
@@ -160,33 +173,33 @@ public class PlayerAnimator : MonoBehaviour
             }
         }
     }
-    private void TriggerDodge()
-    {
-        if (_playerFSM.CurrentState != PlayerState.Attacking &&
-            _playerFSM.CurrentState != PlayerState.Skill &&
-            _playerFSM.CurrentState != PlayerState.Hurt)
-        {
-            _animator.SetTrigger(_dodgeHash);
-        }
-    }
-    private void TriggerSkill()
-    {
-        if (_playerFSM.CurrentState == PlayerState.Idle || _playerFSM.CurrentState == PlayerState.Walking || _playerFSM.CurrentState == PlayerState.Running)
-        {
-            int skillIdToUse = 0;
-            _animator.SetInteger(_skillIDHash, skillIdToUse);
-            _animator.SetTrigger(_skillTriggerHash);
-        }
-    }
     private void TriggerKnockout() => _animator.SetTrigger(_knockoutHash);
     private void TriggerPermadeath() => _animator.SetTrigger(_permadeathHash);
     private void TriggerBlockHit() => _animator.SetTrigger(_blockHitHash);
     public void AE_ActivateLightHitbox() => _playerCombat.ActivateWeapon(false);
     public void AE_ActivateHeavyHitbox() => _playerCombat.ActivateWeapon(true);
     public void AE_DeactivateHitbox() => _playerCombat.DeactivateWeapon();
-    public void AE_FinishAction()
+    public void OnAnimationStateExit(ActionStateType type)
     {
-        _playerFSM.ChangeState(PlayerState.Idle);
-        _playerCombat.EndAttackRoutine();
+        switch (type)
+        {
+            case ActionStateType.Attack:
+                _playerCombat.EndAttackRoutine();
+                break;
+            case ActionStateType.Dodge:
+            case ActionStateType.Skill:
+            case ActionStateType.Hurt:
+
+                _animator.ResetTrigger(_dodgeHash);
+                _animator.ResetTrigger(_skillTriggerHash);
+
+                if (_playerFSM.CurrentState == PlayerState.Dodging ||
+                    _playerFSM.CurrentState == PlayerState.Skill ||
+                    _playerFSM.CurrentState == PlayerState.Hurt)
+                {
+                    _playerFSM.ChangeState(PlayerState.Idle);
+                }
+                break;
+        }
     }
 }

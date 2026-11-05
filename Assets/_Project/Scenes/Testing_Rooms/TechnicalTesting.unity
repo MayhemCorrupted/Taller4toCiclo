@@ -12538,7 +12538,16 @@ PrefabInstance:
       propertyPath: _combat
       value: 
       objectReference: {fileID: 1147760581}
-    m_RemovedComponents: []
+    - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _stunDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
+      propertyPath: _knockbackForce
+      value: 9.5
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6204997315890622434, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -18567,11 +18576,12 @@ GameObject:
   - component: {fileID: 1053689692}
   - component: {fileID: 1053689691}
   - component: {fileID: 1053689688}
+  - component: {fileID: 1053689698}
   - component: {fileID: 1053689694}
   - component: {fileID: 1053689696}
-  - component: {fileID: 1053689690}
   - component: {fileID: 1053689689}
   - component: {fileID: 1053689695}
+  - component: {fileID: 1053689697}
   m_Layer: 3
   m_Name: EnemyDummy
   m_TagString: Untagged
@@ -18591,8 +18601,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthSystem
-  _maxHealth: 60
-  _defense: 10
+  _maxHealth: 0
+  _defense: 0
 --- !u!136 &1053689689
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -18616,33 +18626,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &1053689690
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1053689687}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 32
-  m_CollisionDetection: 0
 --- !u!23 &1053689691
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -18771,8 +18754,50 @@ MonoBehaviour:
   _patrolRadius: 5
   _canBeStunned: 1
   _stunDuration: 0.5
-  _knockbackForce: 15
+  _knockbackForce: 8.5
   _knockbackFriction: 8
+--- !u!54 &1053689697
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053689687}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 32
+  m_CollisionDetection: 0
+--- !u!114 &1053689698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053689687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922548bd51690a04c8822abf83617ce9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HealthEvents
+  OnEntityDeath:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1055457614
 GameObject:
   m_ObjectHideFlags: 0
@@ -32619,10 +32644,10 @@ GameObject:
   - component: {fileID: 1751283148}
   - component: {fileID: 1751283152}
   - component: {fileID: 1751283149}
-  - component: {fileID: 1751283142}
   - component: {fileID: 1751283151}
   - component: {fileID: 1751283147}
   - component: {fileID: 1751283146}
+  - component: {fileID: 1751283142}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player

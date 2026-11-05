@@ -6,7 +6,6 @@ public class PlayerInputs : MonoBehaviour
     public event Action OnLightAttack;
     public event Action OnHeavyAttack;
     public event Action OnSkill;
-    //public event Action OnUseItem;
     public event Action OnInteract;
     public event Action OnOpenInventory;
     public event Action OnLockOn;
@@ -35,7 +34,6 @@ public class PlayerInputs : MonoBehaviour
         _inputActions.Gameplay.Skill.performed += ctx => OnSkill?.Invoke();
         _inputActions.Gameplay.Dodge.performed += ctx => OnDodge?.Invoke();
         _inputActions.Gameplay.Interact.performed += ctx => OnInteract?.Invoke();
-        //_inputActions.Gameplay.UseItem.performed += ctx => OnUseItem?.Invoke();
         _inputActions.Gameplay.LockOn.performed += ctx => OnLockOn?.Invoke();
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();

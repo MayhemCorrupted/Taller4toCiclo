@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
@@ -7,10 +8,10 @@ using UnityEngine.InputSystem;
 public class PlayerCombat : MonoBehaviour
 {
     [SerializeField] private WeaponHitbox _weaponHitbox;
-    [SerializeField] private float _baseLightDamage = 21;
+    [SerializeField] private float _baseLightDamage = 21f;
     [SerializeField] private float _baseHeavyDamage = 46.2f;
     [SerializeField] private float _attackCooldown = 0.5f;
-    [SerializeField] private float _lockOnRadius = 15;
+    [SerializeField] private float _lockOnRadius = 15f;
     [SerializeField] private float _lightAttackImpulse = 3f;
     [SerializeField] private float _heavyAttackImpulse = 4.5f;
     [SerializeField] private LayerMask _enemyLayer;
@@ -27,6 +28,7 @@ public class PlayerCombat : MonoBehaviour
     private int _heavyComboState = 0;
     private bool _canContinueCombo = false;
     private float _currentCooldown = 0f;
+    private bool _isWeaponActive = false;
 
     public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
@@ -115,10 +117,16 @@ public class PlayerCombat : MonoBehaviour
         _canContinueCombo = false;
         _lightComboState = 0;
         _heavyComboState = 0;
-        _playerFSM.ChangeState(PlayerState.Idle);
+
+        if (_playerFSM.CurrentState == PlayerState.Attacking)
+        {
+            _playerFSM.ChangeState(PlayerState.Idle);
+        }
     }
     public void ActivateWeapon(bool isHeavyAttack)
     {
+        _isWeaponActive = true;
+
         float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
         float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
         float grossDamage = (baseDamage * _playerStats.DamageMultiplier) * vesaniaMultiplier;
@@ -137,6 +145,7 @@ public class PlayerCombat : MonoBehaviour
     }
     public void DeactivateWeapon()
     {
+        _isWeaponActive = false;
         if (_weaponHitbox != null) _weaponHitbox.DisableHitbox();
     }
     private void ToggleLockOn()
@@ -171,6 +180,7 @@ public class PlayerCombat : MonoBehaviour
             _lockOnTarget = null;
         }
     }
+
     private void CombatRotation()
     {
         if (_lockOnTarget != null)

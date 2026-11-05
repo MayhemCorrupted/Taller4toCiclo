@@ -4,10 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyBrain))]
 public class EnemyCombat : MonoBehaviour
 {
-	private EnemyBrain _brain;
-	[SerializeField] private LayerMask _targetLayer;
-	[SerializeField] private LayerMask _wallLayer;
-	[SerializeField] private float _checkInterval = 0.1f;
+    private EnemyBrain _brain;
+    [SerializeField] private LayerMask _targetLayer;
+    [SerializeField] private LayerMask _wallLayer;
+    [SerializeField] private float _checkInterval = 0.1f;
 
     private float _detectionRadius, _attackRadius, _loseTargetRadius;
     private List<EnemyAttack> _attacks = new();

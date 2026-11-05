@@ -40,7 +40,7 @@ public class PlayerStamina : MonoBehaviour
     {
         if (_playerFSM.CurrentState == PlayerState.Running)
         {
-           UseStamina(_staminaDrainRate * Time.deltaTime);
+            UseStamina(_staminaDrainRate * Time.deltaTime);
         }
     }
     public bool TryConsumeDodgeStamina()

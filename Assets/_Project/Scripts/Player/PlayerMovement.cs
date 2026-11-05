@@ -66,7 +66,8 @@ public class PlayerMovement : MonoBehaviour
                     _dashDirection = transform.forward;
                 }
             }
-            _characterController.Move((_dashSpeed * _dashDirection + _verticalVelocity) * Time.deltaTime);
+
+            _characterController.Move(_dashSpeed * Time.deltaTime * _dashDirection);
             Gravity();
             return;
         }

@@ -1,21 +1,25 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Health))]
+[RequireComponent(typeof(Rigidbody))]
 public class EnemyMovement : MonoBehaviour
 {
     private NavMeshAgent _NavAgent;
     private Health _health;
-    [SerializeField] private EnemyBrain _brain;    
-    [SerializeField] private EnemyCombat _combat;  
+    private Rigidbody _rb;
+
+    [SerializeField] private EnemyBrain _brain;
+    [SerializeField] private EnemyCombat _combat;
 
     [Header("Patrol Settings")]
     [Min(0.0f)] public float _patrolWaitingTime = 1.0f;
     [Min(0.1f)] public float _patrolRadius = 5.0f;
 
     [Header("Hit Reaction & Game Feel")]
-    [SerializeField] private bool _canBeStunned = true; 
+    [SerializeField] private bool _canBeStunned = true;
     [SerializeField] private float _stunDuration = 0.5f;
     [SerializeField] private float _knockbackForce = 15f;
     [SerializeField] private float _knockbackFriction = 8f;
@@ -28,13 +32,17 @@ public class EnemyMovement : MonoBehaviour
     {
         _NavAgent = GetComponent<NavMeshAgent>();
         _health = GetComponent<Health>();
+        _rb = GetComponent<Rigidbody>();
+
+        _rb.isKinematic = true;
+        _rb.useGravity = false;
     }
     private void Start()
     {
-        if (_brain != null) 
+        if (_brain != null)
         {
-            if (_brain.CurrentState == EnemyState.Patroling)
             _brain.OnStateChanged += HandleStateChanged;
+            if (_brain.CurrentState == EnemyState.Patroling)
                 SetRandomPatrolPoint();
         }
         _health.OnTakeDamage += HandleDamageTaken;
@@ -46,9 +54,9 @@ public class EnemyMovement : MonoBehaviour
     }
     void Update()
     {
-        _NavAgent.speed = _speed;
+        if (!_NavAgent.enabled || _brain == null) return;
 
-        if (_brain == null) return; 
+        _NavAgent.speed = _speed;
 
         switch (_brain.CurrentState)
         {
@@ -82,6 +90,8 @@ public class EnemyMovement : MonoBehaviour
     }
     private void HandleStateChanged(EnemyState newState)
     {
+        if (!_NavAgent.enabled) return;
+
         if (newState == EnemyState.Patroling)
         {
             _isWaiting = false;
@@ -136,14 +146,19 @@ public class EnemyMovement : MonoBehaviour
     }
     private void HandleHurt()
     {
-        _NavAgent.isStopped = true;
-        _NavAgent.velocity = Vector3.zero;
+        if (_NavAgent.enabled)
+        {
+            _NavAgent.isStopped = true;
+            _NavAgent.velocity = Vector3.zero;
+        }
     }
     private IEnumerator StunAndKnockbackRoutine()
     {
         _brain.ChangeState(EnemyState.Hurt);
-        _NavAgent.isStopped = true;
-        _NavAgent.velocity = Vector3.zero;
+
+        _NavAgent.enabled = false;
+        _rb.isKinematic = false;
+        _rb.useGravity = true;
 
         PlayerMovement player = FindAnyObjectByType<PlayerMovement>();
         Vector3 knockbackDir = Vector3.zero;
@@ -154,18 +169,30 @@ public class EnemyMovement : MonoBehaviour
             knockbackDir.y = 0;
         }
 
-        Vector3 currentKnockbackVelocity = knockbackDir * _knockbackForce;
+        _rb.linearVelocity = knockbackDir * _knockbackForce;
 
         float timer = 0f;
         while (timer < _stunDuration)
         {
-            _NavAgent.Move(currentKnockbackVelocity * Time.deltaTime);
-            currentKnockbackVelocity = Vector3.Lerp(currentKnockbackVelocity, Vector3.zero, Time.deltaTime * _knockbackFriction);
+            Vector3 currentVel = _rb.linearVelocity;
+            Vector3 horizontalVel = new(currentVel.x, 0, currentVel.z);
+
+            horizontalVel = Vector3.Lerp(horizontalVel, Vector3.zero, Time.deltaTime * _knockbackFriction);
+            _rb.linearVelocity = new(horizontalVel.x, currentVel.y, horizontalVel.z);
 
             timer += Time.deltaTime;
             yield return null;
         }
 
+        _rb.isKinematic = true;
+        _rb.useGravity = false;
+
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+        }
+
+        _NavAgent.enabled = true;
         _brain.ChangeState(EnemyState.Chasing);
     }
 }
