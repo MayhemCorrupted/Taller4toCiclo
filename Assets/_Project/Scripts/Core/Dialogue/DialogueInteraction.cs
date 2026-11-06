@@ -19,7 +19,6 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
             if (!loopDialogue)
             {
                 _hasBeenUsed = true;
-
                 enabled = false;
             }
         }

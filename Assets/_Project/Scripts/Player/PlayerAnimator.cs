@@ -47,12 +47,12 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnLightAttack += TriggerLightAttack;
         _playerInputs.OnHeavyAttack += TriggerHeavyAttack;
         _playerFSM.OnStateChanged += HandleFSMStateChanged;
+        GameManager.Instance.OnLifeLost += TriggerKnockout;
+        GameManager.Instance.OnGameOver += TriggerPermadeath;
 
         if (_playerHealth != null)
         {
             _playerHealth.OnHurt += TriggerHurt;
-            _playerHealth.OnLifeLost += TriggerKnockout;
-            _playerHealth.OnPermadeath += TriggerPermadeath;
             _playerHealth.OnBlockHit += TriggerBlockHit;
         }
     }
@@ -61,12 +61,12 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnLightAttack -= TriggerLightAttack;
         _playerInputs.OnHeavyAttack -= TriggerHeavyAttack;
         _playerFSM.OnStateChanged -= HandleFSMStateChanged;
+        GameManager.Instance.OnLifeLost -= TriggerKnockout;
+        GameManager.Instance.OnGameOver -= TriggerPermadeath;
 
         if (_playerHealth != null)
         {
             _playerHealth.OnHurt -= TriggerHurt;
-            _playerHealth.OnLifeLost -= TriggerKnockout;
-            _playerHealth.OnPermadeath -= TriggerPermadeath;
             _playerHealth.OnBlockHit -= TriggerBlockHit;
         }
     }

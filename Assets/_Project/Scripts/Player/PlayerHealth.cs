@@ -6,17 +6,14 @@ using UnityEngine;
 public class PlayerHealth : Health
 {
     public event Action OnHurt;
-    public event Action OnLifeLost;
     public event Action OnHealed;
-    public event Action OnPermadeath;
     public event Action OnBlockHit;
-    private int _currentLives = 3;
+
     [SerializeField] private float _invulnerabilityDuration = 0.5f;
     private float _invulnerabilityTimer = 0f;
     private PlayerStats _statsSystem;
     private PlayerStamina _staminaSystem;
     private PlayerFSM _playerFSM;
-
     protected override void Awake()
     {
         _statsSystem = GetComponent<PlayerStats>();
@@ -25,9 +22,23 @@ public class PlayerHealth : Health
 
         _statsSystem.OnStatsUpdated += SetHealth;
     }
+    private void Start()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLifeLost += HandleLifeLost;
+            GameManager.Instance.OnGameOver += HandlePermadeath;
+        }
+    }
     private void OnDestroy()
     {
         _statsSystem.OnStatsUpdated -= SetHealth;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLifeLost -= HandleLifeLost;
+            GameManager.Instance.OnGameOver -= HandlePermadeath;
+        }
     }
     private void Update()
     {
@@ -55,7 +66,7 @@ public class PlayerHealth : Health
 
         if (_playerFSM.CurrentState == PlayerState.Blocking)
         {
-            finalDamage *= 0.4f;
+            finalDamage *= 0.4f; 
             float blockStaminaCost = 10 + (unmitigatedDamage * 0.5f);
             if (_staminaSystem.HasEnoughStamina(blockStaminaCost))
             {
@@ -74,7 +85,7 @@ public class PlayerHealth : Health
                     _playerFSM.ChangeState(PlayerState.Hurt);
                     OnHurt?.Invoke();
                 }
-            }   
+            }
         }
         else
         {
@@ -124,17 +135,17 @@ public class PlayerHealth : Health
     }
     protected override void Die()
     {
-        if (_currentLives > 1)
+        if (GameManager.Instance != null)
         {
-            _currentLives--;
-            _playerFSM.ChangeState(PlayerState.Knockout);
-            OnLifeLost?.Invoke();
-        }
-        else
-        {
-            _playerFSM.ChangeState(PlayerState.Death);
-            OnPermadeath?.Invoke();
+            GameManager.Instance.HandlePlayerDeath();
         }
     }
-    public int CurrentLives => _currentLives;
+    private void HandleLifeLost()
+    {
+        _playerFSM.ChangeState(PlayerState.Knockout);
+    }
+    private void HandlePermadeath()
+    {
+        _playerFSM.ChangeState(PlayerState.Death);
+    }
 }

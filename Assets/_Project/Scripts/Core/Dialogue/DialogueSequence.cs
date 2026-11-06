@@ -7,6 +7,8 @@ using UnityEngine.Localization;
     public LocalizedString DialogueText;
     public Sprite SpeakerSprite;
     [Range(0, 0.1f)] public float CustomTextSpeed;
+    [Header("Eventos de Línea")]
+    public string LineEndEventID;
 }
 [Serializable] public struct DialogueOption
 {
@@ -18,4 +20,5 @@ public class DialogueSequence : ScriptableObject
 {
     public DialogueLine[] Lines;
     public DialogueOption[] Options;
+    public string SequenceEndEventID;
 }

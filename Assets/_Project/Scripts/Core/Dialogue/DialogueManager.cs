@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 public class DialogueManager : MonoBehaviour
 {
+    public event Action<string> OnDialogueEventTriggered;
+
     private DialogueUI _dialogueUI;
     private PlayerInputs _playerInputs;
 
@@ -55,6 +58,12 @@ public class DialogueManager : MonoBehaviour
         }
         else
         {
+            string currentLineEvent = _currentSequence.Lines[_currentLineIndex].LineEndEventID;
+            if (!string.IsNullOrEmpty(currentLineEvent))
+            {
+                OnDialogueEventTriggered?.Invoke(currentLineEvent);
+            }
+
             _currentLineIndex++;
 
             if (_currentLineIndex < _currentSequence.Lines.Length)
@@ -78,8 +87,12 @@ public class DialogueManager : MonoBehaviour
     private void HandleOptionSelected(DialogueSequence nextSequence)
     {
         _dialogueUI.HideAllOptions();
+
         if (nextSequence != null)
         {
+            string sequenceEvent = _currentSequence.SequenceEndEventID;
+            if (!string.IsNullOrEmpty(sequenceEvent)) OnDialogueEventTriggered?.Invoke(sequenceEvent);
+
             LoadSequence(nextSequence);
             _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
         }
@@ -90,6 +103,9 @@ public class DialogueManager : MonoBehaviour
     }
     private void EndDialogue()
     {
+        string sequenceEvent = _currentSequence.SequenceEndEventID;
+        if (!string.IsNullOrEmpty(sequenceEvent)) OnDialogueEventTriggered?.Invoke(sequenceEvent);
+
         _dialogueUI.CloseUI(() =>
         {
             _isDialogueActive = false;
@@ -110,7 +126,7 @@ public class DialogueManager : MonoBehaviour
             "PC_Gamepad" => "Gamepad",
             _ => "KeyboardMouse",
         };
-        string finalKeyName = "E"; 
+        string finalKeyName = "E";
         for (int i = 0; i < interactAction.bindings.Count; i++)
         {
             if (interactAction.bindings[i].groups.Contains(controlScheme))

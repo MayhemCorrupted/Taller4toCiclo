@@ -17,7 +17,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
       m_TableEntryReference:
-        m_KeyId: 613670283001856
+        m_KeyId: 349939552632832
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -33,11 +33,14 @@ MonoBehaviour:
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
     CustomTextSpeed: 0
+    OnLineEnd:
+      m_PersistentCalls:
+        m_Calls: []
   - SpeakerName:
       m_TableReference:
         m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
       m_TableEntryReference:
-        m_KeyId: 613670283001856
+        m_KeyId: 349939552632832
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -53,7 +56,13 @@ MonoBehaviour:
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
     CustomTextSpeed: 0
+    OnLineEnd:
+      m_PersistentCalls:
+        m_Calls: []
   Options: []
+  OnSequenceEnd:
+    m_PersistentCalls:
+      m_Calls: []
   references:
     version: 2
     RefIds: []

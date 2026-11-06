@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-public class DoorController : MonoBehaviour
+public class DoorController : MonoBehaviour, IInteractable
 {
     [Header("Door Settings")]
     [SerializeField] private Transform _hinge;
