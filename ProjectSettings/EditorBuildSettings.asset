@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/Main_Levels/Menu.unity
     guid: 8dfa968c4a7b76b4d9e3bbce82f9d109
   - enabled: 1
-    path: Assets/_Project/Scenes/Testing_Rooms/Prototype.unity
+    path: Assets/_Project/Scenes/Main_Levels/StageOneScene.unity
     guid: 45d1b0b632bcff443aa9c8b8dca3de61
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 97c2476c5ca5687459222f0d41062135, type: 2}

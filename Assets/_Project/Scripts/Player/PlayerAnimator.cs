@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 public class PlayerAnimator : MonoBehaviour
 {
     public bool HasWeapon { get; set; } = true;
@@ -32,6 +33,7 @@ public class PlayerAnimator : MonoBehaviour
     private float _currentInputX;
     private float _currentInputY;
     private Transform _playerRoot;
+    public float DodgeNormalizedTime { get; private set; }
     private void Awake()
     {
         _playerFSM = GetComponentInParent<PlayerFSM>();
@@ -47,8 +49,12 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnLightAttack += TriggerLightAttack;
         _playerInputs.OnHeavyAttack += TriggerHeavyAttack;
         _playerFSM.OnStateChanged += HandleFSMStateChanged;
-        GameManager.Instance.OnLifeLost += TriggerKnockout;
-        GameManager.Instance.OnGameOver += TriggerPermadeath;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLifeLost += TriggerKnockout;
+            GameManager.Instance.OnGameOver += TriggerPermadeath;
+        }
 
         if (_playerHealth != null)
         {
@@ -61,8 +67,12 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnLightAttack -= TriggerLightAttack;
         _playerInputs.OnHeavyAttack -= TriggerHeavyAttack;
         _playerFSM.OnStateChanged -= HandleFSMStateChanged;
-        GameManager.Instance.OnLifeLost -= TriggerKnockout;
-        GameManager.Instance.OnGameOver -= TriggerPermadeath;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLifeLost -= TriggerKnockout;
+            GameManager.Instance.OnGameOver -= TriggerPermadeath;
+        }
 
         if (_playerHealth != null)
         {
@@ -75,6 +85,25 @@ public class PlayerAnimator : MonoBehaviour
         if (UIManager.Instance.CurrentState == GameState.Gameplay)
         {
             SyncMovement();
+            TrackDodgeProgress(); 
+        }
+    }
+    private void TrackDodgeProgress()
+    {
+        if (_playerFSM.CurrentState == PlayerState.Dodging)
+        {
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(1);
+
+            if (!stateInfo.IsName("Dodge"))
+            {
+                stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            }
+
+            DodgeNormalizedTime = Mathf.Clamp01(stateInfo.normalizedTime);
+        }
+        else
+        {
+            DodgeNormalizedTime = 0f;
         }
     }
     private void SyncMovement()

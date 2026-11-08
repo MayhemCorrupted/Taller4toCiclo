@@ -10,7 +10,6 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private WeaponHitbox _weaponHitbox;
     [SerializeField] private float _baseLightDamage = 21f;
     [SerializeField] private float _baseHeavyDamage = 46.2f;
-    [SerializeField] private float _attackCooldown = 0.5f;
     [SerializeField] private float _lockOnRadius = 15f;
     [SerializeField] private float _lightAttackImpulse = 3f;
     [SerializeField] private float _heavyAttackImpulse = 4.5f;
@@ -24,7 +23,6 @@ public class PlayerCombat : MonoBehaviour
     private Camera _mainCamera;
     readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
 
-    private float _currentCooldown = 0f;
     private bool _isWeaponActive = false;
     public Transform LockOnTarget => _lockOnTarget;
     private void Awake()
@@ -50,16 +48,10 @@ public class PlayerCombat : MonoBehaviour
             CheckLockTargetValid();
             CombatRotation();
         }
-
-        if (_currentCooldown > 0)
-        {
-            _currentCooldown -= Time.deltaTime;
-        }
     }
     public bool TryLightAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
-        if (_currentCooldown > 0) return false;
 
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
@@ -73,7 +65,6 @@ public class PlayerCombat : MonoBehaviour
     public bool TryHeavyAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
-        if (_currentCooldown > 0) return false;
 
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
@@ -87,7 +78,6 @@ public class PlayerCombat : MonoBehaviour
     public void EndAttackRoutine()
     {
         DeactivateWeapon();
-        _currentCooldown = _attackCooldown;
 
         if (_playerFSM.CurrentState == PlayerState.Attacking)
         {

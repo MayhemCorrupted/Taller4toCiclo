@@ -9,7 +9,11 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _walkSpeed = 5f;
     [SerializeField] private float _runSpeed = 10f;
+    [Header("Dash Settings")]
     [SerializeField] private float _dashSpeed = 12f;
+    [Tooltip("La curva determina el multiplicador de velocidad sincronizado con la animación. Eje X = % Animación (0 a 1), Eje Y = Multiplicador (1 a 0).")]
+    [SerializeField] private AnimationCurve _dashCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
+    [Space]
     [SerializeField] private float _accelerationRate = 5f;
     [SerializeField] private float _decelerationRate = 12f;
     [SerializeField] private float _turnSmoothTime = 0.1f;
@@ -28,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerFSM _playerFSM;
     private PlayerStamina _playerStamina;
     private PlayerCombat _playerCombat;
+    private PlayerAnimator _playerAnimator;
     private Transform _mainCameraTransform;
     public Vector3 CurrentVelocity => _characterController.velocity;
     private void Awake()
@@ -38,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
         _playerFSM = GetComponent<PlayerFSM>();
         _playerStamina = GetComponent<PlayerStamina>();
         _playerCombat = GetComponent<PlayerCombat>();
+        _playerAnimator = GetComponentInChildren<PlayerAnimator>();
         if (Camera.main != null) _mainCameraTransform = Camera.main.transform;
     }
     private void Update()
@@ -65,9 +71,27 @@ public class PlayerMovement : MonoBehaviour
                 {
                     _dashDirection = transform.forward;
                 }
+
+                if (_playerCombat.LockOnTarget == null && _dashDirection != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(_dashDirection);
+                }
             }
 
-            _characterController.Move(_dashSpeed * Time.deltaTime * _dashDirection);
+            float normalizedTime = _playerAnimator != null ? _playerAnimator.DodgeNormalizedTime : 0f;
+            float currentDashSpeed = _dashSpeed * _dashCurve.Evaluate(normalizedTime);
+
+            Vector2 currentInput = _playerInputs.MoveInput;
+            if (currentInput.magnitude >= 0.1f)
+            {
+                bool hasSufficientStamina = _playerStamina.CurrentStamina > 0;
+                float baseTargetSpeed = (_playerInputs.InputRun && hasSufficientStamina) ? _runSpeed : _walkSpeed;
+                float intendedSpeed = baseTargetSpeed * _playerStats.SpeedMultiplier;
+
+                currentDashSpeed = Mathf.Max(currentDashSpeed, intendedSpeed);
+            }
+
+            _characterController.Move(currentDashSpeed * Time.deltaTime * _dashDirection);
             Gravity();
             return;
         }

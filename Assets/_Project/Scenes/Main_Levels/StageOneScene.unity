@@ -20296,9 +20296,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _attackCooldown
+      value: 0.05
+      objectReference: {fileID: 0}
     - target: {fileID: 5401380329016130178, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashCurve.m_Curve.Array.data[1].inSlope
+      value: -0.85342973
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashCurve.m_Curve.Array.data[0].outSlope
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashCurve.m_Curve.Array.data[1].inWeight
+      value: 0.21586251
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashCurve.m_Curve.Array.data[1].outSlope
+      value: -0.85342973
       objectReference: {fileID: 0}
     - target: {fileID: 8200756771809824385, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_LocalPosition.x
