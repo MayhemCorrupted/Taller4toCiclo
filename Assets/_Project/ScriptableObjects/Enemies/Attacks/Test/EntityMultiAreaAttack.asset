@@ -14,16 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EntityMultiAreaAttack
   damage: 10
   knockback: 0
-  cooldown: 2
-  telegraphDuration: 1
-  attackDuration: 1
-  armorState: 1
-  hyperarmorDamageMultiplier: 0.5
+  telegraphDuration: 3
+  attackDuration: 2
+  trackTargetUntil: 0.7
+  armorState: 2
+  hyperarmorDamageMultiplier: 1
   animationTrigger: 
   executionStyle: 0
   areaOrigin: 1
-  numberOfAreas: 3
-  areaRadius: 2
-  scatterRadius: 8
+  numberOfAreas: 6
+  areaRadius: 1
+  scatterRadius: 7
   delayBetweenAreas: 0.3
   indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}

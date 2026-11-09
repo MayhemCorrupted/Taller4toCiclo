@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "EntityRangeAttack", menuName = "Rotbound/Entity/Attack/EntityRangeAttack")]
@@ -10,9 +11,9 @@ public class EntityRangeAttack : EntityAttack
     [Min(0.0f)] public float precisionFactor = 1.0f;
     [Min(0.0f)] public float maxDeviation = 1.0f;
     public float verticalOffset = 0.0f;
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        if (projectileInstance == null) return;
+        if (projectileInstance == null) yield break;
 
         Vector3 spawnPos = origin.position + (Vector3.up * verticalOffset);
         PlayerMovement plMov = target.GetComponentInParent<PlayerMovement>();
@@ -30,6 +31,7 @@ public class EntityRangeAttack : EntityAttack
         {
             projectileComp.Init(shootDirection * projectileSpeed, damage, lifetime);
         }
+        yield return null;
     }
     private Vector3 PredictPosition(Vector3 targetPosition, Vector3 firingPosition, Vector3 targetVelocity, float speed)
     {

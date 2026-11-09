@@ -50,9 +50,9 @@ public class EntityMovement : MonoBehaviour
     private void OnDestroy()
     {
         if (_brain != null) _brain.OnStateChanged -= HandleStateChanged;
-        _health.OnTakeDamage -= HandleDamageTaken;
+        if (_health != null) _health.OnTakeDamage -= HandleDamageTaken;
     }
-    void Update()
+    private void Update()
     {
         if (!_NavAgent.enabled || _brain == null) return;
 
@@ -123,13 +123,6 @@ public class EntityMovement : MonoBehaviour
             }
         }
     }
-    private void HandleDamageTaken(float damage)
-    {
-        if (!_canBeStunned || _brain == null) return;
-
-        if (_stunCoroutine != null) StopCoroutine(_stunCoroutine);
-        _stunCoroutine = StartCoroutine(StunAndKnockbackRoutine());
-    }
     private void HandleChasing()
     {
         _NavAgent.isStopped = false;
@@ -151,6 +144,15 @@ public class EntityMovement : MonoBehaviour
             _NavAgent.isStopped = true;
             _NavAgent.velocity = Vector3.zero;
         }
+    }
+    private void HandleDamageTaken(float damage)
+    {
+        if (!_canBeStunned || _brain == null) return;
+
+        if (_combat != null && _combat.IsArmorActive) return;
+
+        if (_stunCoroutine != null) StopCoroutine(_stunCoroutine);
+        _stunCoroutine = StartCoroutine(StunAndKnockbackRoutine());
     }
     private IEnumerator StunAndKnockbackRoutine()
     {

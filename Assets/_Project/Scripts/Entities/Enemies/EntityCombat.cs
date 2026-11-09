@@ -11,7 +11,9 @@ public class EntityCombat : MonoBehaviour
     [SerializeField] private LayerMask _wallLayer;
     [SerializeField] private float _checkInterval = 0.1f;
     private float _detectionRadius, _attackRadius, _loseTargetRadius;
-    private List<EntityAttack> _attacks = new();
+    private float _minCooldown, _maxCooldown;
+    private List<EntityAttack> _allAttacks = new();
+    private readonly List<EntityAttack> _availableAttacks = new();
     private Transform _target;
     private float _atkCountdown = 0.0f;
     private readonly Collider[] _hitBuffer = new Collider[5];
@@ -21,6 +23,8 @@ public class EntityCombat : MonoBehaviour
     private Health _health;
     public bool CanSeeTarget => _target != null;
     public bool IsInAttackRange { get; private set; }
+    public bool IsPerformingAttack => _isPerformingAttack;
+    public bool IsArmorActive => _isPerformingAttack && _currentAttackLogic != null && _currentAttackLogic.armorState != ArmorType.None;
     public Transform TargetTransform => _target;
     public Vector3 TargetLocation => _target ? _target.position : Vector3.positiveInfinity;
     private void Awake()
@@ -37,19 +41,22 @@ public class EntityCombat : MonoBehaviour
     {
         if (_brain != null) _brain.OnStateChanged -= HandleBrainStateChanged;
     }
-    public void SetValues(float detRadius, float atkRadius, float losRadius, List<EntityAttack> attacks)
+    public void SetValues(float detRadius, float atkRadius, float losRadius, float minCd, float maxCd, List<EntityAttack> attacks)
     {
         _detectionRadius = detRadius;
         _attackRadius = atkRadius;
         _loseTargetRadius = losRadius;
-        _attacks = attacks;
+        _minCooldown = minCd;
+        _maxCooldown = maxCd;
 
+        _allAttacks = attacks;
+        ResetAttackPool();
         _rangeEvalInterval = new WaitForSeconds(_checkInterval);
         StartCoroutine(DetectionRoutine());
     }
     private void Update()
     {
-        if (_attacks.Count == 0 || _target == null) return;
+        if (_allAttacks.Count == 0 || _target == null) return;
 
         if (_brain != null && _brain.CurrentState == EnemyState.Attacking && !_isPerformingAttack)
         {
@@ -63,16 +70,33 @@ public class EntityCombat : MonoBehaviour
             }
         }
     }
+    private void ResetAttackPool()
+    {
+        _availableAttacks.Clear();
+        _availableAttacks.AddRange(_allAttacks);
+
+        for (int i = 0; i < _availableAttacks.Count; i++)
+        {
+            EntityAttack temp = _availableAttacks[i];
+            int randomIndex = Random.Range(i, _availableAttacks.Count);
+            _availableAttacks[i] = _availableAttacks[randomIndex];
+            _availableAttacks[randomIndex] = temp;
+        }
+    }
     private IEnumerator PerformAttackRoutine()
     {
         _isPerformingAttack = true;
+        if (_availableAttacks.Count == 0)
+        {
+            ResetAttackPool();
+        }
 
-        int rndIdx = Random.Range(0, _attacks.Count);
-        _currentAttackLogic = _attacks[rndIdx];
+        _currentAttackLogic = _availableAttacks[0];
+        _availableAttacks.RemoveAt(0);
 
         if (_currentAttackLogic == null)
         {
-            _atkCountdown = 1.0f;
+            _atkCountdown = Random.Range(_minCooldown, _maxCooldown);
             _isPerformingAttack = false;
             yield break;
         }
@@ -102,20 +126,25 @@ public class EntityCombat : MonoBehaviour
 
         if (_target != null)
         {
-            _currentAttackLogic.Execute(transform, _target, this);
+            IEnumerator attackExecution = _currentAttackLogic.Execute(transform, _target, this);
+            if (attackExecution != null)
+            {
+                yield return StartCoroutine(attackExecution);
+            }
+            else
+            {
+                if (_currentAttackLogic.attackDuration > 0)
+                {
+                    yield return new WaitForSeconds(_currentAttackLogic.attackDuration);
+                }
+            }
         }
-
-        if (_currentAttackLogic.attackDuration > 0)
-        {
-            yield return new WaitForSeconds(_currentAttackLogic.attackDuration);
-        }
-
         if (_currentAttackLogic.armorState != ArmorType.None && _health != null)
         {
             _health.SetDamageMultiplier(1.0f);
         }
 
-        _atkCountdown = _currentAttackLogic.cooldown;
+        _atkCountdown = Random.Range(_minCooldown, _maxCooldown);
         _isPerformingAttack = false;
     }
     private void HandleBrainStateChanged(EnemyState newState)
@@ -124,12 +153,7 @@ public class EntityCombat : MonoBehaviour
         {
             if (_isPerformingAttack && _currentAttackLogic != null)
             {
-                if (_currentAttackLogic.armorState != ArmorType.None)
-                {
-                    _brain.ChangeState(EnemyState.Attacking);
-                    return;
-                }
-                else
+                if (_currentAttackLogic.armorState == ArmorType.None)
                 {
                     _currentAttackLogic.CancelAttack();
                 }
@@ -139,7 +163,7 @@ public class EntityCombat : MonoBehaviour
             StopAllCoroutines();
             StartCoroutine(DetectionRoutine());
 
-            _atkCountdown = _attacks.Count > 0 ? _attacks[0].cooldown : 1.0f;
+            _atkCountdown = Random.Range(_minCooldown, _maxCooldown);
         }
     }
     private IEnumerator DetectionRoutine()

@@ -25,6 +25,7 @@ public class EntityMultiChargeAttack : EntityAttack
         _localDirections.Clear();
         ClearIndicators();
 
+        origin.TryGetComponent(out Health entityHealth);
         if (target != null) LookAtTarget(origin, target.position);
 
         if (chargeStyle == MultiChargeStyle.SimultaneousWave)
@@ -41,7 +42,7 @@ public class EntityMultiChargeAttack : EntityAttack
                 if (indicatorPrefab != null)
                 {
                     Vector3 worldDir = origin.rotation * localDir;
-                    InstantiateIndicator(origin, worldDir);
+                    //InstantiateIndicator(origin, worldDir);
                 }
             }
         }
@@ -65,7 +66,7 @@ public class EntityMultiChargeAttack : EntityAttack
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && target != null)
+        if (trackTarget && origin != null && target != null && normalizedTime <= trackTargetUntil)
         {
             LookAtTarget(origin, target.position);
         }
@@ -99,15 +100,16 @@ public class EntityMultiChargeAttack : EntityAttack
             origin.rotation = Quaternion.LookRotation(lookDir);
         }
     }
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
         if (chargeStyle == MultiChargeStyle.SimultaneousWave)
         {
             ExecuteSimultaneousWave(origin);
+            yield break;
         }
-        else if (chargeStyle == MultiChargeStyle.ConsecutiveDashes && runner != null)
+        else if (chargeStyle == MultiChargeStyle.ConsecutiveDashes)
         {
-            runner.StartCoroutine(ConsecutiveDashesRoutine(origin, target));
+            yield return ConsecutiveDashesRoutine(origin, target);
         }
     }
     private void ExecuteSimultaneousWave(Transform origin)
@@ -155,7 +157,9 @@ public class EntityMultiChargeAttack : EntityAttack
             while (prepTimer < telegraphDuration)
             {
                 prepTimer += Time.deltaTime;
-                if (trackTarget && target != null)
+                float normalizedTime = prepTimer / telegraphDuration;
+
+                if (trackTarget && target != null && normalizedTime <= trackTargetUntil)
                 {
                     LookAtTarget(origin, target.position);
                     _consecutiveDir = origin.forward;
@@ -205,7 +209,6 @@ public class EntityMultiChargeAttack : EntityAttack
             }
             yield return null;
         }
-
         origin.position = targetPosition;
     }
     private void ClearIndicators()

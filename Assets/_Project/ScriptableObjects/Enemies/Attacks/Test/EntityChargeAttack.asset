@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EntityChargeAttack
   damage: 5
   knockback: 2
-  cooldown: 3
-  telegraphDuration: 2
+  telegraphDuration: 3
   attackDuration: 1
+  trackTargetUntil: 0.7
   armorState: 2
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 

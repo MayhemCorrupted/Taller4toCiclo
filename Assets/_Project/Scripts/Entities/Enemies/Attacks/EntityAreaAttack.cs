@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "EntityAreaAttack", menuName = "Rotbound/Entity/Attack/EntityAreaAttack")]
@@ -15,7 +16,7 @@ public class EntityAreaAttack : EntityAttack
     {
         _calculatedCenter = (areaOrigin == AreaOrigin.Attacker) ? origin.position : target.position;
         _calculatedCenter.y = origin.position.y;
-
+        origin.TryGetComponent(out Health entityHealth);
         if (indicatorPrefab != null)
         {
             _currentIndicator = Instantiate(indicatorPrefab, _calculatedCenter, Quaternion.identity);
@@ -23,11 +24,12 @@ public class EntityAreaAttack : EntityAttack
 
             if (_currentIndicator.TryGetComponent(out EntityIndicator indicator))
             {
+                indicator.Init(entityHealth);
                 indicator.AnimateIndicator(telegraphDuration);
             }
         }
     }
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
         int hitCount = Physics.OverlapSphereNonAlloc(_calculatedCenter, radius, _hitBuffer);
 
@@ -39,6 +41,11 @@ public class EntityAreaAttack : EntityAttack
             }
         }
 
+        if (_currentIndicator != null) Destroy(_currentIndicator);
+        yield return null;
+    }
+    public override void CancelAttack()
+    {
         if (_currentIndicator != null) Destroy(_currentIndicator);
     }
 }

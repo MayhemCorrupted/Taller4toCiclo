@@ -27,7 +27,7 @@ public class EntityMultiAreaAttack : EntityAttack
 
         Vector3 basePosition = (areaOrigin == AreaOrigin.Attacker) ? origin.position : target.position;
         basePosition.y = origin.position.y;
-
+        origin.TryGetComponent(out Health _entityHealth);
         for (int i = 0; i < numberOfAreas; i++)
         {
             Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized * Random.Range(0, scatterRadius);
@@ -45,22 +45,24 @@ public class EntityMultiAreaAttack : EntityAttack
     {
         GameObject indicatorObj = Instantiate(indicatorPrefab, center, Quaternion.identity);
         indicatorObj.transform.localScale = new Vector3(areaRadius * 2, 0.1f, areaRadius * 2);
-
+        
         if (indicatorObj.TryGetComponent(out EntityIndicator indicatorComp))
         {
+            indicatorComp.Init(_entityHealth);
             indicatorComp.AnimateIndicator(duration);
         }
         _indicators.Add(indicatorObj);
     }
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
         if (executionStyle == MultiAreaStyle.Simultaneous)
         {
             ExecuteSimultaneous();
+            yield break; 
         }
-        else if (executionStyle == MultiAreaStyle.Consecutive && runner != null)
+        else if (executionStyle == MultiAreaStyle.Consecutive)
         {
-            runner.StartCoroutine(ConsecutiveAreasRoutine());
+            yield return ConsecutiveAreasRoutine();
         }
     }
     private void ExecuteSimultaneous()
@@ -80,7 +82,7 @@ public class EntityMultiAreaAttack : EntityAttack
             if (indicatorPrefab != null)
             {
                 float individualTelegraph = telegraphDuration / numberOfAreas;
-                InstantiateIndicator(center, individualTelegraph);
+                //InstantiateIndicator(center, individualTelegraph, _entityHealth);
                 yield return new WaitForSeconds(individualTelegraph);
             }
 

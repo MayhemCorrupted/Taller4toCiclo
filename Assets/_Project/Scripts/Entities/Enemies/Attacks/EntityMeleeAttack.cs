@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections;
 [CreateAssetMenu(fileName = "EntityMeleeAttack", menuName = "Rotbound/Entity/Attack/EntityMeleeAttack")]
 public class EntityMeleeAttack : EntityAttack
 {
@@ -9,7 +9,7 @@ public class EntityMeleeAttack : EntityAttack
     public Vector3 hitboxMeasurements = Vector3.one;
     public float verticalOffset = 0.0f;
     private readonly Collider[] _hitBuffer = new Collider[10];
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
         Vector3 originPos = origin.position + (Vector3.up * verticalOffset);
         int hitCount;
@@ -36,6 +36,7 @@ public class EntityMeleeAttack : EntityAttack
                 {
                     Vector3 knockbackDir = (hit.transform.position - origin.position).normalized;
                     playerMov.ApplyKnockback(knockbackDir, knockback);
+                    yield return null;
                 }
             }
         }

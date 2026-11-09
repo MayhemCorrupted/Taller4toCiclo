@@ -19,7 +19,7 @@ public class EntityChargeAttack : EntityAttack
         if (origin == null) return;
 
         UpdateTargetPosition(origin);
-
+        origin.TryGetComponent(out Health entityHealth);
         if (indicatorPrefab != null)
         {
             Vector3 dir = origin.forward;
@@ -31,13 +31,14 @@ public class EntityChargeAttack : EntityAttack
 
             if (_currentIndicator.TryGetComponent(out _indicatorComp))
             {
+                _indicatorComp.Init(entityHealth);
                 _indicatorComp.AnimateIndicator(telegraphDuration);
             }
         }
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null)
+        if (trackTarget && origin != null && normalizedTime <= trackTargetUntil)
         {
             UpdateTargetPosition(origin);
 
@@ -57,17 +58,17 @@ public class EntityChargeAttack : EntityAttack
         Vector3 dir = origin.forward;
         _chargeTargetPosition = origin.position + (dir * maxChargeDistance);
     }
-
-    public override void Execute(Transform origin, Transform target, MonoBehaviour runner)
+    public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
         if (_currentIndicator != null) Destroy(_currentIndicator);
 
         if (runner != null && attackDuration > 0f)
         {
-            runner.StartCoroutine(ChargeMovementRoutine(origin));
+            yield return runner.StartCoroutine(ChargeMovementRoutine(origin));
         }
         else
         {
+            yield return null;
             origin.position = _chargeTargetPosition;
         }
     }

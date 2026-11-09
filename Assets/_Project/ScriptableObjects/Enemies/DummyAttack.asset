@@ -18,6 +18,9 @@ MonoBehaviour:
   detectionRadius: 20
   attackRadius: 10
   lossRadius: 25
+  minAttackCooldown: 1
+  maxAttackCooldown: 2
   attacks:
-  - {fileID: 11400000, guid: e0d564fa94fb5d349a851cd99678188e, type: 2}
   - {fileID: 11400000, guid: d9846467c80d4bb4c8b0b96c14c864aa, type: 2}
+  - {fileID: 11400000, guid: c18327958a3e83c4a9d7b6de8068cb88, type: 2}
+  - {fileID: 11400000, guid: e0d564fa94fb5d349a851cd99678188e, type: 2}
