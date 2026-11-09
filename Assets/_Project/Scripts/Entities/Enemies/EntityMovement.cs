@@ -5,14 +5,14 @@ using System.Collections;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Health))]
 [RequireComponent(typeof(Rigidbody))]
-public class EnemyMovement : MonoBehaviour
+public class EntityMovement : MonoBehaviour
 {
     private NavMeshAgent _NavAgent;
     private Health _health;
     private Rigidbody _rb;
 
-    [SerializeField] private EnemyBrain _brain;
-    [SerializeField] private EnemyCombat _combat;
+    [SerializeField] private EntityBrain _brain;
+    [SerializeField] private EntityCombat _combat;
 
     [Header("Patrol Settings")]
     [Min(0.0f)] public float _patrolWaitingTime = 1.0f;

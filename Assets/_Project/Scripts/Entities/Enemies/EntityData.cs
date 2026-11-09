@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Objects/EnemyData")]
-public class EnemyData : ScriptableObject
+[CreateAssetMenu(fileName = "EntityData", menuName = "Rotbound/Entity/EntityData")]
+public class EntityData : ScriptableObject
 {
 	[Header("Stats")]
 	[Min(1)] public int health;
@@ -12,5 +12,5 @@ public class EnemyData : ScriptableObject
 	[Min(0.1f)] public float detectionRadius;
 	[Min(0.1f)] public float attackRadius;
 	[Min(0.1f)] public float lossRadius;
-	public List<EnemyAttack> attacks = new();
+	public List<EntityAttack> attacks = new();
 }

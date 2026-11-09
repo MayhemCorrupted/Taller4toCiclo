@@ -8,8 +8,8 @@ public class Health : MonoBehaviour
 
     [SerializeField] protected float _maxHealth;
     [SerializeField] protected float _defense;
-
     protected float _currentHealth;
+    protected float _currentDamageMultiplier = 1.0f; 
     public float MaxHealth => _maxHealth;
     public float CurrentHealth => _currentHealth;
     public float Defense => _defense;
@@ -20,11 +20,17 @@ public class Health : MonoBehaviour
     public virtual bool TakeDamage(float amount)
     {
         if (_currentHealth <= 0) return false;
+
         float damage = (amount * 100) / (100 + _defense);
+
+        damage *= _currentDamageMultiplier;
+
         _currentHealth -= damage;
         OnTakeDamage?.Invoke(damage);
         NotifyHealthChanged();
+
         Debug.Log($"{gameObject.name} Recibió {damage} daño. Vida actual: {_currentHealth}/{_maxHealth}");
+
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
@@ -38,6 +44,10 @@ public class Health : MonoBehaviour
         _defense = defense;
         _currentHealth = _maxHealth;
         NotifyHealthChanged();
+    }
+    public void SetDamageMultiplier(float multiplier)
+    {
+        _currentDamageMultiplier = Mathf.Clamp01(multiplier);
     }
     protected void OnTakingDamage(float damage)
     {

@@ -18613,7 +18613,7 @@ PrefabInstance:
     - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
       propertyPath: _data
       value: 
-      objectReference: {fileID: 11400000, guid: 30568c9f0fecfef42831966cc87f4270, type: 2}
+      objectReference: {fileID: 11400000, guid: cf4fabc5fef6f6a498e6700b8399da36, type: 2}
     - target: {fileID: 1202830902662934329, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
       propertyPath: _combat
       value: 
@@ -18640,7 +18640,7 @@ PrefabInstance:
       objectReference: {fileID: 1147760581}
     - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
       propertyPath: _stunDuration
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6756939468450792380, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
       propertyPath: _knockbackForce
@@ -20305,8 +20305,16 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _runSpeed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _dashSpeed
-      value: 10
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _walkSpeed
+      value: 2.7
       objectReference: {fileID: 0}
     - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _dashCurve.m_Curve.Array.data[1].inSlope
@@ -29837,9 +29845,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 466388576946185970, guid: dbd99352639aa74458e6549060033eaa, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: dbd99352639aa74458e6549060033eaa, type: 3}
       propertyPath: m_Name
       value: ForestLowModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: dbd99352639aa74458e6549060033eaa, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550463727306718371, guid: dbd99352639aa74458e6549060033eaa, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

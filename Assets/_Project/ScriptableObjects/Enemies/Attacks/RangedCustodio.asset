@@ -15,6 +15,8 @@ MonoBehaviour:
   damage: 45
   knockback: 1.5
   cooldown: 2
+  telegraphDuration: 1
+  animationTrigger: 
   projectileInstance: {fileID: 7495063903542279499, guid: e3a25f02c0fc8b7478319e4d75556d27, type: 3}
   projectileSpeed: 8.5
   lifetime: 10
