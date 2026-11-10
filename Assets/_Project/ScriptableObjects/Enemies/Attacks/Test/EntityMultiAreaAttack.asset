@@ -17,13 +17,18 @@ MonoBehaviour:
   telegraphDuration: 3
   attackDuration: 2
   trackTargetUntil: 0.7
+  overrideBaseArmor: 1
   armorState: 2
   hyperarmorDamageMultiplier: 1
   animationTrigger: 
-  executionStyle: 0
+  executionStyle: 1
   areaOrigin: 1
-  numberOfAreas: 6
-  areaRadius: 1
-  scatterRadius: 7
-  delayBetweenAreas: 0.3
+  patternType: 3
+  numberOfAreas: 12
+  areaRadius: 2
+  scatterRadius: 5
+  delayBetweenAreas: 0.2
+  trackTarget: 1
+  waveCount: 2
+  delayBetweenWaves: 0.5
   indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}

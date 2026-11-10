@@ -105,6 +105,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "Swap",
+                    "type": "Button",
+                    "id": "50a839ea-fc99-42d3-a902-4e7edb611922",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -232,7 +242,7 @@
                 {
                     "name": "",
                     "id": "3d028c97-762b-44ab-b5a3-228e08b0c70d",
-                    "path": "<Gamepad>/buttonSouth",
+                    "path": "<Touchscreen>/Press",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
@@ -265,7 +275,7 @@
                 {
                     "name": "",
                     "id": "b82b5f93-f0a2-4e3d-b3a3-63dd685ae24a",
-                    "path": "<Gamepad>/buttonSouth",
+                    "path": "<Touchscreen>/Press",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
@@ -468,6 +478,50 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "Skill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4e491e25-12f9-4c8e-a962-d0c8e56e7b91",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "Swap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "add1dfc4-1f06-43a5-9511-4e9cf4c4e52c",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Swap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c4b4671-8bf7-47e8-a1cb-73cef4c626d7",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Swap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94617563-a2f3-4035-a3e8-889360e86d11",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "Swap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

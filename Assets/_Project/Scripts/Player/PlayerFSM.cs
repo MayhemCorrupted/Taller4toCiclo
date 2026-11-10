@@ -1,31 +1,22 @@
 using System;
 using UnityEngine;
-public enum PlayerState
-{
-    Idle,
-    Walking,
-    Running,
-    Dodging,
-    Attacking,
-    Skill,
-    Blocking,
-    UsingItem,
-    Hurt,
-    Knockout,
-    Death,
-}
+public enum PlayerState { Idle, Walking, Running, Dodging, Attacking, Skill, Blocking, UsingItem, Hurt, Knockout, Death }
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInputs))]
+[RequireComponent(typeof(PlayerCombat))]
 public class PlayerFSM : MonoBehaviour
 {
     public PlayerState CurrentState { get; private set; }
     public event Action<PlayerState> OnStateChanged;
+
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
+    private PlayerCombat _playerCombat;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
         _playerStamina = GetComponent<PlayerStamina>();
+        _playerCombat = GetComponent<PlayerCombat>();
     }
     private void OnEnable()
     {
@@ -47,7 +38,9 @@ public class PlayerFSM : MonoBehaviour
             CurrentState == PlayerState.Dodging ||
             CurrentState == PlayerState.Skill ||
             CurrentState == PlayerState.UsingItem ||
-            CurrentState == PlayerState.Hurt)
+            CurrentState == PlayerState.Hurt ||
+            CurrentState == PlayerState.Knockout ||
+            CurrentState == PlayerState.Death)
         {
             return;
         }
@@ -78,12 +71,14 @@ public class PlayerFSM : MonoBehaviour
             }
         }
     }
-    private void CallSkillRequest() => RequestAttackState(PlayerState.Skill);
-    private void RequestAttackState(PlayerState attackState)
+    private void CallSkillRequest()
     {
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running)
         {
-            ChangeState(attackState);
+            if (_playerCombat != null)
+            {
+                _playerCombat.TrySkillAttack();
+            }
         }
     }
     public void ChangeState(PlayerState newState)

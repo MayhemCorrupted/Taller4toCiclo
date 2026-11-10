@@ -16,29 +16,16 @@ public class PlayerHealth : Health
     private PlayerFSM _playerFSM;
     protected override void Awake()
     {
+        base.Awake();
         _statsSystem = GetComponent<PlayerStats>();
         _staminaSystem = GetComponent<PlayerStamina>();
         _playerFSM = GetComponent<PlayerFSM>();
 
         _statsSystem.OnStatsUpdated += SetHealth;
     }
-    private void Start()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnLifeLost += HandleLifeLost;
-            GameManager.Instance.OnGameOver += HandlePermadeath;
-        }
-    }
     private void OnDestroy()
     {
         _statsSystem.OnStatsUpdated -= SetHealth;
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnLifeLost -= HandleLifeLost;
-            GameManager.Instance.OnGameOver -= HandlePermadeath;
-        }
     }
     private void Update()
     {
@@ -61,13 +48,14 @@ public class PlayerHealth : Health
     {
         if (_currentHealth <= 0 || _invulnerabilityTimer > 0) return false;
 
-        float unmitigatedDamage = (incomingDamage * 100) / (100 + _defense);
+        float unmitigatedDamage = (incomingDamage * 100f) / (100f + _defense);
         float finalDamage = unmitigatedDamage;
 
         if (_playerFSM.CurrentState == PlayerState.Blocking)
         {
-            finalDamage *= 0.4f; 
-            float blockStaminaCost = 10 + (unmitigatedDamage * 0.5f);
+            finalDamage *= 0.4f;
+            float blockStaminaCost = 10f + (unmitigatedDamage * 0.5f);
+
             if (_staminaSystem.HasEnoughStamina(blockStaminaCost))
             {
                 _staminaSystem.UseStamina(blockStaminaCost);
@@ -99,12 +87,26 @@ public class PlayerHealth : Health
         }
         _invulnerabilityTimer = _invulnerabilityDuration;
         NotifyHealthChanged();
+
         if (_currentHealth <= 0)
         {
-            Die();
             _currentHealth = 0;
+            Die();
         }
         return true;
+    }
+    public void ConsumeHealth(float amount)
+    {
+        if (_currentHealth <= 0) return;
+
+        _currentHealth -= amount;
+        NotifyHealthChanged();
+
+        if (_currentHealth <= 0)
+        {
+            _currentHealth = 0;
+            Die();
+        }
     }
     public void Heal(float amount)
     {
@@ -112,7 +114,7 @@ public class PlayerHealth : Health
 
         _currentHealth += amount;
         if (_currentHealth > _maxHealth) _currentHealth = _maxHealth;
-
+        NotifyHealthChanged();
         OnHealed?.Invoke();
     }
     public void TakeDirectDamage(float amount)
@@ -124,8 +126,8 @@ public class PlayerHealth : Health
 
         if (_currentHealth <= 0)
         {
-            Die();
             _currentHealth = 0;
+            Die();
         }
         else
         {
@@ -137,15 +139,14 @@ public class PlayerHealth : Health
     {
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.HandlePlayerDeath();
+            if (GameManager.Instance.CurrentLives <= 1)
+            {
+                _playerFSM.ChangeState(PlayerState.Death);
+            }
+            else
+            {
+                _playerFSM.ChangeState(PlayerState.Knockout);
+            }
         }
-    }
-    private void HandleLifeLost()
-    {
-        _playerFSM.ChangeState(PlayerState.Knockout);
-    }
-    private void HandlePermadeath()
-    {
-        _playerFSM.ChangeState(PlayerState.Death);
     }
 }

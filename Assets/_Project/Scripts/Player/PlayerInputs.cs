@@ -11,6 +11,8 @@ public class PlayerInputs : MonoBehaviour
     public event Action OnLockOn;
     public event Action OnDodge;
     public event Action OnPause;
+    public event Action OnSwap;
+    public event Action OnUseItem;
     public Vector2 MoveInput { get; private set; }
     public bool InputRun { get; private set; }
     public bool InputBlock { get; private set; }
@@ -35,6 +37,8 @@ public class PlayerInputs : MonoBehaviour
         _inputActions.Gameplay.Dodge.performed += ctx => OnDodge?.Invoke();
         _inputActions.Gameplay.Interact.performed += ctx => OnInteract?.Invoke();
         _inputActions.Gameplay.LockOn.performed += ctx => OnLockOn?.Invoke();
+        _inputActions.Gameplay.UseItem.performed += ctx => OnUseItem?.Invoke();
+        _inputActions.Gameplay.Swap.performed += ctx => OnSwap?.Invoke();
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();
         _inputActions.UI.Pause.performed += ctx => OnPause?.Invoke();

@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerStamina))]
+[RequireComponent(typeof(PlayerHealth))]
 public class PlayerCombat : MonoBehaviour
 {
     [SerializeField] private WeaponHitbox _weaponHitbox;
@@ -15,31 +16,45 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float _heavyAttackImpulse = 4.5f;
     [SerializeField] private LayerMask _enemyLayer;
 
+    [Header("Skills Settings")]
+    [SerializeField] private GameObject _rangedProjectilePrefab;
+    [SerializeField] private Transform _projectileSpawnPoint;
+    [SerializeField] private float _areaSkillRadius = 4f;
+
     private Transform _lockOnTarget;
     private PlayerInputs _playerInputs;
     private PlayerFSM _playerFSM;
     private PlayerStats _playerStats;
     private PlayerMovement _playerMovement;
+    private PlayerStamina _playerStamina;
+    private PlayerHealth _playerHealth;
     private Camera _mainCamera;
-    readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
 
+    readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
     private bool _isWeaponActive = false;
     public Transform LockOnTarget => _lockOnTarget;
+    
+    // 0 = Ruego al Alba, 1 = Veneración Carmesí
+    public int CurrentSkillID { get; private set; } = 0;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
         _playerFSM = GetComponent<PlayerFSM>();
         _playerStats = GetComponent<PlayerStats>();
         _playerMovement = GetComponent<PlayerMovement>();
+        _playerStamina = GetComponent<PlayerStamina>();
+        _playerHealth = GetComponent<PlayerHealth>();
         _mainCamera = Camera.main;
     }
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
+        _playerInputs.OnSwap += SwapSkill; 
     }
     private void OnDisable()
     {
         _playerInputs.OnLockOn -= ToggleLockOn;
+        _playerInputs.OnSwap -= SwapSkill;
     }
     private void Update()
     {
@@ -47,6 +62,67 @@ public class PlayerCombat : MonoBehaviour
         {
             CheckLockTargetValid();
             CombatRotation();
+        }
+    }
+    public void SwapSkill()
+    {
+        CurrentSkillID = CurrentSkillID == 0 ? 1 : 0;
+    }
+
+    public bool TrySkillAttack()
+    {
+        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
+
+        if (_playerFSM.CurrentState != PlayerState.Idle &&
+            _playerFSM.CurrentState != PlayerState.Walking &&
+            _playerFSM.CurrentState != PlayerState.Running) return false;
+
+        if (CurrentSkillID == 0) 
+        {
+            if (!_playerStamina.HasEnoughStamina(60f)) return false;
+            _playerStamina.UseStamina(60f);
+        }
+        else 
+        {
+            if (!_playerStamina.HasEnoughStamina(15f) || _playerHealth.CurrentHealth <= 20f) return false;
+            _playerStamina.UseStamina(15f);
+            _playerHealth.ConsumeHealth(20f);
+        }
+
+        if (_lockOnTarget == null) SnapToMouse();
+
+        _playerFSM.ChangeState(PlayerState.Skill);
+        return true;
+    }
+    public void ExecuteSkill()
+    {
+        float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
+
+        if (CurrentSkillID == 0) 
+        {
+            float damage = (_baseLightDamage * 3f * _playerStats.DamageMultiplier) * vesaniaMultiplier;
+            int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _areaSkillRadius, _hitEnemiesBuffer, _enemyLayer);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (_hitEnemiesBuffer[i].TryGetComponent(out Health enemyHealth))
+                {
+                    enemyHealth.TakeDamage(damage);
+                }
+            }
+        }
+        else if (CurrentSkillID == 1) 
+        {
+            float damage = (_baseLightDamage * 2.5f * _playerStats.DamageMultiplier) * vesaniaMultiplier;
+
+            if (_rangedProjectilePrefab != null && _projectileSpawnPoint != null)
+            {
+                GameObject proj = Instantiate(_rangedProjectilePrefab, _projectileSpawnPoint.position, transform.rotation);
+                if (proj.TryGetComponent(out PlayerProjectile projectile))
+                {
+                    projectile.Init(transform.forward, damage);
+                }
+            }
         }
     }
     public bool TryLightAttack()
@@ -79,7 +155,7 @@ public class PlayerCombat : MonoBehaviour
     {
         DeactivateWeapon();
 
-        if (_playerFSM.CurrentState == PlayerState.Attacking)
+        if (_playerFSM.CurrentState == PlayerState.Attacking || _playerFSM.CurrentState == PlayerState.Skill)
         {
             _playerFSM.ChangeState(PlayerState.Idle);
         }
@@ -181,7 +257,7 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            if (_playerFSM.CurrentState == PlayerState.Skill || _playerFSM.CurrentState == PlayerState.Blocking)
+            if (_playerFSM.CurrentState == PlayerState.Skill || _playerFSM.CurrentState == PlayerState.Blocking || _playerFSM.CurrentState == PlayerState.Attacking)
             {
                 SnapToMouse();
             }

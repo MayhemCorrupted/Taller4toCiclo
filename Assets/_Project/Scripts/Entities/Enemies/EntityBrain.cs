@@ -15,29 +15,44 @@ public class EntityBrain : MonoBehaviour
     public event Action<EnemyState> OnStateChanged;
     private EnemyState _currentState = EnemyState.Patroling;
     public EnemyState CurrentState => _currentState;
+
     private void Awake()
     {
-        _health.SetHealthValues(_data.health, _data.defense);
+        if (_health == null) _health = GetComponent<Health>();
+        if (_combat == null) _combat = GetComponent<EntityCombat>();
+        if (_movement == null) _movement = GetComponent<EntityMovement>();
 
-        if (_combat != null)
+        if (_data != null)
         {
-            _combat.SetValues(_data.detectionRadius, _data.attackRadius, _data.lossRadius, _data.minAttackCooldown, _data.maxAttackCooldown, _data.attacks);
-        }
+            if (_health != null) _health.SetHealthValues(_data.health, _data.defense);
 
-        if (_movement != null) _movement.SetSpeed(_data.speed);
+            if (_combat != null)
+            {
+                _combat.SetData(_data);
+            }
+            if (_movement != null) _movement.SetSpeed(_data.speed);
+        }
+        else
+        {
+            Debug.LogWarning($"EntityBrain en {gameObject.name}: No se ha asignado el Asset EntityData.");
+        }
     }
+
     private void Update()
     {
         if (_currentState == EnemyState.Hurt) return;
+
         if (_combat == null)
         {
             ChangeState(EnemyState.Patroling);
             return;
         }
+
         if (_combat.IsPerformingAttack)
         {
             return;
         }
+
         if (_combat.IsInAttackRange)
             ChangeState(EnemyState.Attacking);
         else if (_combat.CanSeeTarget)

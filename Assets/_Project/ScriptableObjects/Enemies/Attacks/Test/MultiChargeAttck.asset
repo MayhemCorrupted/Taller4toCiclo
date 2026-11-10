@@ -10,20 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: da9390a1fb9bb534abf67d68af4bc36c, type: 3}
-  m_Name: SimultaneousChargeAttack
+  m_Name: MultiChargeAttck
   m_EditorClassIdentifier: Assembly-CSharp::EntityMultiChargeAttack
-  damage: 10
-  knockback: 0
-  telegraphDuration: 3
+  damage: 15
+  knockback: 5
+  telegraphDuration: 1.5
   attackDuration: 2
   trackTargetUntil: 0.8
+  overrideBaseArmor: 0
   armorState: 2
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
-  chargeStyle: 0
-  numberOfCharges: 5
+  numberOfCharges: 4
   maxChargeDistance: 10
   hitboxRadius: 1.5
   trackTarget: 1
   delayBetweenCharges: 0.2
+  waveCount: 2
+  delayBetweenWaves: 1
   indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 public class PlayerAnimator : MonoBehaviour
 {
     public bool HasWeapon { get; set; } = true;
@@ -50,12 +49,6 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnHeavyAttack += TriggerHeavyAttack;
         _playerFSM.OnStateChanged += HandleFSMStateChanged;
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnLifeLost += TriggerKnockout;
-            GameManager.Instance.OnGameOver += TriggerPermadeath;
-        }
-
         if (_playerHealth != null)
         {
             _playerHealth.OnHurt += TriggerHurt;
@@ -68,12 +61,6 @@ public class PlayerAnimator : MonoBehaviour
         _playerInputs.OnHeavyAttack -= TriggerHeavyAttack;
         _playerFSM.OnStateChanged -= HandleFSMStateChanged;
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnLifeLost -= TriggerKnockout;
-            GameManager.Instance.OnGameOver -= TriggerPermadeath;
-        }
-
         if (_playerHealth != null)
         {
             _playerHealth.OnHurt -= TriggerHurt;
@@ -85,7 +72,7 @@ public class PlayerAnimator : MonoBehaviour
         if (UIManager.Instance.CurrentState == GameState.Gameplay)
         {
             SyncMovement();
-            TrackDodgeProgress(); 
+            TrackDodgeProgress();
         }
     }
     private void TrackDodgeProgress()
@@ -173,8 +160,16 @@ public class PlayerAnimator : MonoBehaviour
         }
         else if (newState == PlayerState.Skill)
         {
-            _animator.SetInteger(_skillIDHash, 0);
+            _animator.SetInteger(_skillIDHash, _playerCombat.CurrentSkillID);
             _animator.SetTrigger(_skillTriggerHash);
+        }
+        else if (newState == PlayerState.Knockout)
+        {
+            _animator.SetTrigger(_knockoutHash);
+        }
+        else if (newState == PlayerState.Death)
+        {
+            _animator.SetTrigger(_permadeathHash);
         }
     }
     private bool CanAttack()
@@ -198,9 +193,8 @@ public class PlayerAnimator : MonoBehaviour
         }
     }
     private void TriggerHurt() => _animator.SetTrigger(_hurtHash);
-    private void TriggerKnockout() => _animator.SetTrigger(_knockoutHash);
-    private void TriggerPermadeath() => _animator.SetTrigger(_permadeathHash);
     private void TriggerBlockHit() => _animator.SetTrigger(_blockHitHash);
+    public void AE_ExecuteSkill() => _playerCombat.ExecuteSkill();
     public void AE_ActivateLightHitbox() => _playerCombat.ActivateWeapon(false);
     public void AE_ActivateHeavyHitbox() => _playerCombat.ActivateWeapon(true);
     public void AE_DeactivateHitbox() => _playerCombat.DeactivateWeapon();
@@ -214,7 +208,6 @@ public class PlayerAnimator : MonoBehaviour
             case ActionStateType.Dodge:
             case ActionStateType.Skill:
             case ActionStateType.Hurt:
-
                 _animator.ResetTrigger(_dodgeHash);
                 _animator.ResetTrigger(_skillTriggerHash);
                 _animator.ResetTrigger(_hurtHash);
@@ -226,6 +219,29 @@ public class PlayerAnimator : MonoBehaviour
                     _playerFSM.ChangeState(PlayerState.Idle);
                 }
                 break;
+            case ActionStateType.Knockout:
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.ProcessPlayerDeathAfterAnimation();
+                }
+                break;
+            case ActionStateType.Death:
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.ProcessGameOverAfterAnimation();
+                }
+                break;
+        }
+    }
+    public void RespawnPlayer()
+    {
+        _animator.ResetTrigger(_knockoutHash);
+        _animator.ResetTrigger(_permadeathHash);
+        _animator.ResetTrigger(_hurtHash);
+
+        if (_playerFSM.CurrentState == PlayerState.Knockout || _playerFSM.CurrentState == PlayerState.Death)
+        {
+            _playerFSM.ChangeState(PlayerState.Idle);
         }
     }
 }

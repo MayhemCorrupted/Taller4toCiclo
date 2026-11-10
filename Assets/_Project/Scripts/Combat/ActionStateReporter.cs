@@ -1,5 +1,5 @@
 using UnityEngine;
-public enum ActionStateType { Attack, Dodge, Skill, Hurt }
+public enum ActionStateType { Attack, Dodge, Skill, Hurt, Knockout, Death }
 public class ActionStateReporter : StateMachineBehaviour
 {
     public ActionStateType actionType;

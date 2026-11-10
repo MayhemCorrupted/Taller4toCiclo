@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityRangeAttack", menuName = "Rotbound/Entity/Attack/EntityRangeAttack")]
 public class EntityRangeAttack : EntityAttack
 {
@@ -10,10 +9,10 @@ public class EntityRangeAttack : EntityAttack
     [Min(0.0f)] public float lifetime = 10.0f;
     [Min(0.0f)] public float precisionFactor = 1.0f;
     [Min(0.0f)] public float maxDeviation = 1.0f;
-    public float verticalOffset = 0.0f;
+    public float verticalOffset = 1.0f;
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        if (projectileInstance == null) yield break;
+        if (projectileInstance == null || target == null) yield break;
 
         Vector3 spawnPos = origin.position + (Vector3.up * verticalOffset);
         PlayerMovement plMov = target.GetComponentInParent<PlayerMovement>();
@@ -25,18 +24,19 @@ public class EntityRangeAttack : EntityAttack
         Vector3 shootDirection = (predictedTarget - spawnPos).normalized;
         if (shootDirection.sqrMagnitude < 0.001f) shootDirection = origin.forward;
 
-        GameObject projectile = Instantiate(projectileInstance, spawnPos, Quaternion.LookRotation(shootDirection));
+        GameObject projectileObj = Instantiate(projectileInstance, spawnPos, Quaternion.LookRotation(shootDirection));
 
-        if (projectile.TryGetComponent(out Projectile projectileComp))
+        if (projectileObj.TryGetComponent(out Projectile projectileComp))
         {
-            projectileComp.Init(shootDirection * projectileSpeed, damage, lifetime);
+            projectileComp.Init(shootDirection * projectileSpeed, damage, lifetime, origin);
         }
+
         yield return null;
     }
     private Vector3 PredictPosition(Vector3 targetPosition, Vector3 firingPosition, Vector3 targetVelocity, float speed)
     {
         float distance = (targetPosition - firingPosition).magnitude;
-        float estimatedTime = distance / speed;
+        float estimatedTime = distance / Mathf.Max(speed, 0.1f);
         return targetPosition + (targetVelocity * estimatedTime);
     }
     private Vector3 TweakPrecision(Vector3 initialPrediction)
