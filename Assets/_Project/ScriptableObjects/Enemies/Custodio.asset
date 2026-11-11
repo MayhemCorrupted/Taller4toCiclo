@@ -12,11 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb07f7ab27696cb408e0e295a3b983f2, type: 3}
   m_Name: Custodio
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  rank: 1
+  preferredAttackDistance: 2
   health: 140
   defense: 40
   speed: 2.3
+  defaultArmorState: 0
+  defaultHyperarmorMultiplier: 0.5
   detectionRadius: 8
   attackRadius: 11
   lossRadius: 14
-  attacks:
-  - {fileID: 11400000, guid: 57a88d3374daccd4490427b725c1299b, type: 2}
+  minAttackCooldown: 1
+  maxAttackCooldown: 2
+  phases:
+  - phaseName: 1
+    healthThresholdPercentage: 1
+    attackPool:
+      closeRangeMax: 0
+      mediumRangeMax: 7
+      closeRangeAttacks: []
+      mediumRangeAttacks: []
+      farRangeAttacks: []

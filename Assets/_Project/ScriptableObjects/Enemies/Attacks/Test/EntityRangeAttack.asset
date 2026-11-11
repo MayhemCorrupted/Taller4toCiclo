@@ -12,18 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c2c791b144d564899d395130d0640c, type: 3}
   m_Name: EntityRangeAttack
   m_EditorClassIdentifier: Assembly-CSharp::EntityRangeAttack
-  damage: 1
-  knockback: 0
-  telegraphDuration: 1
+  damage: 14
+  knockback: 3
+  telegraphDuration: 2
   attackDuration: 1
   trackTargetUntil: 0.8
   overrideBaseArmor: 0
-  armorState: 0
+  armorState: 1
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
   projectileInstance: {fileID: 7495063903542279499, guid: e3a25f02c0fc8b7478319e4d75556d27, type: 3}
   projectileSpeed: 10
   lifetime: 10
-  precisionFactor: 0.7
-  maxDeviation: 1
-  verticalOffset: 1
+  verticalOffset: 0
+  maxEvaluationDistance: 15

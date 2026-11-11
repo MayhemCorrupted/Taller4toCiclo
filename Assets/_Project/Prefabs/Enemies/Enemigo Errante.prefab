@@ -170,6 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09c47e7f32d469f41ac438d5e7375cd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCombat
+  _animator: {fileID: 0}
   _targetLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -194,7 +195,7 @@ MonoBehaviour:
   _patrolWaitingTime: 1
   _patrolRadius: 5
   _canBeStunned: 1
-  _stunDuration: 1
+  _stunDuration: 0.5
   _knockbackForce: 9.5
   _knockbackFriction: 8
 --- !u!136 &1940082226952018290

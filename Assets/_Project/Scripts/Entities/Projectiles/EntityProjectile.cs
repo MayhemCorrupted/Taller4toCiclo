@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class Projectile : MonoBehaviour
+public class EntityProjectile : MonoBehaviour
 {
     [SerializeField] private LayerMask _wallLayer;
     private Vector3 _direction;
@@ -11,7 +11,10 @@ public class Projectile : MonoBehaviour
     private bool _isInitialized = false;
     public void Init(Vector3 direction, float speed, float dmg, float lifetime, Transform owner)
     {
-        _direction = direction.normalized;
+        _direction = direction;
+        _direction.y = 0f; 
+        _direction.Normalize();
+
         _speed = speed;
         _damage = dmg;
         _owner = owner;
@@ -31,11 +34,13 @@ public class Projectile : MonoBehaviour
 
         if (other.CompareTag("Enemy"))
             return;
+
         if (_wallLayer != 0 && ((1 << other.gameObject.layer) & _wallLayer) != 0)
         {
             Destroy(gameObject);
             return;
         }
+
         PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
         if (health != null)
         {

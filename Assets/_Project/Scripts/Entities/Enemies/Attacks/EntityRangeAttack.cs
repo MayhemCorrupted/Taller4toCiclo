@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityRangeAttack", menuName = "Rotbound/Entity/Attack/EntityRangeAttack")]
 public class EntityRangeAttack : EntityAttack
 {
@@ -9,7 +8,11 @@ public class EntityRangeAttack : EntityAttack
     [Min(0.1f)] public float projectileSpeed = 15f;
     [Min(0.0f)] public float lifetime = 5.0f;
     public float verticalOffset = 1.0f;
+
     [Header("PREDICTION & PROBABILITY")]
+    [Tooltip("0 = Dispara directo al jugador. 1 = Interceptación predictiva total.")]
+    [Range(0f, 1f)] public float predictionIntensity = 1.0f;
+
     [Tooltip("Distancia máxima a la que el enemigo considera viable el disparo para calcular la probabilidad.")]
     public float maxEvaluationDistance = 15f;
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
@@ -19,20 +22,25 @@ public class EntityRangeAttack : EntityAttack
         Vector3 spawnPos = origin.position + (Vector3.up * verticalOffset);
         PlayerMovement plMov = target.GetComponentInParent<PlayerMovement>();
 
+        Vector3 flatTargetPos = target.position;
+        flatTargetPos.y = spawnPos.y;
+
         Vector3 targetVelocity = plMov != null ? plMov.CurrentVelocity : Vector3.zero;
+        targetVelocity.y = 0f;
 
-        float hitProbability = CalculateHitProbability(origin.position, target.position, targetVelocity);
+        Vector3 perfectlyPredictedTarget = PredictKinematicPosition(flatTargetPos, spawnPos, targetVelocity, projectileSpeed);
 
-        Debug.Log($"Probabilidad estimada de acierto del disparo: {hitProbability * 100f:F1}%");
+        Vector3 finalAimPoint = Vector3.Lerp(flatTargetPos, perfectlyPredictedTarget, predictionIntensity);
 
-        Vector3 predictedTarget = PredictKinematicPosition(target.position, spawnPos, targetVelocity, projectileSpeed);
-
-        Vector3 shootDirection = (predictedTarget - spawnPos).normalized;
+        Vector3 shootDirection = (finalAimPoint - spawnPos).normalized;
         if (shootDirection.sqrMagnitude < 0.001f) shootDirection = origin.forward;
+
+        shootDirection.y = 0f;
+        shootDirection.Normalize();
 
         GameObject projectileObj = Instantiate(projectileInstance, spawnPos, Quaternion.LookRotation(shootDirection));
 
-        if (projectileObj.TryGetComponent(out Projectile projectileComp))
+        if (projectileObj.TryGetComponent(out EntityProjectile projectileComp))
         {
             projectileComp.Init(shootDirection, projectileSpeed, damage, lifetime, origin);
         }
@@ -48,7 +56,7 @@ public class EntityRangeAttack : EntityAttack
         float distanceFactor = 1f - Mathf.Clamp01(distance / maxEvaluationDistance);
 
         float speedMagnitude = targetVel.magnitude;
-        float speedFactor = Mathf.Clamp01(1f - (speedMagnitude / 10f)); 
+        float speedFactor = Mathf.Clamp01(1f - (speedMagnitude / 10f));
 
         float finalProbability = (distanceFactor * 0.7f) + (speedFactor * 0.3f);
 

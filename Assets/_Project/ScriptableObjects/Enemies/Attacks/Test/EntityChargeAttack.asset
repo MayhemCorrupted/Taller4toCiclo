@@ -18,7 +18,7 @@ MonoBehaviour:
   attackDuration: 1
   trackTargetUntil: 0.8
   overrideBaseArmor: 0
-  armorState: 2
+  armorState: 1
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
   maxChargeDistance: 10

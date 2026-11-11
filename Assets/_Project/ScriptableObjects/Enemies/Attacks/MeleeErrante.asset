@@ -14,10 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 20
   knockback: 7
-  cooldown: 4
   telegraphDuration: 1
+  attackDuration: 0
+  trackTargetUntil: 0.8
+  overrideBaseArmor: 1
+  armorState: 1
+  hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
   isRadial: 0
   radius: 2
-  hitboxMeasurements: {x: 2, y: 2, z: 0.5}
-  verticalOffset: 1
+  hitboxMeasurements: {x: 1, y: 1, z: 2}
+  verticalOffset: 0
+  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

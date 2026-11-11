@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [CreateAssetMenu(fileName = "EntityMultiWaveAttack", menuName = "Rotbound/Entity/Attack/EntityMultiWaveAttack")]
 public class EntityMultiWaveAttack : EntityAttack
 {
