@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
     [Space]
     [SerializeField] private float _accelerationRate = 5f;
     [SerializeField] private float _decelerationRate = 12f;
-    [SerializeField] private float _turnSmoothTime = 0.1f;
+    [SerializeField] [Range(0.05f, 0.5f)] private float _turnSmoothTime = 0.1f;
     [SerializeField] private float _gravity = -9.81f;
     [SerializeField] private float _combatFriction = 15f;
     [SerializeField] private float _blockedKnockbackMultiplier = 0.35f;
@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
                     _dashDirection = transform.forward;
                 }
 
-                if (_playerCombat.LockOnTarget == null && _dashDirection != Vector3.zero)
+                if (_dashDirection != Vector3.zero)
                 {
                     transform.rotation = Quaternion.LookRotation(_dashDirection);
                 }
@@ -80,6 +80,8 @@ public class PlayerMovement : MonoBehaviour
 
             float normalizedTime = _playerAnimator != null ? _playerAnimator.DodgeNormalizedTime : 0f;
             float currentDashSpeed = _dashSpeed * _dashCurve.Evaluate(normalizedTime);
+
+            currentDashSpeed *= _playerStats.SpeedMultiplier;
 
             Vector2 currentInput = _playerInputs.MoveInput;
             if (currentInput.magnitude >= 0.1f)
@@ -90,7 +92,6 @@ public class PlayerMovement : MonoBehaviour
 
                 currentDashSpeed = Mathf.Max(currentDashSpeed, intendedSpeed);
             }
-
             _characterController.Move(currentDashSpeed * Time.deltaTime * _dashDirection);
             Gravity();
             return;

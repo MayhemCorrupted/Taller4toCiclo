@@ -1,19 +1,28 @@
-using System.Collections;
 using UnityEngine;
-[RequireComponent(typeof(Rigidbody))]
+
+[RequireComponent(typeof(Collider))]
 public class Projectile : MonoBehaviour
 {
+    [SerializeField] private LayerMask _wallLayer;
+    private Vector3 _direction;
+    private float _speed;
     private float _damage;
-    private Rigidbody _rb;
     private Transform _owner;
-    public void Init(Vector3 velocity, float dmg, float lifetime, Transform owner)
+    private bool _isInitialized = false;
+    public void Init(Vector3 direction, float speed, float dmg, float lifetime, Transform owner)
     {
-        _rb = GetComponent<Rigidbody>();
+        _direction = direction.normalized;
+        _speed = speed;
         _damage = dmg;
         _owner = owner;
+        _isInitialized = true;
 
-        _rb.linearVelocity = velocity;
-        StartCoroutine(PendingDestruction(lifetime));
+        Destroy(gameObject, lifetime);
+    }
+    private void Update()
+    {
+        if (!_isInitialized) return;
+        transform.position += _speed * Time.deltaTime * _direction;
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -22,18 +31,16 @@ public class Projectile : MonoBehaviour
 
         if (other.CompareTag("Enemy"))
             return;
-
+        if (_wallLayer != 0 && ((1 << other.gameObject.layer) & _wallLayer) != 0)
+        {
+            Destroy(gameObject);
+            return;
+        }
         PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
         if (health != null)
         {
             health.TakeDamage(_damage);
+            Destroy(gameObject);
         }
-
-        Destroy(gameObject);
-    }
-    private IEnumerator PendingDestruction(float lifetime)
-    {
-        yield return new WaitForSeconds(lifetime);
-        Destroy(gameObject);
     }
 }

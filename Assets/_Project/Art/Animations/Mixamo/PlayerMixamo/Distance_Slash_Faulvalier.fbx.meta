@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 720064795c3ffd74c8015f50646493de
+guid: bef52cb17e191204baeb94c0dec70ead
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Distance_Slash_Faulvalier_MIXAMO
+      name: Distance_Slash_MIXAMO
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0

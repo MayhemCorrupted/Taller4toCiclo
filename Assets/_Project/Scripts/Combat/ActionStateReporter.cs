@@ -1,5 +1,5 @@
 using UnityEngine;
-public enum ActionStateType { Attack, Dodge, Skill, Hurt, Knockout, Death }
+public enum ActionStateType { Attack, Dodge, Skill, Hurt, Knockout, Death, UsingItem }
 public class ActionStateReporter : StateMachineBehaviour
 {
     public ActionStateType actionType;
@@ -16,7 +16,7 @@ public class ActionStateReporter : StateMachineBehaviour
     }
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_playerAnimator != null && !_hasExited) 
+        if (_playerAnimator != null && !_hasExited)
         {
             _hasExited = true;
             _playerAnimator.OnAnimationStateExit(actionType);

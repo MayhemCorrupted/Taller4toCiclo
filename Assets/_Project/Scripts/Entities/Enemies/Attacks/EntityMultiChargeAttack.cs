@@ -64,38 +64,37 @@ public class EntityMultiChargeAttack : EntityAttack
         }
         _indicators.Add(indicatorObj);
     }
-
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
+        if (origin.TryGetComponent<Collider>(out var mainCollider)) mainCollider.isTrigger = true;
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
             {
-                Prepare(origin, target);
-                yield return new WaitForSeconds(telegraphDuration);
+                yield return TelegraphRoutine(origin, target);
             }
 
             yield return ConsecutiveDashesRoutine(origin, target);
 
             if (w < waveCount - 1 && delayBetweenWaves > 0) yield return new WaitForSeconds(delayBetweenWaves);
         }
+
+        if (mainCollider != null) mainCollider.isTrigger = false;
     }
     private IEnumerator ConsecutiveDashesRoutine(Transform origin, Transform target)
     {
-        ClearIndicators();
         float dashDuration = attackDuration > 0 ? (attackDuration / numberOfCharges) : 0.1f;
-        CharacterController cc = origin.GetComponent<CharacterController>();
 
         for (int i = 0; i < numberOfCharges; i++)
         {
             if (i > 0)
             {
                 if (delayBetweenCharges > 0) yield return new WaitForSeconds(delayBetweenCharges);
-                if (trackTarget && target != null) LookAtTarget(origin, target.position);
+                yield return TelegraphRoutine(origin, target);
             }
 
+            ClearIndicators();
             Vector3 chargeDir = origin.forward;
-            if (cc != null) cc.detectCollisions = false;
 
             _damagedPlayers.Clear();
             Vector3 startPos = origin.position;
@@ -106,10 +105,8 @@ public class EntityMultiChargeAttack : EntityAttack
             {
                 timer += Time.deltaTime;
                 float t = Mathf.Clamp01(timer / dashDuration);
-                Vector3 currentPos = Vector3.Lerp(startPos, targetPos, t);
 
-                if (cc != null) cc.Move(currentPos - origin.position);
-                else origin.position = currentPos;
+                origin.position = Vector3.Lerp(startPos, targetPos, t);
 
                 int hitCount = Physics.OverlapSphereNonAlloc(origin.position, hitboxRadius, _hitBuffer);
                 for (int h = 0; h < hitCount; h++)
@@ -123,8 +120,20 @@ public class EntityMultiChargeAttack : EntityAttack
                 }
                 yield return null;
             }
+        }
+    }
+    private IEnumerator TelegraphRoutine(Transform origin, Transform target)
+    {
+        Prepare(origin, target);
 
-            if (cc != null) cc.detectCollisions = true;
+        float prepTimer = 0f;
+        while (prepTimer < telegraphDuration)
+        {
+            prepTimer += Time.deltaTime;
+            float normalizedPrep = prepTimer / telegraphDuration;
+
+            UpdatePreparation(origin, target, normalizedPrep);
+            yield return null;
         }
     }
     private void LookAtTarget(Transform origin, Vector3 targetPos)

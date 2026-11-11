@@ -3,7 +3,6 @@ public interface IInteractable
 {
     void Interact();
 }
-
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 public class PlayerInteraction : MonoBehaviour

@@ -13,25 +13,27 @@ public class PlayerStats : MonoBehaviour
     public float _armorDefense = 0;
     public float MaxHealth { get; private set; }
     public float MaxStamina { get; private set; }
-    public float DamageMultiplier { get; private set; }
+    public float FuerzaMult { get; private set; }
     public float SpeedMultiplier { get; private set; }
     public int Iframes { get; private set; }
     public float Defense { get; private set; }
     public float VesaniaDamageBonus { get; private set; }
     public float ConsumableDamageBonus { get; private set; }
+
     private void Awake()
     {
         RecalculateStats();
     }
+
     private void Start()
     {
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnVesaniaChanged += HandleVesaniaChanged;
-
             UpdateVesaniaBonus(GameManager.Instance.CurrentVesania);
         }
     }
+
     private void OnDestroy()
     {
         if (GameManager.Instance != null)
@@ -39,10 +41,12 @@ public class PlayerStats : MonoBehaviour
             GameManager.Instance.OnVesaniaChanged -= HandleVesaniaChanged;
         }
     }
+
     private void HandleVesaniaChanged(int newVesaniaLevel)
     {
         UpdateVesaniaBonus(newVesaniaLevel);
     }
+
     private void UpdateVesaniaBonus(int level)
     {
         VesaniaDamageBonus = 0f;
@@ -53,27 +57,25 @@ public class PlayerStats : MonoBehaviour
 
         RecalculateStats();
     }
+
     public void ApplyTemporaryDamageBoost(float amount)
     {
         ConsumableDamageBonus = amount;
         RecalculateStats();
     }
+
     public void RecalculateStats()
     {
         MaxHealth = 80 + (12 * _lifeLevel);
-        MaxStamina = 60 + (8 * _staminaLevel);
+        MaxStamina = 60 + (8 * _staminaLevel); 
         float strengthBonus;
         if (_strengthLevel <= 6) strengthBonus = _strengthLevel * 0.05f;
         else strengthBonus = (6 * 0.05f) + ((_strengthLevel - 6) * 0.03f);
+        FuerzaMult = strengthBonus;
 
-        DamageMultiplier = 1 + strengthBonus + ConsumableDamageBonus + VesaniaDamageBonus;
-
-        SpeedMultiplier = 1 + (_agilityLevel * 0.03f); 
-
-        Iframes = Mathf.CeilToInt(12 + (_agilityLevel - 1) / 2);
-
+        SpeedMultiplier = 1 + (_agilityLevel * 0.03f);
+        Iframes = Mathf.CeilToInt(12 + (_agilityLevel - 1) / 2f);
         Defense = 10f + _armorDefense;
-
         OnStatsUpdated?.Invoke();
     }
 }

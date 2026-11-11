@@ -8,7 +8,6 @@ public class PlayerFSM : MonoBehaviour
 {
     public PlayerState CurrentState { get; private set; }
     public event Action<PlayerState> OnStateChanged;
-
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
     private PlayerCombat _playerCombat;

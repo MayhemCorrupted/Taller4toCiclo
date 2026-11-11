@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e494fe46f3141144c862bb7efecbcddb
+guid: fc29d7f09d897434cbf7c056e120ee3f
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Strafe_Left_Walk_Faulvalier_MIXAMO
+      name: Strafe_Walk_Left_MIXAMO
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
@@ -42,7 +42,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1

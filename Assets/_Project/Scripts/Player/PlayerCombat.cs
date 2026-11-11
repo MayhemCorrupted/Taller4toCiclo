@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
@@ -9,8 +10,7 @@ using UnityEngine.InputSystem;
 public class PlayerCombat : MonoBehaviour
 {
     [SerializeField] private WeaponHitbox _weaponHitbox;
-    [SerializeField] private float _baseLightDamage = 21f;
-    [SerializeField] private float _baseHeavyDamage = 46.2f;
+    [SerializeField] private float _baseWeaponDamage = 20f;
     [SerializeField] private float _lockOnRadius = 15f;
     [SerializeField] private float _lightAttackImpulse = 3f;
     [SerializeField] private float _heavyAttackImpulse = 4.5f;
@@ -20,7 +20,18 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private GameObject _rangedProjectilePrefab;
     [SerializeField] private Transform _projectileSpawnPoint;
     [SerializeField] private float _areaSkillRadius = 4f;
+    [SerializeField] private float _distanceSelfDamage = 2.5f;
 
+    [Header("Burst Settings")]
+    [SerializeField] private int _burstCount = 3;
+    [SerializeField] private float _burstDelay = 0.15f;
+    [SerializeField] private float _burstSpreadAngle = 15f; 
+    [Header("Skills Cooldowns")]
+    [SerializeField] private float _distanceSkillCooldownDuration = 3f;
+    [SerializeField] private float _areaSkillCooldownDuration = 5f;
+
+    private float _distanceSkillTimer = 0f;
+    private float _areaSkillTimer = 0f;
     private Transform _lockOnTarget;
     private PlayerInputs _playerInputs;
     private PlayerFSM _playerFSM;
@@ -30,11 +41,9 @@ public class PlayerCombat : MonoBehaviour
     private PlayerHealth _playerHealth;
     private Camera _mainCamera;
 
-    readonly private Collider[] _hitEnemiesBuffer = new Collider[15];
+    private readonly Collider[] _hitEnemiesBuffer = new Collider[15];
     private bool _isWeaponActive = false;
     public Transform LockOnTarget => _lockOnTarget;
-    
-    // 0 = Ruego al Alba, 1 = Veneración Carmesí
     public int CurrentSkillID { get; private set; } = 0;
     private void Awake()
     {
@@ -49,7 +58,7 @@ public class PlayerCombat : MonoBehaviour
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
-        _playerInputs.OnSwap += SwapSkill; 
+        _playerInputs.OnSwap += SwapSkill;
     }
     private void OnDisable()
     {
@@ -58,17 +67,27 @@ public class PlayerCombat : MonoBehaviour
     }
     private void Update()
     {
+        UpdateCooldowns();
+
         if (UIManager.Instance.CurrentState == GameState.Gameplay)
         {
             CheckLockTargetValid();
             CombatRotation();
         }
     }
+    private void UpdateCooldowns()
+    {
+        if (_distanceSkillTimer > 0f) _distanceSkillTimer -= Time.deltaTime;
+        if (_areaSkillTimer > 0f) _areaSkillTimer -= Time.deltaTime;
+    }
     public void SwapSkill()
     {
         CurrentSkillID = CurrentSkillID == 0 ? 1 : 0;
     }
-
+    public bool IsSkillOnCooldown(int skillID)
+    {
+        return skillID == 0 ? _distanceSkillTimer > 0f : _areaSkillTimer > 0f;
+    }
     public bool TrySkillAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
@@ -77,16 +96,27 @@ public class PlayerCombat : MonoBehaviour
             _playerFSM.CurrentState != PlayerState.Walking &&
             _playerFSM.CurrentState != PlayerState.Running) return false;
 
-        if (CurrentSkillID == 0) 
-        {
-            if (!_playerStamina.HasEnoughStamina(60f)) return false;
-            _playerStamina.UseStamina(60f);
-        }
-        else 
+        if (IsSkillOnCooldown(CurrentSkillID)) return false;
+
+        if (CurrentSkillID == 0)
         {
             if (!_playerStamina.HasEnoughStamina(15f) || _playerHealth.CurrentHealth <= 20f) return false;
+        }
+        else
+        {
+            if (!_playerStamina.HasEnoughStamina(60f)) return false;
+        }
+
+        if (CurrentSkillID == 0)
+        {
             _playerStamina.UseStamina(15f);
-            _playerHealth.ConsumeHealth(20f);
+            _playerHealth.ConsumeHealth(_distanceSelfDamage);
+            _distanceSkillTimer = _distanceSkillCooldownDuration;
+        }
+        else
+        {
+            _playerStamina.UseStamina(60f);
+            _areaSkillTimer = _areaSkillCooldownDuration;
         }
 
         if (_lockOnTarget == null) SnapToMouse();
@@ -94,13 +124,21 @@ public class PlayerCombat : MonoBehaviour
         _playerFSM.ChangeState(PlayerState.Skill);
         return true;
     }
+    private float CalculateGrossDamage(float attackMultiplier)
+    {
+        float sumBonus = _playerStats.FuerzaMult + _playerStats.VesaniaDamageBonus + _playerStats.ConsumableDamageBonus;
+        return _baseWeaponDamage * attackMultiplier * (1f + sumBonus);
+    }
     public void ExecuteSkill()
     {
-        float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
-
-        if (CurrentSkillID == 0) 
+        if (CurrentSkillID == 0)
         {
-            float damage = (_baseLightDamage * 3f * _playerStats.DamageMultiplier) * vesaniaMultiplier;
+            float damage = CalculateGrossDamage(2.5f);
+            StartCoroutine(ShootBurstRoutine(damage));
+        }
+        else if (CurrentSkillID == 1)
+        {
+            float damage = CalculateGrossDamage(3.0f);
             int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _areaSkillRadius, _hitEnemiesBuffer, _enemyLayer);
 
             for (int i = 0; i < hitCount; i++)
@@ -111,18 +149,32 @@ public class PlayerCombat : MonoBehaviour
                 }
             }
         }
-        else if (CurrentSkillID == 1) 
+    }
+    private IEnumerator ShootBurstRoutine(float damage)
+    {
+        for (int i = 0; i < _burstCount; i++)
         {
-            float damage = (_baseLightDamage * 2.5f * _playerStats.DamageMultiplier) * vesaniaMultiplier;
-
             if (_rangedProjectilePrefab != null && _projectileSpawnPoint != null)
             {
-                GameObject proj = Instantiate(_rangedProjectilePrefab, _projectileSpawnPoint.position, transform.rotation);
+                float angle = 0f;
+                if (i > 0)
+                {
+                    float directionMultiplier = (i % 2 != 0) ? 1f : -1f;
+                    angle = Mathf.Ceil(i / 2f) * _burstSpreadAngle * directionMultiplier;
+                }
+
+                Quaternion spreadRotation = transform.rotation * Quaternion.Euler(0f, angle, 0f);
+
+                Vector3 shootDirection = spreadRotation * Vector3.forward;
+
+                GameObject proj = Instantiate(_rangedProjectilePrefab, _projectileSpawnPoint.position, spreadRotation);
                 if (proj.TryGetComponent(out PlayerProjectile projectile))
                 {
-                    projectile.Init(transform.forward, damage);
+                    projectile.Init(shootDirection, damage);
                 }
             }
+
+            yield return new WaitForSeconds(_burstDelay);
         }
     }
     public bool TryLightAttack()
@@ -164,9 +216,8 @@ public class PlayerCombat : MonoBehaviour
     {
         _isWeaponActive = true;
 
-        float baseDamage = isHeavyAttack ? _baseHeavyDamage : _baseLightDamage;
-        float vesaniaMultiplier = 1f + _playerStats.VesaniaDamageBonus;
-        float grossDamage = (baseDamage * _playerStats.DamageMultiplier) * vesaniaMultiplier;
+        float attackMultiplier = isHeavyAttack ? 2.2f : 1.0f;
+        float grossDamage = CalculateGrossDamage(attackMultiplier);
 
         if (_weaponHitbox != null)
         {
@@ -245,6 +296,7 @@ public class PlayerCombat : MonoBehaviour
     }
     private void CombatRotation()
     {
+        if (_playerFSM.CurrentState == PlayerState.Dodging) return;
         if (_lockOnTarget != null)
         {
             Vector3 directionToTarget = _lockOnTarget.position - transform.position;

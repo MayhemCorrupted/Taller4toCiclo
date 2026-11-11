@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [CreateAssetMenu(fileName = "EntityChargeAttack", menuName = "Rotbound/Entity/Attack/EntityChargeAttack")]
 public class EntityChargeAttack : EntityAttack
 {
@@ -63,7 +64,6 @@ public class EntityChargeAttack : EntityAttack
     {
         _chargeTargetPosition = origin.position + (origin.forward * maxChargeDistance);
     }
-
     private void LookAtTarget(Transform origin, Vector3 targetPos)
     {
         Vector3 lookDir = (targetPos - origin.position).normalized;
@@ -89,15 +89,15 @@ public class EntityChargeAttack : EntityAttack
         Vector3 startPos = origin.position;
         float timer = 0f;
         HashSet<PlayerHealth> damagedPlayers = new();
-        if (origin.TryGetComponent<CharacterController>(out var cc)) cc.detectCollisions = false;
+
+        if (origin.TryGetComponent<Collider>(out var mainCollider)) mainCollider.isTrigger = true;
+
         while (timer < attackDuration)
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / attackDuration);
-            Vector3 currentPos = Vector3.Lerp(startPos, _chargeTargetPosition, t);
 
-            if (cc != null) cc.Move(currentPos - origin.position);
-            else origin.position = currentPos;
+            origin.position = Vector3.Lerp(startPos, _chargeTargetPosition, t);
 
             int hitCount = Physics.OverlapSphereNonAlloc(origin.position, hitboxRadius, _hitBuffer);
             for (int i = 0; i < hitCount; i++)
@@ -116,7 +116,7 @@ public class EntityChargeAttack : EntityAttack
             yield return null;
         }
 
-        if (cc != null) cc.detectCollisions = true;
+        if (mainCollider != null) mainCollider.isTrigger = false;
     }
     public override void CancelAttack()
     {

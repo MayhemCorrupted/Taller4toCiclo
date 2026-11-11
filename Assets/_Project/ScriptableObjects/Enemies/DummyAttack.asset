@@ -30,9 +30,7 @@ MonoBehaviour:
       mediumRangeMax: 7
       closeRangeAttacks:
       - {fileID: 11400000, guid: 547ccba26512c2948a2e63426dddf8a0, type: 2}
-      - {fileID: 11400000, guid: 412a294f3236d5246b8a00d8e7c207e1, type: 2}
       mediumRangeAttacks:
       - {fileID: 11400000, guid: d9846467c80d4bb4c8b0b96c14c864aa, type: 2}
-      - {fileID: 11400000, guid: e0d564fa94fb5d349a851cd99678188e, type: 2}
       farRangeAttacks:
-      - {fileID: 11400000, guid: c18327958a3e83c4a9d7b6de8068cb88, type: 2}
+      - {fileID: 11400000, guid: 964f01d0bdda98648b30fdae3f17ea23, type: 2}

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 64265b4d4f0ad21469c609b222220a6d
+guid: a034d506e80ea5d4197887a0921f0978
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Walk_Back_Faulvalier_MIXAMO
+      name: Backward_Walk_MIXAMO
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
@@ -42,12 +42,12 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
-      loopBlendOrientation: 0
+      loopBlendOrientation: 1
       loopBlendPositionY: 1
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 0
       keepOriginalPositionXZ: 0
       heightFromFeet: 1

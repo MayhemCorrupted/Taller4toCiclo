@@ -14,9 +14,9 @@ public class PlayerHealth : Health
     private PlayerStats _statsSystem;
     private PlayerStamina _staminaSystem;
     private PlayerFSM _playerFSM;
+    public bool IsDodgeInvulnerable { get; set; } = false;
     protected override void Awake()
     {
-        base.Awake();
         _statsSystem = GetComponent<PlayerStats>();
         _staminaSystem = GetComponent<PlayerStamina>();
         _playerFSM = GetComponent<PlayerFSM>();
@@ -34,6 +34,11 @@ public class PlayerHealth : Health
             _invulnerabilityTimer -= Time.deltaTime;
         }
     }
+    public void ResetHealth()
+    {
+        _currentHealth = _maxHealth;
+        NotifyHealthChanged();
+    }
     public void SetHealth()
     {
         _maxHealth = _statsSystem.MaxHealth;
@@ -46,7 +51,8 @@ public class PlayerHealth : Health
     }
     public override bool TakeDamage(float incomingDamage)
     {
-        if (_currentHealth <= 0 || _invulnerabilityTimer > 0) return false;
+        if (_currentHealth <= 0 || _invulnerabilityTimer > 0 || IsDodgeInvulnerable)
+            return false;
 
         float unmitigatedDamage = (incomingDamage * 100f) / (100f + _defense);
         float finalDamage = unmitigatedDamage;

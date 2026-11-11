@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: EntityMultiAreaAttack
   m_EditorClassIdentifier: Assembly-CSharp::EntityMultiAreaAttack
   damage: 10
-  knockback: 0
+  knockback: 1
   telegraphDuration: 3
-  attackDuration: 2
-  trackTargetUntil: 0.7
+  attackDuration: 1
+  trackTargetUntil: 0.8
   overrideBaseArmor: 1
   armorState: 2
   hyperarmorDamageMultiplier: 1
   animationTrigger: 
-  executionStyle: 1
+  executionStyle: 0
   areaOrigin: 1
-  patternType: 3
+  patternType: 2
   numberOfAreas: 12
   areaRadius: 2
-  scatterRadius: 5
+  scatterRadius: 4
   delayBetweenAreas: 0.2
   trackTarget: 1
   waveCount: 2

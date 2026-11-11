@@ -1,8 +1,10 @@
-using UnityEngine;
 using System;
 using System.Collections;
 using System.Linq;
-[Serializable] public class InventorySlot
+using UnityEngine;
+
+[Serializable]
+public class InventorySlot
 {
     public ItemData Item;
     public int Quantity;
@@ -29,11 +31,10 @@ public class InventoryManager : MonoBehaviour
     private int _consumableCount = 0;
     [SerializeField] private InventorySlot[] _generalSlots = new InventorySlot[6];
     [SerializeField] private InventorySlot[] _armorInventorySlots = new InventorySlot[3];
-
     private PlayerInputs _playerInputs;
     private PlayerStats _playerStats;
     private PlayerHealth _playerHealth;
-
+    private PlayerFSM _playerFSM;
     private Coroutine _activeBuffCoroutine;
     private Coroutine _activeHealCoroutine;
     private void Awake()
@@ -41,6 +42,7 @@ public class InventoryManager : MonoBehaviour
         _playerInputs = FindAnyObjectByType<PlayerInputs>();
         _playerStats = FindAnyObjectByType<PlayerStats>();
         _playerHealth = FindAnyObjectByType<PlayerHealth>();
+        _playerFSM = FindAnyObjectByType<PlayerFSM>();
 
         for (int i = 0; i < _generalSlots.Length; i++)
         {
@@ -53,11 +55,11 @@ public class InventoryManager : MonoBehaviour
     }
     private void OnEnable()
     {
-        _playerInputs.OnUseItem += UseEquippedConsumable;
+        if (_playerInputs != null) _playerInputs.OnUseItem += UseEquippedConsumable;
     }
     private void OnDisable()
     {
-        _playerInputs.OnUseItem -= UseEquippedConsumable;
+        if (_playerInputs != null) _playerInputs.OnUseItem -= UseEquippedConsumable;
     }
     public void AddItemToInventory(ItemData item, int amount)
     {
@@ -131,6 +133,12 @@ public class InventoryManager : MonoBehaviour
         InventorySlot slot = _generalSlots[slotIndex];
         if (slot.IsEmpty || slot.Item is not ConsumableItem consumable) return;
 
+        if (consumable.EffectType == ConsumableEffectType.StatBoost)
+        {
+            Debug.LogWarning("[InventoryManager] Las pociones StatBoost no pueden equiparse. Deben canjearse.");
+            OnInventoryUpdated?.Invoke(_generalSlots); 
+            return;
+        }
         ConsumableItem previousConsumable = _equippedConsumable;
         int previousCount = _consumableCount;
 
@@ -195,13 +203,32 @@ public class InventoryManager : MonoBehaviour
     private void UseEquippedConsumable()
     {
         if (_equippedConsumable == null || _consumableCount <= 0) return;
+        if (_playerFSM == null) return;
+
+        if (_playerFSM.CurrentState != PlayerState.Idle &&
+            _playerFSM.CurrentState != PlayerState.Walking &&
+            _playerFSM.CurrentState != PlayerState.Running)
+        {
+            return;
+        }
+        if (_equippedConsumable.EffectType == ConsumableEffectType.Heal &&
+            _playerHealth != null && _playerHealth.CurrentHealth >= _playerHealth.MaxHealth)
+        {
+            Debug.Log("[Inventory] La salud ya está al máximo.");
+            return;
+        }
+        _playerFSM.ChangeState(PlayerState.UsingItem);
+    }
+    public void ApplyConsumableEffect()
+    {
+        if (_equippedConsumable == null || _consumableCount <= 0) return;
 
         bool wasUsed = false;
 
         switch (_equippedConsumable.EffectType)
         {
             case ConsumableEffectType.Heal:
-                if (_playerHealth.CurrentHealth < _playerHealth.MaxHealth)
+                if (_playerHealth != null && _playerHealth.CurrentHealth < _playerHealth.MaxHealth)
                 {
                     if (_activeHealCoroutine != null) StopCoroutine(_activeHealCoroutine);
                     _activeHealCoroutine = StartCoroutine(GradualHealRoutine(_equippedConsumable.EffectValue, 5f));
@@ -214,19 +241,17 @@ public class InventoryManager : MonoBehaviour
                 _activeBuffCoroutine = StartCoroutine(DamageBoostRoutine(_equippedConsumable.EffectValue, 25));
                 wasUsed = true;
                 break;
-
-            case ConsumableEffectType.StatBoost:
-                wasUsed = true;
-                break;
         }
 
         if (wasUsed)
         {
             _consumableCount--;
             if (_consumableCount <= 0) _equippedConsumable = null;
+
             OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
         }
     }
+
     private IEnumerator GradualHealRoutine(float totalHeal, float duration)
     {
         float healedAmount = 0;
@@ -243,12 +268,12 @@ public class InventoryManager : MonoBehaviour
     private IEnumerator DamageBoostRoutine(float boostAmount, int durationInSeconds)
     {
         _playerStats.ApplyTemporaryDamageBoost(boostAmount);
+        float second = 1;
 
         for (int i = 0; i < durationInSeconds; i++)
         {
-            float Seconds = 1f;
-            yield return new WaitForSeconds(Seconds);
-            _playerHealth.TakeDirectDamage(2f);
+            yield return new WaitForSeconds(second);
+            _playerHealth.TakeDirectDamage(2f); 
         }
 
         _playerStats.ApplyTemporaryDamageBoost(0f);

@@ -102,6 +102,7 @@ public class StatsUI : MonoBehaviour, IPanel
 
         _stats.RecalculateStats();
         _health.SetHealth();
+        _health.ResetHealth();
         ClosePanel();
     }
     private void UpdateUI()

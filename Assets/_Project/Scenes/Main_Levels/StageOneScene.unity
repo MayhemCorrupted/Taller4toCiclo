@@ -2122,7 +2122,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryPanelUI
   _inventoryPanel: {fileID: 1623962041}
   _firstSelectedSlot: {fileID: 1862845188}
-  _renderPreviewCamera: {fileID: 0}
+  _renderPreviewCamera: {fileID: 1223180314}
 --- !u!114 &110998166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13715,7 +13715,7 @@ MonoBehaviour:
   _hinge: {fileID: 430152121}
   _openAngle: 70
   _doorSpeed: 2
-  _revertDirection: 0
+  _revertDirection: 1
   _forcedDirection: 0
 --- !u!1 &438135530
 GameObject:
@@ -20302,6 +20302,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _areaSkillRadius
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _baseWeaponDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _distanceSelfDamage
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _projectileSpawnPoint
       value: 
       objectReference: {fileID: 67486611}
@@ -20309,9 +20321,29 @@ PrefabInstance:
       propertyPath: _rangedProjectilePrefab
       value: 
       objectReference: {fileID: 8842223974744976116, guid: 8f5c7e91f91d61443a7c02aa231c6a82, type: 3}
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _areaSkillCooldownDuration
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _distanceSkillCooldownDuration
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5401380329016130178, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _dashSpeed
+      value: 11.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _turnSmoothTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7704428511730323887, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8200756771809824385, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -20352,6 +20384,14 @@ PrefabInstance:
     - target: {fileID: 8200756771809824385, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217354096255262677, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.000999409
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217354096255262677, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.84000015
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -29877,6 +29917,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 8247994413960396516, guid: dbd99352639aa74458e6549060033eaa, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 555cfe5331cbedc45bdfc85c7faab7a7, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -43708,7 +43752,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatsUI
   _statsContainer: {fileID: 2115372682}
   _availablePointsText: {fileID: 1025771028}
-  _renderPreviewCamera: {fileID: 0}
+  _renderPreviewCamera: {fileID: 1223180314}
   _statsText:
   - {fileID: 1263215447}
   - {fileID: 10708941}
@@ -46366,6 +46410,11 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1223180314 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3325879163644345856, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+  m_PrefabInstance: {fileID: 656594803}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1223618869
 GameObject:
   m_ObjectHideFlags: 0
@@ -59148,88 +59197,26 @@ MonoBehaviour:
   - requiredStateValue: 0
     onStateTriggered:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 590728896}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1519288117}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 559514503}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+        m_Calls: []
   - requiredStateValue: 1
     onStateTriggered:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 590728896}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 1519288117}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 559514503}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
+        m_Calls: []
   _currentProgression:
     EntitiesKilled: 0
     TotalEntities: 0
     InteractionsCompleted: 0
     TotalInteractions: 0
+  _progressionMilestones: []
+  onCombatCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  onInteractionsCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  onTotalProgressionCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1495404470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -80559,7 +80546,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2115372683
 RectTransform:
   m_ObjectHideFlags: 0
@@ -80873,7 +80860,7 @@ MonoBehaviour:
   _hinge: {fileID: 2118185935}
   _openAngle: 70
   _doorSpeed: 2
-  _revertDirection: 0
+  _revertDirection: 1
   _forcedDirection: 0
 --- !u!65 &2118185937
 BoxCollider:

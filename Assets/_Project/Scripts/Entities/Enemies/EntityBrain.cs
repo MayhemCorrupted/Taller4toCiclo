@@ -18,10 +18,21 @@ public class EntityBrain : MonoBehaviour
 
     private void Awake()
     {
-        if (_health == null) _health = GetComponent<Health>();
-        if (_combat == null) _combat = GetComponent<EntityCombat>();
-        if (_movement == null) _movement = GetComponent<EntityMovement>();
-
+        if (_health == null)
+        {
+            TryGetComponent<Health>(out Health health); 
+            _health = health;
+        }
+        if (_combat == null)
+        {
+            TryGetComponent<EntityCombat>(out EntityCombat combat);
+            _combat = combat;
+        }
+        if (_movement == null)
+        {
+            TryGetComponent<EntityMovement>(out EntityMovement movement);
+            _movement = movement;
+        }
         if (_data != null)
         {
             if (_health != null) _health.SetHealthValues(_data.health, _data.defense);
