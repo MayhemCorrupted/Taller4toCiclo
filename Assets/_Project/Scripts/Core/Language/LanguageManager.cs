@@ -47,8 +47,14 @@ public class LanguageManager : MonoBehaviour
 
         void handler(string translatedText)
         {
-            if (uiText != null) uiText.text = translatedText;
-            onUpdate?.Invoke(translatedText);
+            if (onUpdate != null)
+            {
+                onUpdate.Invoke(translatedText);
+            }
+            else if (uiText != null)
+            {
+                uiText.text = translatedText;
+            }
         }
 
         locString.StringChanged += handler;

@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
-[Serializable]
-public struct DialogueEventBinding
+[Serializable] public struct DialogueEventBinding
 {
     [Tooltip("El ID de texto escrito en el ScriptableObject del diálogo.")]
     public string eventID;

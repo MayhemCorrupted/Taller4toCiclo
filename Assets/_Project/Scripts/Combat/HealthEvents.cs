@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.Events;
+
 [RequireComponent(typeof(Health))]
 public class HealthEvents : MonoBehaviour
 {
     private Health _entityHealth;
+
+    [Header("Eventos de Inspector")]
     public UnityEvent OnEntityDeath;
     public UnityEvent OnEntityHurt;
 
@@ -13,17 +16,28 @@ public class HealthEvents : MonoBehaviour
         _entityHealth.OnDeath += InvokeDeathEvent;
         _entityHealth.OnHealthChanged += InvokeHurtEvent;
     }
+
     private void OnDestroy()
     {
-        _entityHealth.OnDeath -= InvokeDeathEvent;
-        _entityHealth.OnHealthChanged -= InvokeHurtEvent;   
+        if (_entityHealth != null)
+        {
+            _entityHealth.OnDeath -= InvokeDeathEvent;
+            _entityHealth.OnHealthChanged -= InvokeHurtEvent;
+        }
     }
+
     private void InvokeHurtEvent()
     {
         OnEntityHurt?.Invoke();
     }
+
     private void InvokeDeathEvent()
     {
+        if (StateManager.Instance != null)
+        {
+            StateManager.Instance.RegisterEntityKilled(gameObject.tag);
+        }
+
         OnEntityDeath?.Invoke();
     }
 }

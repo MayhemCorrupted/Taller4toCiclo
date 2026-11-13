@@ -4,10 +4,8 @@ using UnityEngine.InputSystem;
 public class DialogueManager : MonoBehaviour
 {
     public event Action<string> OnDialogueEventTriggered;
-
     private DialogueUI _dialogueUI;
     private PlayerInputs _playerInputs;
-
     private DialogueSequence _currentSequence;
     private int _currentLineIndex;
     private bool _isDialogueActive = false;

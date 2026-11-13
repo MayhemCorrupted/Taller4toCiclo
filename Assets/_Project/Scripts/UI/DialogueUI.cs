@@ -9,11 +9,10 @@ public class DialogueUI : MonoBehaviour
 {
     [SerializeField] private GameObject _playerHUD;
     [SerializeField] private GameObject _dialoguePanel;
-
+    [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private TextMeshProUGUI _speakerNameTMP;
     [SerializeField] private TextMeshProUGUI _dialogueTextTMP;
     [SerializeField] private Image _speakerPortrait;
-
     [SerializeField] private GameObject _optionsContainer;
     [SerializeField] private Button[] _optionButtons;
     [SerializeField] private TextMeshProUGUI[] _optionTMP;
@@ -21,10 +20,10 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _interactionPromptTMP;
     [SerializeField] private LocalizedString _skipTypingLocalizedString;
     [SerializeField] private LocalizedString _nextLineLocalizedString;
-
+    [Header("Tiempos y Animaciones")]
+    [SerializeField] private float _fadePanelDuration = 0.3f;
     [SerializeField] private float _skipPromptDelay = 1.5f;
     [SerializeField] private float _nextPromptDelay = 0.2f;
-
     [SerializeField][Range(0.01f, 0.1f)] private float defaultTextSpeed = 0.03f;
     public bool IsTyping { get; private set; }
     private DialogueLine? _currentLine = null;
@@ -35,6 +34,9 @@ public class DialogueUI : MonoBehaviour
     private float _typingPercentage = 0f;
     private void Awake()
     {
+        if (_canvasGroup == null && _dialoguePanel != null)
+            _canvasGroup = _dialoguePanel.GetComponent<CanvasGroup>();
+
         if (_dialoguePanel != null) _dialoguePanel.SetActive(false);
         HideAllOptions();
         if (_interactionPromptTMP != null) _interactionPromptTMP.gameObject.SetActive(false);
@@ -43,6 +45,7 @@ public class DialogueUI : MonoBehaviour
     {
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
         if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+        LeanTween.cancel(gameObject);
     }
     private void OnDestroy()
     {
@@ -53,7 +56,15 @@ public class DialogueUI : MonoBehaviour
         if (_playerHUD != null) _playerHUD.SetActive(false);
         if (_dialoguePanel != null) _dialoguePanel.SetActive(true);
         HideAllOptions();
-        onComplete?.Invoke();
+
+        if (_canvasGroup != null)
+        {
+            _canvasGroup.alpha = 0f;
+            LeanTween.alphaCanvas(_canvasGroup, 1f, _fadePanelDuration)
+                     .setEaseOutCubic()
+                     .setOnComplete(() => onComplete?.Invoke());
+        }
+        else onComplete?.Invoke();
     }
     public void CloseUI(Action onComplete)
     {
@@ -62,9 +73,20 @@ public class DialogueUI : MonoBehaviour
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
         if (_interactionPromptTMP != null) _interactionPromptTMP.gameObject.SetActive(false);
+
+        if (_canvasGroup != null)
+        {
+            LeanTween.alphaCanvas(_canvasGroup, 0f, _fadePanelDuration)
+                     .setEaseInCubic()
+                     .setOnComplete(() => FinalizeClose(onComplete));
+        }
+        else FinalizeClose(onComplete);
+    }
+    private void FinalizeClose(Action onComplete)
+    {
         if (_dialoguePanel != null) _dialoguePanel.SetActive(false);
         if (_playerHUD != null) _playerHUD.SetActive(true);
-
+        if (_dialogueTextTMP != null) _dialogueTextTMP.text = string.Empty;
         onComplete?.Invoke();
     }
     public void UpdateInteractKeyName(string keyName)
@@ -84,6 +106,12 @@ public class DialogueUI : MonoBehaviour
         _typingPercentage = 0f;
         IsTyping = false;
 
+        if (_dialogueTextTMP != null)
+        {
+            _dialogueTextTMP.text = string.Empty;
+            _dialogueTextTMP.maxVisibleCharacters = 0;
+        }
+
         if (_speakerPortrait != null)
         {
             _speakerPortrait.sprite = line.SpeakerSprite;
@@ -95,17 +123,15 @@ public class DialogueUI : MonoBehaviour
         LanguageManager.Instance.BindText(_speakerNameTMP, line.SpeakerName);
         LanguageManager.Instance.BindText(_dialogueTextTMP, line.DialogueText, (text) =>
         {
-            _dialogueTextTMP.ForceMeshUpdate();
+            if (_dialogueTextTMP.text == text && IsTyping) return;
 
-            if (!IsTyping && _typingPercentage >= 1f)
-            {
-                SkipTypingEffect();
-            }
-            else if (!IsTyping && _typingPercentage == 0f)
-            {
-                if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-                _typingCoroutine = StartCoroutine(TypewriterRoutine());
-            }
+            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+
+            _dialogueTextTMP.text = text;
+            _dialogueTextTMP.maxVisibleCharacters = 0; 
+
+            _typingPercentage = 0f;
+            _typingCoroutine = StartCoroutine(TypewriterRoutine());
         });
     }
     private IEnumerator TypewriterRoutine()
@@ -115,38 +141,21 @@ public class DialogueUI : MonoBehaviour
         IsTyping = true;
         UpdateInteractionPrompt();
 
-        while (_typingPercentage < 1f)
+        _dialogueTextTMP.ForceMeshUpdate();
+        int totalChars = _dialogueTextTMP.textInfo.characterCount;
+        int visibleCount = 0;
+
+        while (visibleCount < totalChars)
         {
-            if (this == null || _dialogueTextTMP == null) yield break;
+            visibleCount++;
+            _dialogueTextTMP.maxVisibleCharacters = visibleCount;
 
-            _dialogueTextTMP.ForceMeshUpdate();
-            TMP_TextInfo textInfo = _dialogueTextTMP.textInfo;
+            _typingPercentage = (float)visibleCount / Mathf.Max(1, totalChars);
 
-            int totalVisibleChars = 0;
-            for (int i = 0; i < textInfo.characterCount; i++)
-            {
-                if (textInfo.characterInfo[i].isVisible) totalVisibleChars++;
-            }
-
-            int charsToShow = Mathf.FloorToInt(_typingPercentage * totalVisibleChars);
-            int visibleCount = 0;
-
-            for (int i = 0; i < textInfo.characterCount; i++)
-            {
-                if (!textInfo.characterInfo[i].isVisible) continue;
-                SetCharAlpha(i, visibleCount < charsToShow ? (byte)255 : (byte)0);
-                visibleCount++;
-            }
-
-            _dialogueTextTMP.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-
-            float totalTime = _currentTextSpeed * totalVisibleChars;
-            if (totalTime > 0) _typingPercentage += Time.deltaTime / totalTime;
-            else _typingPercentage = 1f;
-
-            yield return null;
+            yield return new WaitForSeconds(_currentTextSpeed);
         }
 
+        _typingPercentage = 1f;
         IsTyping = false;
         SkipTypingEffect();
     }
@@ -156,33 +165,11 @@ public class DialogueUI : MonoBehaviour
         if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
 
         _typingPercentage = 1f;
-        TMP_TextInfo textInfo = _dialogueTextTMP.textInfo;
 
-        for (int i = 0; i < textInfo.characterCount; i++)
-        {
-            if (!textInfo.characterInfo[i].isVisible) continue;
-            SetCharAlpha(i, 255);
-        }
+        _dialogueTextTMP.maxVisibleCharacters = 99999;
 
-        _dialogueTextTMP.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
         IsTyping = false;
         UpdateInteractionPrompt();
-    }
-    private void SetCharAlpha(int charIndex, byte alphaValue)
-    {
-        if (this == null || _dialogueTextTMP == null) return;
-        TMP_CharacterInfo charInfo = _dialogueTextTMP.textInfo.characterInfo[charIndex];
-        if (!charInfo.isVisible) return;
-
-        int materialIndex = charInfo.materialReferenceIndex;
-        int vertexIndex = charInfo.vertexIndex;
-
-        Color32[] newVertexColors = _dialogueTextTMP.textInfo.meshInfo[materialIndex].colors32;
-
-        newVertexColors[vertexIndex + 0].a = alphaValue;
-        newVertexColors[vertexIndex + 1].a = alphaValue;
-        newVertexColors[vertexIndex + 2].a = alphaValue;
-        newVertexColors[vertexIndex + 3].a = alphaValue;
     }
     public void ShowOptions(DialogueOption[] options, Action<DialogueSequence> onOptionSelected)
     {

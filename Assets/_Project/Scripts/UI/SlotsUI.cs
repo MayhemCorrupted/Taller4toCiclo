@@ -7,28 +7,29 @@ public class SlotsUI : MonoBehaviour
 {
     public event Action<ItemData> OnItemSelected;
     private InventoryManager _inventoryManager;
-
     [SerializeField] private Button[] _generalSlotButtons = new Button[6];
     [SerializeField] private Image[] _generalSlotIcons = new Image[6];
     [SerializeField] private TextMeshProUGUI[] _generalSlotCounts = new TextMeshProUGUI[6];
-
     [SerializeField] private Button[] _armorInvSlotButtons = new Button[3];
     [SerializeField] private Image[] _armorInvSlotIcons = new Image[3];
-
     [SerializeField] private Button _armorButton;
     [SerializeField] private Image _armorIcon;
-
     [SerializeField] private Button _consumableButton;
     [SerializeField] private Image _consumableIcon;
     [SerializeField] private TextMeshProUGUI _consumableCountText;
 
     [SerializeField] private Image _dragIcon;
-    [SerializeField] private Color _selectedColor = Color.green;
-    [SerializeField] private Color _defaultColor = Color.white;
-    [SerializeField] private Color _emptyColor = new(1, 1, 1, 0);
 
+    [Header("Button Colors (Backgrounds)")]
+    [SerializeField] private Color _buttonSelectedColor = Color.green;
+    [SerializeField] private Color _buttonDefaultColor = Color.white;
+
+    [Header("Icon Colors (Sprites)")]
+    [SerializeField] private Color _iconVisibleColor = new(1f, 1f, 1f, 1f);
+    [SerializeField] private Color _iconHiddenColor = new(1f, 1f, 1f, 0f);  
     private SelectedSlotType _currentSelectionType = SelectedSlotType.None;
     private int _selectedGeneralIndex = -1;
+
     private bool _isDragging = false;
     private SelectedSlotType _dragSourceType;
     private int _dragSourceIndex;
@@ -47,9 +48,12 @@ public class SlotsUI : MonoBehaviour
 
         if (_dragIcon != null)
         {
+            _dragIcon.sprite = null;
+            _dragIcon.color = _iconHiddenColor;
             _dragIcon.gameObject.SetActive(false);
             _dragIcon.raycastTarget = false;
         }
+
         ClearSelection();
     }
     private void OnEnable()
@@ -93,12 +97,12 @@ public class SlotsUI : MonoBehaviour
             OnItemSelected?.Invoke(GetItemData(_currentSelectionType, _selectedGeneralIndex));
         else
             OnItemSelected?.Invoke(null);
-
     }
     public void HandleBeginDrag(int index, SelectedSlotType type, PointerEventData eventData)
     {
         ItemData item = GetItemData(type, index);
         if (item == null) return;
+
         _isDragging = true;
         _dragSourceType = type;
         _dragSourceIndex = index;
@@ -106,6 +110,7 @@ public class SlotsUI : MonoBehaviour
         if (_dragIcon != null)
         {
             _dragIcon.sprite = item.Icon;
+            _dragIcon.color = _iconVisibleColor;
             _dragIcon.gameObject.SetActive(true);
             _dragIcon.transform.position = eventData.position;
         }
@@ -117,15 +122,22 @@ public class SlotsUI : MonoBehaviour
     public void HandleDrag(PointerEventData eventData)
     {
         if (_isDragging && _dragIcon != null)
+        {
             _dragIcon.transform.position = eventData.position;
-        SetIconVisibility(_dragSourceType, _dragSourceIndex, true);
+        }
     }
     public void HandleEndDrag()
     {
         if (!_isDragging) return;
         _isDragging = false;
 
-        if (_dragIcon != null) _dragIcon.gameObject.SetActive(false);
+        if (_dragIcon != null)
+        {
+            _dragIcon.sprite = null;
+            _dragIcon.color = _iconHiddenColor;
+            _dragIcon.gameObject.SetActive(false);
+        }
+
         SetIconVisibility(_dragSourceType, _dragSourceIndex, true);
     }
     public void HandleDrop(SelectedSlotType targetType, int targetIndex)
@@ -191,34 +203,49 @@ public class SlotsUI : MonoBehaviour
     }
     private void SetIconVisibility(SelectedSlotType type, int index, bool isVisible)
     {
-        Color color = isVisible ? _defaultColor : _emptyColor;
+        if (!isVisible)
+        {
+            if (type == SelectedSlotType.General) { _generalSlotIcons[index].sprite = null; _generalSlotIcons[index].color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.ArmorInventory) { _armorInvSlotIcons[index].sprite = null; _armorInvSlotIcons[index].color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.Armor) { _armorIcon.sprite = null; _armorIcon.color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.Consumable) { _consumableIcon.sprite = null; _consumableIcon.color = _iconHiddenColor; }
+            return;
+        }
 
-        if (type == SelectedSlotType.General) _generalSlotIcons[index].color = color;
-        else if (type == SelectedSlotType.ArmorInventory) _armorInvSlotIcons[index].color = color;
-        else if (type == SelectedSlotType.Armor) _armorIcon.color = color;
-        else if (type == SelectedSlotType.Consumable) _consumableIcon.color = color;
+        ItemData item = GetItemData(type, index);
+
+        if (item != null)
+        {
+            if (type == SelectedSlotType.General) { _generalSlotIcons[index].sprite = item.Icon; _generalSlotIcons[index].color = _iconVisibleColor; }
+            else if (type == SelectedSlotType.ArmorInventory) { _armorInvSlotIcons[index].sprite = item.Icon; _armorInvSlotIcons[index].color = _iconVisibleColor; }
+            else if (type == SelectedSlotType.Armor) { _armorIcon.sprite = item.Icon; _armorIcon.color = _iconVisibleColor; }
+            else if (type == SelectedSlotType.Consumable) { _consumableIcon.sprite = item.Icon; _consumableIcon.color = _iconVisibleColor; }
+        }
+        else
+        {
+            if (type == SelectedSlotType.General) { _generalSlotIcons[index].sprite = null; _generalSlotIcons[index].color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.ArmorInventory) { _armorInvSlotIcons[index].sprite = null; _armorInvSlotIcons[index].color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.Armor) { _armorIcon.sprite = null; _armorIcon.color = _iconHiddenColor; }
+            else if (type == SelectedSlotType.Consumable) { _consumableIcon.sprite = null; _consumableIcon.color = _iconHiddenColor; }
+        }
     }
     private void ClearSelection()
     {
         if (_currentSelectionType == SelectedSlotType.General && _selectedGeneralIndex >= 0)
         {
-            bool isEmpty = _inventoryManager.GeneralSlots[_selectedGeneralIndex].IsEmpty;
-            _generalSlotButtons[_selectedGeneralIndex].image.color = isEmpty ? _emptyColor : _defaultColor;
+            _generalSlotButtons[_selectedGeneralIndex].image.color = _buttonDefaultColor;
         }
         else if (_currentSelectionType == SelectedSlotType.ArmorInventory && _selectedGeneralIndex >= 0)
         {
-            bool isEmpty = _inventoryManager.ArmorInventorySlots[_selectedGeneralIndex].IsEmpty;
-            _armorInvSlotButtons[_selectedGeneralIndex].image.color = isEmpty ? _emptyColor : _defaultColor;
+            _armorInvSlotButtons[_selectedGeneralIndex].image.color = _buttonDefaultColor;
         }
         else if (_currentSelectionType == SelectedSlotType.Armor)
         {
-            bool isEmpty = _inventoryManager.EquippedArmor == null;
-            _armorButton.image.color = isEmpty ? _emptyColor : _defaultColor;
+            _armorButton.image.color = _buttonDefaultColor;
         }
         else if (_currentSelectionType == SelectedSlotType.Consumable)
         {
-            bool isEmpty = _inventoryManager.EquippedConsumable == null;
-            _consumableButton.image.color = isEmpty ? _emptyColor : _defaultColor;
+            _consumableButton.image.color = _buttonDefaultColor;
         }
 
         _currentSelectionType = SelectedSlotType.None;
@@ -231,10 +258,10 @@ public class SlotsUI : MonoBehaviour
         _currentSelectionType = type;
         _selectedGeneralIndex = index;
 
-        if (type == SelectedSlotType.General) _generalSlotButtons[index].image.color = _selectedColor;
-        else if (type == SelectedSlotType.ArmorInventory) _armorInvSlotButtons[index].image.color = _selectedColor;
-        else if (type == SelectedSlotType.Armor) _armorButton.image.color = _selectedColor;
-        else if (type == SelectedSlotType.Consumable) _consumableButton.image.color = _selectedColor;
+        if (type == SelectedSlotType.General) _generalSlotButtons[index].image.color = _buttonSelectedColor;
+        else if (type == SelectedSlotType.ArmorInventory) _armorInvSlotButtons[index].image.color = _buttonSelectedColor;
+        else if (type == SelectedSlotType.Armor) _armorButton.image.color = _buttonSelectedColor;
+        else if (type == SelectedSlotType.Consumable) _consumableButton.image.color = _buttonSelectedColor;
 
         OnItemSelected?.Invoke(GetItemData(type, index));
     }
@@ -245,13 +272,13 @@ public class SlotsUI : MonoBehaviour
             if (slots[i].IsEmpty)
             {
                 _generalSlotIcons[i].sprite = null;
-                _generalSlotIcons[i].color = _emptyColor;
+                _generalSlotIcons[i].color = _iconHiddenColor;
                 _generalSlotCounts[i].text = "";
             }
             else
             {
                 _generalSlotIcons[i].sprite = slots[i].Item.Icon;
-                _generalSlotIcons[i].color = _defaultColor;
+                _generalSlotIcons[i].color = _iconVisibleColor;
                 _generalSlotCounts[i].text = slots[i].Quantity > 1 ? slots[i].Quantity.ToString() : "";
             }
         }
@@ -264,12 +291,12 @@ public class SlotsUI : MonoBehaviour
             if (slots[i].IsEmpty)
             {
                 _armorInvSlotIcons[i].sprite = null;
-                _armorInvSlotIcons[i].color = _emptyColor;
+                _armorInvSlotIcons[i].color = _iconHiddenColor;
             }
             else
             {
                 _armorInvSlotIcons[i].sprite = slots[i].Item.Icon;
-                _armorInvSlotIcons[i].color = _defaultColor;
+                _armorInvSlotIcons[i].color = _iconVisibleColor;
             }
         }
         ClearSelection();
@@ -279,12 +306,12 @@ public class SlotsUI : MonoBehaviour
         if (armor != null)
         {
             _armorIcon.sprite = armor.Icon;
-            _armorIcon.color = _defaultColor;
+            _armorIcon.color = _iconVisibleColor;
         }
         else
         {
             _armorIcon.sprite = null;
-            _armorIcon.color = _emptyColor;
+            _armorIcon.color = _iconHiddenColor;
         }
         ClearSelection();
     }
@@ -293,13 +320,13 @@ public class SlotsUI : MonoBehaviour
         if (consumable != null && count > 0)
         {
             _consumableIcon.sprite = consumable.Icon;
-            _consumableIcon.color = _defaultColor;
+            _consumableIcon.color = _iconVisibleColor;
             _consumableCountText.text = count.ToString();
         }
         else
         {
             _consumableIcon.sprite = null;
-            _consumableIcon.color = _emptyColor;
+            _consumableIcon.color = _iconHiddenColor;
             _consumableCountText.text = "";
         }
         ClearSelection();

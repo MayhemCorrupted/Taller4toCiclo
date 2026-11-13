@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System;
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerFSM))]
 [RequireComponent(typeof(PlayerStats))]
@@ -25,11 +26,10 @@ public class PlayerCombat : MonoBehaviour
     [Header("Burst Settings")]
     [SerializeField] private int _burstCount = 3;
     [SerializeField] private float _burstDelay = 0.15f;
-    [SerializeField] private float _burstSpreadAngle = 15f; 
+    [SerializeField] private float _burstSpreadAngle = 15f;
     [Header("Skills Cooldowns")]
     [SerializeField] private float _distanceSkillCooldownDuration = 3f;
     [SerializeField] private float _areaSkillCooldownDuration = 5f;
-
     private float _distanceSkillTimer = 0f;
     private float _areaSkillTimer = 0f;
     private Transform _lockOnTarget;
@@ -40,11 +40,11 @@ public class PlayerCombat : MonoBehaviour
     private PlayerStamina _playerStamina;
     private PlayerHealth _playerHealth;
     private Camera _mainCamera;
-
     private readonly Collider[] _hitEnemiesBuffer = new Collider[15];
     private bool _isWeaponActive = false;
     public Transform LockOnTarget => _lockOnTarget;
     public int CurrentSkillID { get; private set; } = 0;
+    public event Action<int> OnSkillSwapped;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
@@ -80,14 +80,22 @@ public class PlayerCombat : MonoBehaviour
         if (_distanceSkillTimer > 0f) _distanceSkillTimer -= Time.deltaTime;
         if (_areaSkillTimer > 0f) _areaSkillTimer -= Time.deltaTime;
     }
+    public float GetSkillCooldownPercentage(int skillID)
+    {
+        if (skillID == 0) return _distanceSkillCooldownDuration > 0f ? Mathf.Clamp01(_distanceSkillTimer / _distanceSkillCooldownDuration) : 0f;
+        return _areaSkillCooldownDuration > 0f ? Mathf.Clamp01(_areaSkillTimer / _areaSkillCooldownDuration) : 0f;
+    }
     public void SwapSkill()
     {
         CurrentSkillID = CurrentSkillID == 0 ? 1 : 0;
+
+        OnSkillSwapped?.Invoke(CurrentSkillID);
     }
     public bool IsSkillOnCooldown(int skillID)
     {
         return skillID == 0 ? _distanceSkillTimer > 0f : _areaSkillTimer > 0f;
     }
+
     public bool TrySkillAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
@@ -124,11 +132,13 @@ public class PlayerCombat : MonoBehaviour
         _playerFSM.ChangeState(PlayerState.Skill);
         return true;
     }
+
     private float CalculateGrossDamage(float attackMultiplier)
     {
         float sumBonus = _playerStats.FuerzaMult + _playerStats.VesaniaDamageBonus + _playerStats.ConsumableDamageBonus;
         return _baseWeaponDamage * attackMultiplier * (1f + sumBonus);
     }
+
     public void ExecuteSkill()
     {
         if (CurrentSkillID == 0)
@@ -150,6 +160,7 @@ public class PlayerCombat : MonoBehaviour
             }
         }
     }
+
     private IEnumerator ShootBurstRoutine(float damage)
     {
         for (int i = 0; i < _burstCount; i++)
@@ -164,7 +175,6 @@ public class PlayerCombat : MonoBehaviour
                 }
 
                 Quaternion spreadRotation = transform.rotation * Quaternion.Euler(0f, angle, 0f);
-
                 Vector3 shootDirection = spreadRotation * Vector3.forward;
 
                 GameObject proj = Instantiate(_rangedProjectilePrefab, _projectileSpawnPoint.position, spreadRotation);
@@ -173,10 +183,10 @@ public class PlayerCombat : MonoBehaviour
                     projectile.Init(shootDirection, damage);
                 }
             }
-
             yield return new WaitForSeconds(_burstDelay);
         }
     }
+
     public bool TryLightAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
@@ -190,6 +200,7 @@ public class PlayerCombat : MonoBehaviour
         _playerFSM.ChangeState(PlayerState.Attacking);
         return true;
     }
+
     public bool TryHeavyAttack()
     {
         if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;

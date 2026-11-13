@@ -1,36 +1,50 @@
+using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System;
+using UnityEngine.UI;
 public enum OptionSelected { graphics, audio, controls, accessibility }
 public class OptionsPanelUI : MonoBehaviour
 {
+    [Header("Referencias de Paneles")]
     [SerializeField] private PauseMenuUI _pauseMenuUI;
     [SerializeField] private ExitPanelUI _exitPanelUI;
     [SerializeField] private ConfigPanelUI _configPanelUI;
-
     [SerializeField] private GameObject _optionsPanel;
-
+    [Header("Botones de Sección")]
     [SerializeField] private Button _graphicsSectionButton;
     [SerializeField] private Button _audioSectionButton;
     [SerializeField] private Button _controlsSectionButton;
     [SerializeField] private Button _accessibilitySectionButton;
-
+    [Header("Botones de Navegación")]
     [SerializeField] private Button _optionsButton;
-    [SerializeField] private Button _returnButton; 
-    [SerializeField] private Animator _optionsAnimator;
+    [SerializeField] private Button _returnButton;
 
+    [Header("LeanTween Slide Settings")]
+    [SerializeField] private float _transitionDuration = 0.35f;
+    [SerializeField] private float _fastReturnBtnDuration = 0.12f;
+    [SerializeField] private LeanTweenType _easeIn = LeanTweenType.easeOutQuint;
+    [SerializeField] private LeanTweenType _easeOut = LeanTweenType.easeInOutQuint;
     public Action<bool> IsOpen;
     private bool _isTransitioning = false;
-
-    private readonly int _showHash = Animator.StringToHash("Show");
-    private readonly int _hideHash = Animator.StringToHash("Hide");
-    private void Start()
+    private RectTransform _panelRect;
+    private Vector2 _targetPos;
+    private Vector3 _returnBtnDefaultScale = Vector3.one;
+    private void Awake()
     {
         if (_pauseMenuUI == null) _pauseMenuUI = FindAnyObjectByType<PauseMenuUI>();
         if (_exitPanelUI == null) _exitPanelUI = FindAnyObjectByType<ExitPanelUI>();
         if (_configPanelUI == null) _configPanelUI = FindAnyObjectByType<ConfigPanelUI>();
+
+        if (_optionsPanel != null)
+        {
+            _panelRect = _optionsPanel.GetComponent<RectTransform>();
+            _targetPos = _panelRect.anchoredPosition;
+            _optionsPanel.SetActive(false);
+        }
+
+        if (_returnButton != null)
+            _returnBtnDefaultScale = _returnButton.transform.localScale;
 
         if (_graphicsSectionButton != null) _graphicsSectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.graphics));
         if (_audioSectionButton != null) _audioSectionButton.onClick.AddListener(() => OpenSpecificConfig(OptionSelected.audio));
@@ -56,13 +70,15 @@ public class OptionsPanelUI : MonoBehaviour
         if (_controlsSectionButton != null) _controlsSectionButton.onClick.RemoveAllListeners();
         if (_accessibilitySectionButton != null) _accessibilitySectionButton.onClick.RemoveAllListeners();
 
+        if (_optionsButton != null) _optionsButton.onClick.RemoveAllListeners();
         if (_returnButton != null) _returnButton.onClick.RemoveAllListeners();
     }
     private void EscapeClosePanel(bool isPauseOpen)
     {
-        if (!isPauseOpen && _optionsPanel.activeInHierarchy && !_isTransitioning)
+        if (!isPauseOpen && _optionsPanel != null && _optionsPanel.activeInHierarchy)
         {
-            StartCoroutine(ClosingPanel());
+            StopAllCoroutines();
+            StartCoroutine(ClosingPanel(restoreParentFocus: false));
         }
     }
     public void OpenPanel()
@@ -73,15 +89,49 @@ public class OptionsPanelUI : MonoBehaviour
     public void ClosePanel()
     {
         if (_isTransitioning) return;
-        StartCoroutine(ClosingPanel());
+        StartCoroutine(ClosingPanel(restoreParentFocus: true));
     }
     private void OpenSpecificConfig(OptionSelected optionToOpen)
     {
         if (_isTransitioning) return;
-        EnableReturnButton(false);
+
+        SetReturnButtonFastVisibility(false);
         EnableSectionButtons(false);
         EnableOptionsButton(false);
+
         _configPanelUI.OpenConfigPanel(optionToOpen);
+    }
+    public void OnConfigClosed()
+    {
+        SetReturnButtonFastVisibility(true);
+        EnableSectionButtons(true);
+        RestoreSelectedButton();
+    }
+    public void SetReturnButtonFastVisibility(bool visible)
+    {
+        if (_returnButton == null) return;
+
+        LeanTween.cancel(_returnButton.gameObject);
+        _returnButton.interactable = visible;
+
+        if (visible)
+        {
+            _returnButton.gameObject.SetActive(true);
+            _returnButton.transform.localScale = Vector3.zero;
+            LeanTween.scale(_returnButton.gameObject, _returnBtnDefaultScale, _fastReturnBtnDuration)
+                .setEaseOutBack()
+                .setIgnoreTimeScale(true);
+        }
+        else
+        {
+            LeanTween.scale(_returnButton.gameObject, Vector3.zero, _fastReturnBtnDuration)
+                .setEaseInQuint()
+                .setIgnoreTimeScale(true)
+                .setOnComplete(() =>
+                {
+                    if (_returnButton != null) _returnButton.gameObject.SetActive(false);
+                });
+        }
     }
     public void RestoreSelectedButton()
     {
@@ -110,39 +160,79 @@ public class OptionsPanelUI : MonoBehaviour
         if (_accessibilitySectionButton != null) _accessibilitySectionButton.interactable = state;
         if (_controlsSectionButton != null) _controlsSectionButton.interactable = state;
     }
+    private float GetHiddenLeftX(RectTransform rect)
+    {
+        if (rect == null) return -1000f;
+        Canvas canvas = rect.GetComponentInParent<Canvas>();
+        float canvasWidth = canvas != null ? canvas.GetComponent<RectTransform>().rect.width : 2560f;
+        float anchorXInCanvas = canvasWidth * rect.anchorMin.x;
+        float rightEdgeOffset = rect.rect.width * (1f - rect.pivot.x);
+        return -anchorXInCanvas - rightEdgeOffset - 20f;
+    }
     private IEnumerator OpeningPanel()
     {
         _isTransitioning = true;
         IsOpen?.Invoke(true);
-        _optionsPanel.SetActive(true);
-        _optionsAnimator.SetTrigger(_showHash);
-        _pauseMenuUI.EnableResumeButton(false);
-        _exitPanelUI.EnableQuitButton(false);
+
+        if (_optionsPanel != null) _optionsPanel.SetActive(true);
+
+        if (_pauseMenuUI != null) _pauseMenuUI.EnableResumeButton(false);
+        if (_exitPanelUI != null) _exitPanelUI.EnableQuitButton(false);
         EnableOptionsButton(false);
-        EnableReturnButton(true);
+
+        if (_returnButton != null)
+        {
+            LeanTween.cancel(_returnButton.gameObject);
+            _returnButton.gameObject.SetActive(true);
+            _returnButton.transform.localScale = _returnBtnDefaultScale;
+            _returnButton.interactable = true;
+        }
+
         EnableSectionButtons(true);
         SelectButton(_graphicsSectionButton);
-        yield return null;
+
+        if (_panelRect != null)
+        {
+            LeanTween.cancel(_panelRect.gameObject);
+            float hiddenX = GetHiddenLeftX(_panelRect);
+            _panelRect.anchoredPosition = new Vector2(hiddenX, _targetPos.y);
+
+            LeanTween.moveX(_panelRect, _targetPos.x, _transitionDuration)
+                .setEase(_easeIn)
+                .setIgnoreTimeScale(true);
+        }
+
+        yield return new WaitForSecondsRealtime(_transitionDuration);
         _isTransitioning = false;
     }
-    private IEnumerator ClosingPanel()
+    private IEnumerator ClosingPanel(bool restoreParentFocus)
     {
         _isTransitioning = true;
         IsOpen?.Invoke(false);
-        if (_optionsAnimator != null)
-        {
-            _optionsAnimator.SetTrigger(_hideHash);
-            yield return null;
+        EnableReturnButton(false);
+        EnableSectionButtons(false);
 
-            AnimatorStateInfo stateInfo = _optionsAnimator.GetCurrentAnimatorStateInfo(0);
-            yield return new WaitForSecondsRealtime(stateInfo.length);
+        if (_panelRect != null)
+        {
+            LeanTween.cancel(_panelRect.gameObject);
+            float hiddenX = GetHiddenLeftX(_panelRect);
+
+            LeanTween.moveX(_panelRect, hiddenX, _transitionDuration)
+                .setEase(_easeOut)
+                .setIgnoreTimeScale(true);
         }
 
+        yield return new WaitForSecondsRealtime(_transitionDuration);
+
         EnableOptionsButton(true);
-        _pauseMenuUI.EnableResumeButton(true);
-        _exitPanelUI.EnableQuitButton(true);
-        EnableOptionsButton(true);
-        _optionsPanel.SetActive(false);
+        if (restoreParentFocus)
+        {
+            if (_pauseMenuUI != null) _pauseMenuUI.EnableResumeButton(true);
+            if (_exitPanelUI != null) _exitPanelUI.EnableQuitButton(true);
+            SelectButton(_optionsButton);
+        }
+
+        if (_optionsPanel != null) _optionsPanel.SetActive(false);
         _isTransitioning = false;
     }
 }
