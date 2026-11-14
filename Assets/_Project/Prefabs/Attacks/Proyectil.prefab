@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5889689028162476206}
   - component: {fileID: 8822510533601581181}
   - component: {fileID: 6908849013757093667}
-  - component: {fileID: 2749001276196713346}
+  - component: {fileID: 5447188204070546944}
   m_Layer: 0
   m_Name: Proyectil
   m_TagString: Untagged
@@ -113,7 +113,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2749001276196713346
+--- !u!114 &5447188204070546944
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,9 +122,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7495063903542279499}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea483352a7344b24da7f07cdc3f6af55, type: 3}
+  m_Script: {fileID: 11500000, guid: cec2cf2d83355be4d8ade2c8344e1278, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Projectile
+  m_EditorClassIdentifier: Assembly-CSharp::EntityProjectile
   _wallLayer:
     serializedVersion: 2
     m_Bits: 128

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Custodio
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   rank: 1
-  preferredAttackDistance: 2
+  preferredAttackDistance: 3
   health: 140
   defense: 40
   speed: 2.3
@@ -29,7 +29,10 @@ MonoBehaviour:
     healthThresholdPercentage: 1
     attackPool:
       closeRangeMax: 0
-      mediumRangeMax: 7
+      mediumRangeMax: 4
       closeRangeAttacks: []
-      mediumRangeAttacks: []
-      farRangeAttacks: []
+      mediumRangeAttacks:
+      - {fileID: 11400000, guid: 964f01d0bdda98648b30fdae3f17ea23, type: 2}
+      farRangeAttacks:
+      - {fileID: 11400000, guid: 9ee3bfd7fe444f6448ab8e434998263b, type: 2}
+      - {fileID: 11400000, guid: 964f01d0bdda98648b30fdae3f17ea23, type: 2}

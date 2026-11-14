@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79ec6f7cd15c6124a9c05f91b1f0abd8, type: 3}
+  m_Name: EntityAreaAttack
+  m_EditorClassIdentifier: Assembly-CSharp::EntityAreaAttack
+  damage: 15
+  knockback: 0
+  telegraphDuration: 1.5
+  attackDuration: 1
+  trackTargetUntil: 0.7
+  overrideBaseArmor: 1
+  armorState: 1
+  hyperarmorDamageMultiplier: 0.5
+  animationTrigger: 
+  areaOrigin: 1
+  radius: 2.5
+  trackTarget: 1
+  indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}
