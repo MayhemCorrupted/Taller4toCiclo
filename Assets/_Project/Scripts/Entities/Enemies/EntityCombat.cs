@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(Health))]
 public class EntityCombat : MonoBehaviour
 {
+    public static event Action<EntityCombat> OnAnyEnemyTargetDetected;
+    public static event Action<EntityCombat> OnAnyEnemyTargetLost;
     private EntityBrain _brain;
     private Health _health;
     [SerializeField] private Animator _animator;
@@ -17,26 +20,33 @@ public class EntityCombat : MonoBehaviour
     private int _currentPhaseIndex = -1;
 
     private Transform _target;
+    private Health _targetHealth;
     private float _atkCountdown = 0.0f;
     private readonly Collider[] _hitBuffer = new Collider[5];
     private WaitForSeconds _rangeEvalInterval;
+    private Coroutine _detectionCoroutine;
+    private Coroutine _attackCoroutine;
     private bool _isPerformingAttack = false;
     private EntityAttack _currentAttackLogic;
 
     private Vector3 _previousTargetPos;
     public Vector3 TargetVelocity { get; private set; }
+    public EntityData Data => _entityData;
     public EnemyRank Rank => _entityData != null ? _entityData.rank : EnemyRank.Minion;
     public int PreferredAttackDistance => _entityData != null ? _entityData.preferredAttackDistance : 0;
     public EnemyPhase CurrentPhase => _currentPhase;
     public bool IsPerformingAttack => _isPerformingAttack;
-    public Transform TargetTransform => _target;
-    public Vector3 TargetLocation => _target != null ? _target.position : Vector3.positiveInfinity;
-    public bool CanSeeTarget => _target != null;
+    public Transform TargetTransform => IsTargetAlive() ? _target : null;
+    public Vector3 TargetLocation => IsTargetAlive() ? _target.position : Vector3.positiveInfinity;
+    public bool CanSeeTarget => IsTargetAlive();
     public bool IsInAttackRange
     {
         get
         {
-            if (_target == null || _entityData == null) return false;
+            if (_brain != null && (_brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Death))
+                return false;
+
+            if (!IsTargetAlive() || _entityData == null) return false;
 
             if (EntityDirector.Instance != null && EntityDirector.Instance.GetHighestRankPresent() >= EnemyRank.MiniBoss && Rank == EnemyRank.Minion)
             {
@@ -44,16 +54,19 @@ public class EntityCombat : MonoBehaviour
             }
 
             float dist = Vector3.Distance(transform.position, _target.position);
+            _entityData.GetPreferredRangeBand(_currentPhase, out float minRange, out _, out float maxRange);
 
-            float maxRange = _entityData.attackRadius;
-            if (_currentPhase != null)
+            if (dist > maxRange) return false;
+
+            if (PreferredAttackDistance >= 2 && dist < minRange * 0.85f)
             {
-                if (PreferredAttackDistance == 1) maxRange = _currentPhase.attackPool.closeRangeMax;
-                else if (PreferredAttackDistance == 2) maxRange = _currentPhase.attackPool.mediumRangeMax;
-                else maxRange = _entityData.attackRadius;
+                Vector3 awayFromTarget = (transform.position - _target.position).normalized;
+                awayFromTarget.y = 0f;
+                bool isCorneredAgainstWall = Physics.Raycast(transform.position + Vector3.up * 0.5f, awayFromTarget, 1.5f, _wallLayer);
+                if (!isCorneredAgainstWall) return false;
             }
 
-            return dist <= maxRange;
+            return true;
         }
     }
     public bool IsArmorActive
@@ -81,15 +94,32 @@ public class EntityCombat : MonoBehaviour
     {
         EnsureComponentsInitialized();
         if (_brain != null) _brain.OnStateChanged += HandleBrainStateChanged;
-        if (_health != null) _health.OnTakeDamage += EvaluatePhaseChange;
+        if (_health != null)
+        {
+            _health.OnTakeDamage += EvaluatePhaseChange;
+            _health.OnDeath += HandleSelfDeath;
+        }
         if (EntityDirector.Instance != null) EntityDirector.Instance.RegisterEnemy(this);
+
+        if (_entityData != null && _detectionCoroutine == null)
+        {
+            _rangeEvalInterval = new WaitForSeconds(_checkInterval);
+            _detectionCoroutine = StartCoroutine(DetectionRoutine());
+        }
     }
     private void OnDisable()
     {
         if (_brain != null) _brain.OnStateChanged -= HandleBrainStateChanged;
-        if (_health != null) _health.OnTakeDamage -= EvaluatePhaseChange;
+        if (_health != null)
+        {
+            _health.OnTakeDamage -= EvaluatePhaseChange;
+            _health.OnDeath -= HandleSelfDeath;
+        }
         if (EntityDirector.Instance != null) EntityDirector.Instance.UnregisterEnemy(this);
-        if (_currentAttackLogic != null) _currentAttackLogic.CancelAttack();
+
+        AbortCurrentAttack();
+        ClearTarget();
+        _detectionCoroutine = null;
     }
     private void Start()
     {
@@ -102,17 +132,92 @@ public class EntityCombat : MonoBehaviour
         EvaluatePhaseChange(0);
         ApplyCurrentArmorState();
         _rangeEvalInterval = new WaitForSeconds(_checkInterval);
-        if (gameObject.activeInHierarchy) StartCoroutine(DetectionRoutine());
+
+        if (gameObject.activeInHierarchy)
+        {
+            if (_detectionCoroutine != null) StopCoroutine(_detectionCoroutine);
+            _detectionCoroutine = StartCoroutine(DetectionRoutine());
+        }
+    }
+    private bool IsTargetAlive()
+    {
+        if (_target == null || !_target.gameObject.activeInHierarchy)
+            return false;
+
+        if (_targetHealth != null && _targetHealth.CurrentHealth <= 0f)
+            return false;
+
+        return true;
+    }
+    private void SetTarget(Transform newTarget, Health targetHealth)
+    {
+        if (_target == newTarget) return;
+
+        _target = newTarget;
+        _targetHealth = targetHealth;
+        _previousTargetPos = _target.position;
+        OnAnyEnemyTargetDetected?.Invoke(this);
+    }
+    private void ClearTarget()
+    {
+        if (_target == null && _targetHealth == null) return;
+
+        _target = null;
+        _targetHealth = null;
+        TargetVelocity = Vector3.zero;
+        OnAnyEnemyTargetLost?.Invoke(this);
+    }
+    private void AbortCurrentAttack()
+    {
+        if (_attackCoroutine != null)
+        {
+            StopCoroutine(_attackCoroutine);
+            _attackCoroutine = null;
+        }
+
+        if (_currentAttackLogic != null)
+        {
+            _currentAttackLogic.CancelAttack();
+            _currentAttackLogic = null;
+        }
+
+        if (_isPerformingAttack)
+        {
+            _isPerformingAttack = false;
+            ApplyCurrentArmorState();
+            if (EntityDirector.Instance != null) EntityDirector.Instance.NotifyAttackFinished(this);
+        }
+    }
+    private void HandleSelfDeath()
+    {
+        AbortCurrentAttack();
+        ClearTarget();
+        if (_detectionCoroutine != null)
+        {
+            StopCoroutine(_detectionCoroutine);
+            _detectionCoroutine = null;
+        }
+        if (EntityDirector.Instance != null) EntityDirector.Instance.UnregisterEnemy(this);
     }
     private void Update()
     {
+        if (_brain != null && (_brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing))
+            return;
+
+        if (_target != null && !IsTargetAlive())
+        {
+            AbortCurrentAttack();
+            ClearTarget();
+            return;
+        }
+
         if (_target == null || _entityData == null)
         {
             TargetVelocity = Vector3.zero;
             return;
         }
 
-        TargetVelocity = (_target.position - _previousTargetPos) / Time.deltaTime;
+        TargetVelocity = (_target.position - _previousTargetPos) / Mathf.Max(Time.deltaTime, 0.0001f);
         _previousTargetPos = _target.position;
 
         if (_brain != null && _brain.CurrentState == EnemyState.Attacking && !_isPerformingAttack)
@@ -121,7 +226,7 @@ public class EntityCombat : MonoBehaviour
             {
                 if (EntityDirector.Instance == null || EntityDirector.Instance.RequestAttackPermission(this))
                 {
-                    StartCoroutine(PerformAttackRoutine());
+                    _attackCoroutine = StartCoroutine(PerformAttackRoutine());
                 }
             }
             else
@@ -152,7 +257,7 @@ public class EntityCombat : MonoBehaviour
     }
     private EntityAttack SelectAttackByDistance()
     {
-        if (_currentPhase == null || _target == null) return null;
+        if (_currentPhase == null || !IsTargetAlive()) return null;
         float dist = Vector3.Distance(transform.position, _target.position);
         List<EntityAttack> candidatePool = null;
 
@@ -173,17 +278,18 @@ public class EntityCombat : MonoBehaviour
         if (candidatePool == null || candidatePool.Count == 0) candidatePool = _currentPhase.attackPool.closeRangeAttacks;
         if (candidatePool == null || candidatePool.Count == 0) return null;
 
-        return candidatePool[Random.Range(0, candidatePool.Count)];
+        return candidatePool[UnityEngine.Random.Range(0, candidatePool.Count)];
     }
     private IEnumerator PerformAttackRoutine()
     {
         _isPerformingAttack = true;
         _currentAttackLogic = SelectAttackByDistance();
 
-        if (_currentAttackLogic == null)
+        if (_currentAttackLogic == null || !IsTargetAlive())
         {
-            _atkCountdown = Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
+            _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
             _isPerformingAttack = false;
+            _attackCoroutine = null;
             if (EntityDirector.Instance != null) EntityDirector.Instance.NotifyAttackFinished(this);
             yield break;
         }
@@ -197,20 +303,29 @@ public class EntityCombat : MonoBehaviour
         float prepTimer = 0f;
         while (prepTimer < _currentAttackLogic.telegraphDuration)
         {
+            if (!IsTargetAlive() || (_brain != null && (_brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Death)))
+            {
+                AbortCurrentAttack();
+                if (!IsTargetAlive()) ClearTarget();
+                yield break;
+            }
+
             prepTimer += Time.deltaTime;
             _currentAttackLogic.UpdatePreparation(transform, _target, prepTimer / Mathf.Max(_currentAttackLogic.telegraphDuration, 0.001f));
             yield return null;
         }
 
-        if (_target != null)
+        if (IsTargetAlive() && (_brain == null || (_brain.CurrentState != EnemyState.Agonizing && _brain.CurrentState != EnemyState.Death)))
         {
             IEnumerator attackExecution = _currentAttackLogic.Execute(transform, _target, this);
             if (attackExecution != null) yield return StartCoroutine(attackExecution);
         }
 
         ApplyCurrentArmorState();
-        _atkCountdown = Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
+        _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
         _isPerformingAttack = false;
+        _currentAttackLogic = null;
+        _attackCoroutine = null;
 
         if (EntityDirector.Instance != null) EntityDirector.Instance.NotifyAttackFinished(this);
     }
@@ -230,6 +345,14 @@ public class EntityCombat : MonoBehaviour
     }
     private void HandleBrainStateChanged(EnemyState newState)
     {
+        if (newState == EnemyState.Death || newState == EnemyState.Agonizing)
+        {
+            AbortCurrentAttack();
+            if (_entityData != null && newState == EnemyState.Agonizing)
+                _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
+            return;
+        }
+
         if (newState == EnemyState.Hurt)
         {
             ArmorType currentArmor = (_currentAttackLogic != null && _currentAttackLogic.overrideBaseArmor)
@@ -238,13 +361,9 @@ public class EntityCombat : MonoBehaviour
 
             if (_isPerformingAttack && currentArmor == ArmorType.None)
             {
-                if (_currentAttackLogic != null) _currentAttackLogic.CancelAttack();
-                _isPerformingAttack = false;
-                StopAllCoroutines();
-                StartCoroutine(DetectionRoutine());
-                _atkCountdown = Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
-
-                if (EntityDirector.Instance != null) EntityDirector.Instance.NotifyAttackFinished(this);
+                AbortCurrentAttack();
+                if (_entityData != null)
+                    _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
             }
         }
     }
@@ -254,22 +373,38 @@ public class EntityCombat : MonoBehaviour
         {
             yield return _rangeEvalInterval;
             if (_entityData == null) continue;
+            if (_brain != null && _brain.CurrentState == EnemyState.Death) yield break;
 
             if (_target == null)
             {
                 int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _entityData.detectionRadius, _hitBuffer, _targetLayer);
-                if (hitCount > 0 && HasClearLineOfSight(_hitBuffer[0].transform, _entityData.detectionRadius))
+                for (int i = 0; i < hitCount; i++)
                 {
-                    _target = _hitBuffer[0].transform;
-                    _previousTargetPos = _target.position;
+                    Transform candidate = _hitBuffer[i].transform;
+                    Health candidateHealth = candidate.GetComponentInParent<Health>();
+
+                    if (candidateHealth != null && candidateHealth.CurrentHealth <= 0f)
+                        continue;
+
+                    if (HasClearLineOfSight(candidate, _entityData.detectionRadius))
+                    {
+                        SetTarget(candidate, candidateHealth);
+                        break;
+                    }
                 }
             }
             else
             {
+                if (!IsTargetAlive())
+                {
+                    ClearTarget();
+                    continue;
+                }
+
                 float distance = Vector3.Distance(transform.position, _target.position);
                 if (distance > _entityData.lossRadius || !HasClearLineOfSight(_target, distance))
                 {
-                    _target = null;
+                    ClearTarget();
                 }
             }
         }

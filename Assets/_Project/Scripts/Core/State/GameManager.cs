@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 [Serializable]
 public struct VesaniaSpawnGroup
@@ -18,6 +19,15 @@ public class GameManager : MonoBehaviour
     public event Action OnLifeLost;
     public event Action OnPlayerRespawned;
 
+    [Header("Unity Events")]
+    public UnityEvent<int> OnVesaniaChangedEvent;
+    [Tooltip("Se dispara cuando el jugador muere pero aún le quedan vidas. Conectar aquí FadeUI.StartSequence.")]
+    public UnityEvent OnLifeLostEvent;
+    [Tooltip("Se dispara justo después de teletransportar y curar al jugador en el checkpoint.")]
+    public UnityEvent OnPlayerRespawnedEvent;
+    [Tooltip("Se dispara cuando las vidas llegan a 0.")]
+    public UnityEvent OnGameOverEvent;
+
     [Header("Player Settings")]
     [Tooltip("Referencia al GameObject Raíz del jugador. Si es nulo, se buscará automáticamente por Tag 'Player'.")]
     [SerializeField] private GameObject _player;
@@ -32,11 +42,9 @@ public class GameManager : MonoBehaviour
 
     private int _currentLives = 3;
     private int _currentVesania = 1;
-
     public int CurrentLives => _currentLives;
     public int CurrentVesania => _currentVesania;
     public GameObject Player => _player;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -59,26 +67,22 @@ public class GameManager : MonoBehaviour
     {
         UpdateVesaniaObjects();
     }
-    public void ProcessPlayerDeathAfterAnimation()
+    public void ProcessPlayerDeath()
     {
         if (_currentLives <= 0) return;
 
         _currentLives--;
         IncreaseVesania();
 
-        if (_currentLives <= 0)
+        if (_currentLives > 0)
         {
-            TriggerGameOver();
+            OnLifeLost?.Invoke();
+            OnLifeLostEvent?.Invoke();
         }
         else
         {
-            OnLifeLost?.Invoke();
-            RespawnPlayerAtCheckpoint();
+            TriggerGameOver();
         }
-    }
-    public void ProcessGameOverAfterAnimation()
-    {
-        TriggerGameOver();
     }
     private void IncreaseVesania()
     {
@@ -86,6 +90,7 @@ public class GameManager : MonoBehaviour
         {
             _currentVesania++;
             OnVesaniaChanged?.Invoke(_currentVesania);
+            OnVesaniaChangedEvent?.Invoke(_currentVesania);
             UpdateVesaniaObjects();
         }
     }
@@ -93,6 +98,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Muerte definitiva. Las 3 vidas se han agotado.");
         OnGameOver?.Invoke();
+        OnGameOverEvent?.Invoke();
     }
     public void RespawnPlayerAtCheckpoint()
     {
@@ -101,6 +107,7 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("GameManager: No hay referencia al GameObject Raíz del jugador para reaparecer.");
             return;
         }
+
         if (_statueCheckpointTransform != null)
         {
             if (_player.TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
@@ -122,13 +129,14 @@ public class GameManager : MonoBehaviour
         }
 
         OnPlayerRespawned?.Invoke();
+        OnPlayerRespawnedEvent?.Invoke();
     }
-
     public void ResetLivesAndVesania()
     {
         _currentLives = 3;
         _currentVesania = 1;
         OnVesaniaChanged?.Invoke(_currentVesania);
+        OnVesaniaChangedEvent?.Invoke(_currentVesania);
         UpdateVesaniaObjects();
     }
     private void UpdateVesaniaObjects()

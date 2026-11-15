@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[Serializable]
-public class TagRequirement
+
+[Serializable] public class TagRequirement
+
 {
     [Tooltip("El Tag del objeto/enemigo que estamos buscando (Ej: 'Slime', 'Cofre').")]
     public string requiredTag = "Enemy";
@@ -23,7 +24,6 @@ public class TagRequirement
 
     [HideInInspector] public bool hasBeenMet = false;
 }
-
 public class StateManager : MonoBehaviour
 {
     public static StateManager Instance { get; private set; }
@@ -53,7 +53,6 @@ public class StateManager : MonoBehaviour
     private readonly Dictionary<string, int> _killedTags = new();
     private readonly Dictionary<string, int> _interactedTags = new();
     private readonly HashSet<string> _unlockedFlags = new();
-
     private readonly Dictionary<int, UnityEvent> _stateEventsLookup = new();
     private bool _combatCompletedFired;
     private bool _interactionsCompletedFired;
@@ -177,7 +176,6 @@ public class StateManager : MonoBehaviour
             _combatCompletedFired = true;
             onCombatCompleted?.Invoke();
         }
-
         if (!_interactionsCompletedFired && _currentProgression.TotalInteractions > 0 && _currentProgression.InteractionsCompleted >= _currentProgression.TotalInteractions)
         {
             _interactionsCompletedFired = true;

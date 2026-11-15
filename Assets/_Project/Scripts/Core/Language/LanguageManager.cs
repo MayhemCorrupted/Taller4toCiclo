@@ -4,7 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-[Serializable] public struct LocalizedTMP
+
+[Serializable]
+public struct LocalizedTMP
 {
     public string localizedName;
     public LocalizedString localizedText;

@@ -10,29 +10,31 @@ using System;
     [Min(0f)] public float fadeOutDuration;
     [Tooltip("Se invoca al INICIAR la secuencia, justo antes de que el panel empiece a aparecer (Alpha 0 -> 1).")]
     public UnityEvent OnSequenceStart;
+    [Tooltip("Se invoca al FINALIZAR la secuencia, justo después de que el panel haya desaparecido (Alpha 1 -> 0).")]
+    public UnityEvent OnFadeInComplete;
     [Tooltip("Se invoca al terminar el Fade In y completar la duración prolongada de espera, ANTES del Fade Out.")]
     public UnityEvent OnDurationFade;
     [Tooltip("Se invoca cuando el Fade Out termina y el panel ya es invisible (Alpha 0).")]
     public UnityEvent OnSequenceComplete;
 }
-
-[RequireComponent(typeof(CanvasGroup))]
 public class FadeUI : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private GameObject _panelObject;
+
     [Header("Settings")]
     [SerializeField] private bool _disablePanelOnComplete = true;
     [Tooltip("Si es verdadero, el fade funcionará incluso si el juego está pausado (Time.timeScale = 0).")]
     [SerializeField] private bool _useUnscaledTime = false;
+
     [Header("Fade Sequences")]
     [SerializeField] private FadeEvents[] _fadeSettings;
     private Coroutine _currentFadeRoutine;
     private void Awake()
     {
-        if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
-        if (_panelObject == null) _panelObject = gameObject;
+        if (_canvasGroup == null) _canvasGroup = GetComponentInChildren<CanvasGroup>();
+        if (_panelObject == null) _panelObject = _canvasGroup.gameObject;
     }
     public void StartSequence(string sequenceName)
     {
@@ -48,13 +50,11 @@ public class FadeUI : MonoBehaviour
                 break;
             }
         }
-
         if (!eventFound)
         {
             Debug.LogWarning($"FadeUI: No se encontró la secuencia '{sequenceName}' en {gameObject.name}.");
             return;
         }
-
         if (_currentFadeRoutine != null)
         {
             StopCoroutine(_currentFadeRoutine);
@@ -68,7 +68,6 @@ public class FadeUI : MonoBehaviour
         _canvasGroup.alpha = 0f;
 
         activeEvents.OnSequenceStart?.Invoke();
-
         if (activeEvents.fadeInDuration > 0f)
         {
             yield return StartCoroutine(FadeCanvasGroup(0f, 1f, activeEvents.fadeInDuration));
@@ -77,6 +76,8 @@ public class FadeUI : MonoBehaviour
         {
             _canvasGroup.alpha = 1f;
         }
+        activeEvents.OnFadeInComplete?.Invoke();
+
         if (activeEvents.fadeStayDuration > 0f)
         {
             if (_useUnscaledTime)
@@ -102,7 +103,6 @@ public class FadeUI : MonoBehaviour
         {
             _panelObject.SetActive(false);
         }
-
         _currentFadeRoutine = null;
     }
     private IEnumerator FadeCanvasGroup(float startAlpha, float targetAlpha, float duration)

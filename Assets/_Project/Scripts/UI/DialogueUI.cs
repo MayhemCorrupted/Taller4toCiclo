@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization;
 using UnityEngine.UI;
+
 public class DialogueUI : MonoBehaviour
 {
     [SerializeField] private GameObject _playerHUD;
@@ -20,11 +21,13 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _interactionPromptTMP;
     [SerializeField] private LocalizedString _skipTypingLocalizedString;
     [SerializeField] private LocalizedString _nextLineLocalizedString;
+
     [Header("Tiempos y Animaciones")]
     [SerializeField] private float _fadePanelDuration = 0.3f;
     [SerializeField] private float _skipPromptDelay = 1.5f;
     [SerializeField] private float _nextPromptDelay = 0.2f;
     [SerializeField][Range(0.01f, 0.1f)] private float defaultTextSpeed = 0.03f;
+
     public bool IsTyping { get; private set; }
     private DialogueLine? _currentLine = null;
     private Coroutine _typingCoroutine;
@@ -129,6 +132,7 @@ public class DialogueUI : MonoBehaviour
 
             _dialogueTextTMP.text = text;
             _dialogueTextTMP.maxVisibleCharacters = 0; 
+
 
             _typingPercentage = 0f;
             _typingCoroutine = StartCoroutine(TypewriterRoutine());

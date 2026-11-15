@@ -118,7 +118,7 @@ public class StatsUI : MonoBehaviour, IPanel
             if (_increaseStatButton.Length > i && _increaseStatButton[i] != null)
                 _increaseStatButton[i].interactable = (_availablePoints > 0 && _tempStats[i] < 10);
 
-            if (_decreaseStatButton.Length > i && _decreaseStatButton[i] != null)
+            if (_decreaseStatButton.Length > i && _decreaseStatButton[i] != null)   
                 _decreaseStatButton[i].interactable = (_tempStats[i] > _baseStats[i]);
         }
 

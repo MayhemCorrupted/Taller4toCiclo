@@ -319,13 +319,13 @@ public class PlayerAnimator : MonoBehaviour
             case ActionStateType.Knockout:
                 if (GameManager.Instance != null)
                 {
-                    GameManager.Instance.ProcessPlayerDeathAfterAnimation();
+                    GameManager.Instance.ProcessPlayerDeath();
                 }
                 break;
             case ActionStateType.Death:
                 if (GameManager.Instance != null)
                 {
-                    GameManager.Instance.ProcessGameOverAfterAnimation();
+                    GameManager.Instance.ProcessPlayerDeath();
                 }
                 break;
         }

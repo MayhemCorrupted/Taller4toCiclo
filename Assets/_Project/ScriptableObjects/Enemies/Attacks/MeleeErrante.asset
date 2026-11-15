@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 20
   knockback: 7
-  telegraphDuration: 1
-  attackDuration: 0
-  trackTargetUntil: 0.8
+  telegraphDuration: 0.5
+  attackDuration: 1
+  trackTargetUntil: 0.5
   overrideBaseArmor: 1
   armorState: 1
   hyperarmorDamageMultiplier: 0.5
-  animationTrigger: 
+  animationTrigger: Melee
   isRadial: 0
   radius: 2
   hitboxMeasurements: {x: 1, y: 1, z: 2}

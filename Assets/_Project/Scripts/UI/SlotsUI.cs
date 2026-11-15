@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
 public class SlotsUI : MonoBehaviour
 {
     public event Action<ItemData> OnItemSelected;
@@ -26,6 +27,7 @@ public class SlotsUI : MonoBehaviour
 
     [Header("Icon Colors (Sprites)")]
     [SerializeField] private Color _iconVisibleColor = new(1f, 1f, 1f, 1f);
+
     [SerializeField] private Color _iconHiddenColor = new(1f, 1f, 1f, 0f);  
     private SelectedSlotType _currentSelectionType = SelectedSlotType.None;
     private int _selectedGeneralIndex = -1;

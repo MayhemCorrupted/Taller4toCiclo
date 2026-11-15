@@ -9,6 +9,7 @@ public class PlayerInputs : MonoBehaviour
     public event Action OnInteract;
     public event Action OnOpenInventory;
     public event Action OnLockOn;
+    public event Action<float> OnSwitchTarget;
     public event Action OnDodge;
     public event Action OnPause;
     public event Action OnSwap;
@@ -16,9 +17,10 @@ public class PlayerInputs : MonoBehaviour
     public Vector2 MoveInput { get; private set; }
     public bool InputRun { get; private set; }
     public bool InputBlock { get; private set; }
-    public string CurrentDeviceMode { get; private set; }
+    public string CurrentDeviceMode { get; private set; } = "PC_KeyboardMouse";
+
     private PlayerInputActions _inputActions;
-    void Awake()
+    private void Awake()
     {
         _inputActions = new();
 
@@ -42,6 +44,7 @@ public class PlayerInputs : MonoBehaviour
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();
         _inputActions.UI.Pause.performed += ctx => OnPause?.Invoke();
+        InitializeDeviceMode();
     }
     private void OnEnable()
     {
@@ -58,16 +61,45 @@ public class PlayerInputs : MonoBehaviour
     private void Update()
     {
         DetectCurrentDevice();
+        ReadMouseScroll();
+    }
+    private void InitializeDeviceMode()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        CurrentDeviceMode = "Mobile_Touch";
+#else
+        CurrentDeviceMode = "PC_KeyboardMouse";
+#endif
+    }
+    private void ReadMouseScroll()
+    {
+        if (Mouse.current == null) return;
+
+        float scrollY = Mouse.current.scroll.ReadValue().y;
+        if (Mathf.Abs(scrollY) > 0.01f)
+        {
+            OnSwitchTarget?.Invoke(Mathf.Sign(scrollY));
+        }
     }
     private void DetectCurrentDevice()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
         CurrentDeviceMode = "Mobile_Touch";
 #elif UNITY_STANDALONE || UNITY_EDITOR
-        if (Gamepad.current != null)
-            CurrentDeviceMode = "PC_Gamepad";
-        else
+        bool usedMouseOrKeyboard =
+            (Mouse.current != null && (Mouse.current.delta.ReadValue().sqrMagnitude > 0.1f ||
+                                       Mouse.current.leftButton.wasPressedThisFrame ||
+                                       Mouse.current.rightButton.wasPressedThisFrame)) ||
+            (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame);
+
+        if (usedMouseOrKeyboard)
+        {
             CurrentDeviceMode = "PC_KeyboardMouse";
+        }
+        else if (Gamepad.current != null && Gamepad.current.wasUpdatedThisFrame)
+        {
+            CurrentDeviceMode = "PC_Gamepad";
+        }
 #endif
     }
     public void RebindAction(InputAction actionToRebind, int bindingIndex, Action onRebindComplete)

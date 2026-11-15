@@ -37,7 +37,6 @@ public class HealthEvents : MonoBehaviour
         {
             StateManager.Instance.RegisterEntityKilled(gameObject.tag);
         }
-
         OnEntityDeath?.Invoke();
     }
 }
