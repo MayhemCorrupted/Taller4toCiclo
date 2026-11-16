@@ -43137,21 +43137,9 @@ MonoBehaviour:
     onEventTriggered:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1876121610}
-          m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
-          m_MethodName: AddItem
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: df29669b64e8f6f46a96e10ff1f9f8d6, type: 2}
-            m_ObjectArgumentAssemblyTypeName: ItemData, Assembly-CSharp
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1563363928}
-          m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
-          m_MethodName: StartInventoryTutorial
+        - m_Target: {fileID: 2145360389}
+          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
+          m_MethodName: ResetInteraction
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -43168,6 +43156,18 @@ MonoBehaviour:
         - m_Target: {fileID: 1088849914}
           m_TargetAssemblyTypeName: StatsUI, Assembly-CSharp
           m_MethodName: OpenPanel
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 2145360389}
+          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
+          m_MethodName: ResetInteraction
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -76490,6 +76490,18 @@ MonoBehaviour:
         - m_Target: {fileID: 1489273650}
           m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
           m_MethodName: AddStatePoint
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 493622542}
+          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+          m_MethodName: ActivateCheckpoint
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
