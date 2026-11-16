@@ -13,8 +13,49 @@ MonoBehaviour:
   m_Name: Lithoselle Talk
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   CustomUIID: 
-  Lines: []
-  Options: []
+  Lines:
+  - SpeakerName:
+      m_TableReference:
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
+      m_TableEntryReference:
+        m_KeyId: 9003239739113472
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    DialogueText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 13166523996323840
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
+    CustomTextSpeed: 0
+    LineEndEventID: 
+  Options:
+  - OptionText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 13166524747104256
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    NextSequence: {fileID: 11400000, guid: 9ef440ce8c11d4b43b5f633e255eb55f, type: 2}
+  - OptionText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 13166524747104257
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    NextSequence: {fileID: 11400000, guid: e9ac8e45af4247e418bdf57b230b6003, type: 2}
   SequenceEndEventID: 
   references:
     version: 2

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-[Serializable] public struct VesaniaSpawnGroup
+
+[Serializable]
+public struct VesaniaSpawnGroup
 {
     [Tooltip("Nivel de Vesania requerido para aplicar este grupo.")]
     public int requiredVesaniaLevel;
@@ -13,23 +15,29 @@ using UnityEngine.Events;
     [Tooltip("Objetos que se desactivan al alcanzar este nivel de Vesania.")]
     public GameObject[] objectsToDeactivate;
 }
+
 public class GameManager : MonoBehaviour
 {
     private const int MaxBaseVesania = 3;
     private const int Vesania4Level = 4;
+
     public static GameManager Instance { get; private set; }
+
     public event Action<int> OnVesaniaChanged;
     public event Action OnGameOver;
     public event Action OnLifeLost;
     public event Action OnPlayerRespawned;
+    public event Action OnCheckpointActivated;
 
     [Header("Unity Events")]
     public UnityEvent<int> OnVesaniaChangedEvent;
-    [Tooltip("Se dispara cuando el jugador muere pero aún puede reaparecer. Conectar aquí FadeUI.StartSequence.")]
+    [Tooltip("Se dispara cuando se activa el checkpoint por primera vez y se habilitan las 3 vidas y la Vesania.")]
+    public UnityEvent OnCheckpointActivatedEvent;
+    [Tooltip("Se dispara cuando el jugador muere pero aún le quedan vidas tras activar el checkpoint. Conectar aquí FadeUI.StartSequence.")]
     public UnityEvent OnLifeLostEvent;
-    [Tooltip("Se dispara justo después de teletransportar y curar al jugador en el checkpoint.")]
+    [Tooltip("Se dispara justo después de teletransportar y curar al jugador en el punto activo (inicial o checkpoint).")]
     public UnityEvent OnPlayerRespawnedEvent;
-    [Tooltip("Se dispara cuando se agotan todas las vidas.")]
+    [Tooltip("Se dispara al morir sin checkpoint activo o cuando las 3 vidas se agotan.")]
     public UnityEvent OnGameOverEvent;
 
     [Header("Player Settings")]
@@ -37,7 +45,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject _player;
 
     [Header("Vesania & Lives Settings")]
-    [Tooltip("Cantidad de vidas/resurrecciones antes de la muerte definitiva (3 vidas = progresión de Vesania 0 a 3).")]
+    [Tooltip("Cantidad de vidas/resurrecciones al activar el checkpoint (3 vidas = progresión de Vesania 0 a 3).")]
     [SerializeField] private int _startingLives = 3;
     [Tooltip("Porcentaje de vida máximo (0.2 = 20%) para activar Vesania 4 estando en Vesania 3.")]
     [Range(0.01f, 1f)]
@@ -48,10 +56,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private VesaniaSpawnGroup[] _vesaniaSpawnGroups;
 
     [Header("Checkpoint / Respawn Settings")]
-    [Tooltip("Transform de la Estatua de Lithoselle (punto de control principal).")]
+    [Tooltip("Transform de la Estatua de Lithoselle (se usará al activar el checkpoint).")]
     [SerializeField] private Transform _statueCheckpointTransform;
 
     private PlayerHealth _playerHealth;
+    private Vector3 _initialSpawnPosition;
+    private Quaternion _initialSpawnRotation;
+    private bool _hasCapturedInitialSpawn;
+
+    private bool _isCheckpointActivated;
     private int _currentLives;
     private int _baseVesania;
     private int _currentVesania;
@@ -59,11 +72,13 @@ public class GameManager : MonoBehaviour
 
     private readonly Dictionary<GameObject, bool> _resolvedObjectStates = new();
     private readonly List<VesaniaSpawnGroup> _sortedGroups = new();
+    public bool IsCheckpointActivated => _isCheckpointActivated;
     public int CurrentLives => _currentLives;
     public int BaseVesania => _baseVesania;
     public int CurrentVesania => _currentVesania;
-    public bool IsVesania4Active => _currentVesania == Vesania4Level;
+    public bool IsVesania4Active => _isCheckpointActivated && _currentVesania == Vesania4Level;
     public GameObject Player => _player;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -73,16 +88,20 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
 
-        _currentLives = _startingLives;
+        _isCheckpointActivated = false;
+        _currentLives = 0;
         _baseVesania = 0;
         _currentVesania = 0;
 
         ResolvePlayerReferences();
+        CaptureInitialSpawnPoint();
     }
+
     private void OnEnable()
     {
         SubscribePlayerHealth();
     }
+
     private void OnDisable()
     {
         UnsubscribePlayerHealth();
@@ -90,6 +109,9 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         ResolvePlayerReferences();
+        if (!_hasCapturedInitialSpawn)
+            CaptureInitialSpawnPoint();
+
         SubscribePlayerHealth();
         EvaluateVesaniaState(forceNotify: true);
     }
@@ -112,6 +134,14 @@ public class GameManager : MonoBehaviour
                 _playerHealth = _player.GetComponentInChildren<PlayerHealth>();
         }
     }
+    private void CaptureInitialSpawnPoint()
+    {
+        if (_player == null) return;
+
+        _initialSpawnPosition = _player.transform.position;
+        _initialSpawnRotation = _player.transform.rotation;
+        _hasCapturedInitialSpawn = true;
+    }
     private void SubscribePlayerHealth()
     {
         if (_playerHealth == null) return;
@@ -125,13 +155,44 @@ public class GameManager : MonoBehaviour
 
         _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
     }
+
     private void HandlePlayerHealthChanged()
     {
         EvaluateVesaniaState();
     }
+    public void ActivateCheckpoint()
+    {
+        if (_isCheckpointActivated) return;
+
+        _isCheckpointActivated = true;
+        _currentLives = _startingLives;
+        _baseVesania = 0;
+
+        EvaluateVesaniaState(forceNotify: true);
+
+        OnCheckpointActivated?.Invoke();
+        OnCheckpointActivatedEvent?.Invoke();
+    }
+    public void ActivateCheckpoint(Transform newCheckpointTransform)
+    {
+        if (newCheckpointTransform != null)
+        {
+            _statueCheckpointTransform = newCheckpointTransform;
+        }
+
+        ActivateCheckpoint();
+    }
     public void ProcessPlayerDeath()
     {
         if (_isGameOver) return;
+
+        if (!_isCheckpointActivated)
+        {
+            _currentLives = 0;
+            _isGameOver = true;
+            TriggerGameOver();
+            return;
+        }
 
         if (_currentLives > 0)
         {
@@ -151,11 +212,16 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateVesaniaState(bool forceNotify = false)
     {
-        int targetVesania = _baseVesania;
+        int targetVesania = 0;
 
-        if (_baseVesania >= MaxBaseVesania && IsPlayerInLowHealthThreshold())
+        if (_isCheckpointActivated)
         {
-            targetVesania = Vesania4Level;
+            targetVesania = _baseVesania;
+
+            if (_baseVesania >= MaxBaseVesania && IsPlayerInLowHealthThreshold())
+            {
+                targetVesania = Vesania4Level;
+            }
         }
 
         if (forceNotify || targetVesania != _currentVesania)
@@ -182,7 +248,10 @@ public class GameManager : MonoBehaviour
     }
     private void TriggerGameOver()
     {
-        Debug.Log("Muerte definitiva. Las 3 vidas se han agotado.");
+        Debug.Log(_isCheckpointActivated
+            ? "Muerte definitiva. Las 3 vidas se han agotado."
+            : "Muerte antes de activar el checkpoint. Reinicio requerido.");
+
         OnGameOver?.Invoke();
         OnGameOverEvent?.Invoke();
     }
@@ -194,14 +263,20 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (_statueCheckpointTransform != null)
+        Vector3 targetPos = _initialSpawnPosition;
+        Quaternion targetRot = _initialSpawnRotation;
+
+        if (_isCheckpointActivated && _statueCheckpointTransform != null)
         {
-            if (_player.TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
-
-            _player.transform.SetPositionAndRotation(_statueCheckpointTransform.position, _statueCheckpointTransform.rotation);
-
-            if (cc != null) cc.enabled = true;
+            _statueCheckpointTransform.GetPositionAndRotation(out targetPos, out targetRot);
         }
+
+        if (_player.TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
+
+        _player.transform.SetPositionAndRotation(targetPos, targetRot);
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true;
 
         if (_playerHealth == null)
             ResolvePlayerReferences();
@@ -225,7 +300,8 @@ public class GameManager : MonoBehaviour
     public void ResetLivesAndVesania()
     {
         _isGameOver = false;
-        _currentLives = _startingLives;
+        _isCheckpointActivated = false;
+        _currentLives = 0;
         _baseVesania = 0;
 
         EvaluateVesaniaState(forceNotify: true);
@@ -243,6 +319,7 @@ public class GameManager : MonoBehaviour
         }
 
         _sortedGroups.Sort((a, b) => a.requiredVesaniaLevel.CompareTo(b.requiredVesaniaLevel));
+
         for (int i = 0; i < _sortedGroups.Count; i++)
         {
             var group = _sortedGroups[i];
@@ -267,6 +344,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
         for (int i = 0; i < _sortedGroups.Count; i++)
         {
             var group = _sortedGroups[i];
@@ -292,6 +370,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
         foreach (var kvp in _resolvedObjectStates)
         {
             if (kvp.Key != null && kvp.Key.activeSelf != kvp.Value)

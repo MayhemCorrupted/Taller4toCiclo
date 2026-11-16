@@ -8,6 +8,12 @@ public class GameOverUI : MonoBehaviour, IPanel
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private GameObject _panelObject;
 
+    [Header("Sub-Paneles de Resultado")]
+    [Tooltip("Contenedor visual que se encenderá cuando el jugador gane.")]
+    [SerializeField] private GameObject _victoryPanel;
+    [Tooltip("Contenedor visual que se encenderá cuando el jugador pierda.")]
+    [SerializeField] private GameObject _defeatPanel;
+
     [Header("Configuración de Fade In")]
     [Tooltip("Tiempo de espera opcional antes de empezar a oscurecer/mostrar la pantalla.")]
     [Min(0f)][SerializeField] private float _startDelay = 0f;
@@ -17,14 +23,13 @@ public class GameOverUI : MonoBehaviour, IPanel
     [SerializeField] private bool _useUnscaledTime = true;
 
     [Header("Eventos")]
-    [Tooltip("Se dispara justo al comenzar la secuencia de Game Over.")]
+    [Tooltip("Se dispara justo al comenzar la secuencia de fin de partida.")]
     public UnityEvent OnGameOverOpenStart;
     [Tooltip("Se dispara cuando el Fade In termina (Alpha = 1) y los botones ya son interactuables.")]
     public UnityEvent OnGameOverFadeInComplete;
     public bool IsOpen => _isOpen;
     private Coroutine _fadeInCoroutine;
     private bool _isOpen;
-
     private void Awake()
     {
         if (_canvasGroup == null)
@@ -35,10 +40,28 @@ public class GameOverUI : MonoBehaviour, IPanel
 
         ResetPanelVisuals();
     }
+    public void OpenVictoryPanel()
+    {
+        OpenOutcomePanel(isVictory: true);
+    }
+    public void OpenDefeatPanel()
+    {
+        OpenOutcomePanel(isVictory: false);
+    }
     public void OpenPanel()
+    {
+        OpenDefeatPanel();
+    }
+    private void OpenOutcomePanel(bool isVictory)
     {
         if (_isOpen) return;
         _isOpen = true;
+
+        if (_victoryPanel != null)
+            _victoryPanel.SetActive(isVictory);
+
+        if (_defeatPanel != null)
+            _defeatPanel.SetActive(!isVictory);
 
         if (UIManager.Instance != null && UIManager.Instance.CurrentState != GameState.GameOver)
         {
@@ -121,6 +144,12 @@ public class GameOverUI : MonoBehaviour, IPanel
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
         }
+
+        if (_victoryPanel != null)
+            _victoryPanel.SetActive(false);
+
+        if (_defeatPanel != null)
+            _defeatPanel.SetActive(false);
 
         if (_panelObject != null && _panelObject != gameObject)
         {

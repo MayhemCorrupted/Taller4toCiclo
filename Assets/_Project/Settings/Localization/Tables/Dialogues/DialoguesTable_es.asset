@@ -172,6 +172,27 @@ MonoBehaviour:
       que alguna vez fuisteis os d\xE9 firmeza para no sucumbir en la Catedral"
     m_Metadata:
       m_Items: []
+  - m_Id: 13166523996323840
+    m_Localized: "Me alegra verte, mi buen caballero, digame, \xBFQu\xE9 es lo que
+      deseas?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104256
+    m_Localized: Quiero fortalecerme
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104257
+    m_Localized: Por el momento nada
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104258
+    m_Localized: De acuerdo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104259
+    m_Localized: De acuerdo
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

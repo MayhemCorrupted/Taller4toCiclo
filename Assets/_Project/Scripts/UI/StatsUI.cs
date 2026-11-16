@@ -41,6 +41,10 @@ public class StatsUI : MonoBehaviour, IPanel
         if (_confirmButton != null)
             _confirmButton.onClick.AddListener(ConfirmStats);
     }
+    private void Start()
+    {
+        GrantStatPoints(6);
+    }
     public void GrantStatPoints(int points)
     {
         _availablePoints += points;

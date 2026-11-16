@@ -181,13 +181,6 @@ public class InventoryManager : MonoBehaviour
         InventorySlot slot = _generalSlots[slotIndex];
         if (slot.IsEmpty || slot.Item is not ConsumableItem consumable) return;
 
-        if (consumable.EffectType == ConsumableEffectType.StatBoost)
-        {
-            Debug.LogWarning("[InventoryManager] Las pociones StatBoost no pueden equiparse. Deben canjearse.");
-            OnInventoryUpdated?.Invoke(_generalSlots);
-            return;
-        }
-
         ConsumableItem previousConsumable = _equippedConsumable;
         int previousCount = _consumableCount;
 
@@ -293,8 +286,13 @@ public class InventoryManager : MonoBehaviour
                 _activeBuffCoroutine = StartCoroutine(DamageBoostRoutine(_equippedConsumable.EffectValue, 25));
                 wasUsed = true;
                 break;
-        }
 
+            case ConsumableEffectType.StatBoost:
+                StatsUI statsUI = FindAnyObjectByType<StatsUI>();
+                statsUI.GrantStatPoints(_consumableCount);
+                wasUsed = true;
+                break;
+        }
         if (wasUsed)
         {
             _consumableCount--;

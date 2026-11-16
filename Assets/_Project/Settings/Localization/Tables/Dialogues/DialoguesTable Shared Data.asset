@@ -135,6 +135,30 @@ MonoBehaviour:
     m_Key: LITHOSELLE_GIFT_MEMORY
     m_Metadata:
       m_Items: []
+  - m_Id: 13166523996323840
+    m_Key: LITHOSELLE_TALK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104256
+    m_Key: LITHOSELLE_STAT_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104257
+    m_Key: LITHOSELLE_NOTHING_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104258
+    m_Key: LITHOSELLE_HEAL_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104259
+    m_Key: LITHOSELLE_STAT_ANSWER
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13166524747104258
+    m_Key: LITHOSELLE_HEAL_OPTION
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
