@@ -12,6 +12,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerCombat : MonoBehaviour
 {
+    [Header("Estado de Arma Equipada")]
+    [Tooltip("Si es falso, el jugador no podrá atacar, bloquear ni usar habilidades, y se ocultará el contenedor de ataques.")]
+    [SerializeField] private bool _isWeaponActive = true;
+    [Tooltip("Opcional: Objeto visual del arma en la mano del jugador para activarlo/desactivarlo junto con el estado.")]
+    [SerializeField] private GameObject _weaponVisualObject;
+
+    [Header("Weapon & Damage")]
     [SerializeField] private WeaponHitbox _weaponHitbox;
     [SerializeField] private float _baseWeaponDamage = 20f;
     [SerializeField] private float _lightAttackImpulse = 3f;
@@ -57,14 +64,25 @@ public class PlayerCombat : MonoBehaviour
     private PlayerMovement _playerMovement;
     private PlayerStamina _playerStamina;
     private PlayerHealth _playerHealth;
+    private PlayerAnimator _playerAnimator;
     private Camera _mainCamera;
 
     private readonly Collider[] _hitEnemiesBuffer = new Collider[15];
-    private bool _isWeaponActive = false;
-
+    private bool _isHitboxActive = false;
+    public bool IsWeaponActive
+    {
+        get => _isWeaponActive;
+        set
+        {
+            if (_isWeaponActive == value) return;
+            _isWeaponActive = value;
+            ApplyWeaponActiveState(_isWeaponActive);
+        }
+    }
     public Transform LockOnTarget => _lockOnTarget;
     public int CurrentSkillID { get; private set; } = 0;
 
+    public event Action<bool> OnWeaponActiveChanged;
     public event Action<int> OnSkillSwapped;
     public event Action<Transform> OnLockOnTargetChanged;
     private void Awake()
@@ -75,10 +93,16 @@ public class PlayerCombat : MonoBehaviour
         _playerMovement = GetComponent<PlayerMovement>();
         _playerStamina = GetComponent<PlayerStamina>();
         _playerHealth = GetComponent<PlayerHealth>();
+        _playerAnimator = GetComponentInChildren<PlayerAnimator>();
         _mainCamera = Camera.main;
 
         InitializeFootIndicator();
     }
+    private void Start()
+    {
+        ApplyWeaponActiveState(_isWeaponActive);
+    }
+
     private void OnEnable()
     {
         _playerInputs.OnLockOn += ToggleLockOn;
@@ -96,13 +120,31 @@ public class PlayerCombat : MonoBehaviour
         if (_footIndicatorInstance != null)
             Destroy(_footIndicatorInstance);
     }
+    private bool IsBlockedByLayingOrStandUp()
+    {
+        return _playerAnimator != null && (_playerAnimator.IsLaying || _playerAnimator.IsStandingUp);
+    }
+    private void ApplyWeaponActiveState(bool isActive)
+    {
+        if (!isActive)
+        {
+            DeactivateWeapon();
+        }
+
+        if (_weaponVisualObject != null)
+        {
+            _weaponVisualObject.SetActive(isActive);
+        }
+
+        OnWeaponActiveChanged?.Invoke(isActive);
+    }
     private void Update()
     {
         UpdateCooldowns();
+        CheckLockTargetValid();
 
-        if (UIManager.Instance.CurrentState == GameState.Gameplay)
+        if (_playerInputs.AreGameplayInputsEnabled && !IsBlockedByLayingOrStandUp())
         {
-            CheckLockTargetValid();
             CombatRotation();
         }
     }
@@ -167,7 +209,9 @@ public class PlayerCombat : MonoBehaviour
     }
     public void SwapSkill()
     {
-        if (_swapCooldownTimer > 0f) return;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return;
+        if (!_isWeaponActive || _swapCooldownTimer > 0f) return;
+
         CurrentSkillID = CurrentSkillID == 0 ? 1 : 0;
         _swapCooldownTimer = _swapCooldownDuration;
 
@@ -179,7 +223,8 @@ public class PlayerCombat : MonoBehaviour
     }
     public bool TrySkillAttack()
     {
-        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return false;
+        if (!_isWeaponActive) return false;
 
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
@@ -267,7 +312,8 @@ public class PlayerCombat : MonoBehaviour
     }
     public bool TryLightAttack()
     {
-        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return false;
+        if (!_isWeaponActive) return false;
 
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
@@ -280,7 +326,8 @@ public class PlayerCombat : MonoBehaviour
     }
     public bool TryHeavyAttack()
     {
-        if (UIManager.Instance.CurrentState != GameState.Gameplay) return false;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return false;
+        if (!_isWeaponActive) return false;
 
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
@@ -302,7 +349,9 @@ public class PlayerCombat : MonoBehaviour
     }
     public void ActivateWeapon(bool isHeavyAttack)
     {
-        _isWeaponActive = true;
+        if (!_isWeaponActive) return;
+
+        _isHitboxActive = true;
 
         float attackMultiplier = isHeavyAttack ? 2.2f : 1.0f;
         float grossDamage = CalculateGrossDamage(attackMultiplier);
@@ -321,9 +370,10 @@ public class PlayerCombat : MonoBehaviour
     }
     public void DeactivateWeapon()
     {
-        _isWeaponActive = false;
+        _isHitboxActive = false;
         if (_weaponHitbox != null) _weaponHitbox.DisableHitbox();
     }
+
     private void SetLockOnTarget(Transform newTarget)
     {
         if (_lockOnTarget == newTarget) return;
@@ -367,7 +417,7 @@ public class PlayerCombat : MonoBehaviour
     }
     private void ToggleLockOn()
     {
-        if (UIManager.Instance.CurrentState != GameState.Gameplay) return;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return;
 
         if (_lockOnTarget != null)
         {
@@ -379,7 +429,7 @@ public class PlayerCombat : MonoBehaviour
     }
     private void SwitchLockOnTarget(float scrollDirection)
     {
-        if (UIManager.Instance.CurrentState != GameState.Gameplay) return;
+        if (!_playerInputs.AreGameplayInputsEnabled || IsBlockedByLayingOrStandUp()) return;
         if (_lockOnTarget == null || _switchTargetTimer > 0f) return;
 
         int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _lockOnRadius, _hitEnemiesBuffer, _enemyLayer);

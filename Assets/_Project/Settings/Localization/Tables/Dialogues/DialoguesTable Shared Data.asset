@@ -15,14 +15,6 @@ MonoBehaviour:
   m_TableCollectionName: DialoguesTable
   m_TableCollectionNameGuidString: 87896db2562e33b4eb3af09bcb455886
   m_Entries:
-  - m_Id: 354246607912960
-    m_Key: TEST_DIALOGUE1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 354246620495872
-    m_Key: TEST_DIALOGUE2
-    m_Metadata:
-      m_Items: []
   - m_Id: 1020483465789440
     m_Key: TEST_A_OPTION
     m_Metadata:
@@ -31,8 +23,52 @@ MonoBehaviour:
     m_Key: TEST_B_OPTION
     m_Metadata:
       m_Items: []
-  - m_Id: 1020483813916672
-    m_Key: TEST_DIALOGUE3
+  - m_Id: 12889339876491264
+    m_Key: NARRATOR_INITIAL_PHRASE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390656
+    m_Key: VILEUTCH_INITIAL1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390657
+    m_Key: VILEUTCH_INITIAL2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390658
+    m_Key: VILEUTCH_INITIAL3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390659
+    m_Key: VILEUTCH_INITIAL4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390660
+    m_Key: VILEUTCH_INITIAL5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390661
+    m_Key: VILEUTCH_INITIAL6
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13006011530625024
+    m_Key: VILEUTCH_INITIAL7
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390662
+    m_Key: LITHOSELLE_INITIAL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390663
+    m_Key: LITHOSELLE_TUTORIAL1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390664
+    m_Key: LITHOSELLE_TUTORIAL2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390665
+    m_Key: LITHOSELLE_TUTORIAL3
     m_Metadata:
       m_Items: []
   m_Metadata:

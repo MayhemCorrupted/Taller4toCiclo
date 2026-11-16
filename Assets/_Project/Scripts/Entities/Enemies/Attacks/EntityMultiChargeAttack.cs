@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityMultiChargeAttack", menuName = "Rotbound/Entity/Attack/EntityMultiChargeAttack")]
 public class EntityMultiChargeAttack : EntityAttack
 {
@@ -23,6 +22,7 @@ public class EntityMultiChargeAttack : EntityAttack
     private readonly List<GameObject> _indicators = new();
     private readonly Collider[] _hitBuffer = new Collider[20];
     private readonly HashSet<PlayerHealth> _damagedPlayers = new();
+    private Collider _activeMainCollider;
     public override void Prepare(Transform origin, Transform target)
     {
         ClearIndicators();
@@ -66,7 +66,14 @@ public class EntityMultiChargeAttack : EntityAttack
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        if (origin.TryGetComponent<Collider>(out var mainCollider)) mainCollider.isTrigger = true;
+        yield return WaitDamageDelay();
+
+        if (origin == null) yield break;
+        if (origin.TryGetComponent(out _activeMainCollider))
+        {
+            _activeMainCollider.isTrigger = true;
+        }
+
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
@@ -79,7 +86,11 @@ public class EntityMultiChargeAttack : EntityAttack
             if (w < waveCount - 1 && delayBetweenWaves > 0) yield return new WaitForSeconds(delayBetweenWaves);
         }
 
-        if (mainCollider != null) mainCollider.isTrigger = false;
+        if (_activeMainCollider != null)
+        {
+            _activeMainCollider.isTrigger = false;
+            _activeMainCollider = null;
+        }
     }
     private IEnumerator ConsecutiveDashesRoutine(Transform origin, Transform target)
     {
@@ -111,11 +122,11 @@ public class EntityMultiChargeAttack : EntityAttack
                 int hitCount = Physics.OverlapSphereNonAlloc(origin.position, hitboxRadius, _hitBuffer);
                 for (int h = 0; h < hitCount; h++)
                 {
-                    if (_hitBuffer[h].TryGetComponent(out PlayerHealth ph) && !_damagedPlayers.Contains(ph))
+                    Collider hit = _hitBuffer[h];
+                    PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                    if (ph != null && _damagedPlayers.Add(ph))
                     {
-                        ph.TakeDamage(damage);
-                        _damagedPlayers.Add(ph);
-                        if (_hitBuffer[h].TryGetComponent(out PlayerMovement playerMov)) playerMov.ApplyKnockback(chargeDir, knockback);
+                        ApplyDamageAndKnockback(hit, chargeDir, origin.position);
                     }
                 }
                 yield return null;
@@ -130,7 +141,7 @@ public class EntityMultiChargeAttack : EntityAttack
         while (prepTimer < telegraphDuration)
         {
             prepTimer += Time.deltaTime;
-            float normalizedPrep = prepTimer / telegraphDuration;
+            float normalizedPrep = prepTimer / Mathf.Max(telegraphDuration, 0.001f);
 
             UpdatePreparation(origin, target, normalizedPrep);
             yield return null;
@@ -147,5 +158,13 @@ public class EntityMultiChargeAttack : EntityAttack
         foreach (var ind in _indicators) if (ind != null) Destroy(ind);
         _indicators.Clear();
     }
-    public override void CancelAttack() => ClearIndicators();
+    public override void CancelAttack()
+    {
+        ClearIndicators();
+        if (_activeMainCollider != null)
+        {
+            _activeMainCollider.isTrigger = false;
+            _activeMainCollider = null;
+        }
+    }
 }

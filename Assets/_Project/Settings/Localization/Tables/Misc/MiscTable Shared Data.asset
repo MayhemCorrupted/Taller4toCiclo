@@ -15,10 +15,6 @@ MonoBehaviour:
   m_TableCollectionName: MiscTable
   m_TableCollectionNameGuidString: 9a5edb2a14d8b1142b46cb6fd703c931
   m_Entries:
-  - m_Id: 349939552632832
-    m_Key: STATUE_NAME
-    m_Metadata:
-      m_Items: []
   - m_Id: 1076780030640128
     m_Key: DIALOGUE_SKIP
     m_Metadata:

@@ -138,12 +138,29 @@ public class EntityAnimator : MonoBehaviour
                 break;
         }
     }
+    public void OnAnimationStateEnter(EntityActionStateType type)
+    {
+        switch (type)
+        {
+            case EntityActionStateType.Attack:
+                if (_combat != null) _combat.NotifyAttackAnimationStarted();
+                break;
+
+            case EntityActionStateType.Hurt:
+                if (_brain != null) _brain.NotifyHurtAnimationStarted();
+                break;
+        }
+    }
     public void OnAnimationStateExit(EntityActionStateType type)
     {
         if (_animator == null) return;
 
         switch (type)
         {
+            case EntityActionStateType.Attack:
+                if (_combat != null) _combat.NotifyAttackAnimationEnded();
+                break;
+
             case EntityActionStateType.Agonize:
                 _animator.ResetTrigger(AgonizeHash);
                 if (_brain != null) _brain.EndAgonize();
@@ -151,6 +168,7 @@ public class EntityAnimator : MonoBehaviour
 
             case EntityActionStateType.Hurt:
                 _animator.ResetTrigger(HurtHash);
+                if (_brain != null) _brain.NotifyHurtAnimationEnded();
                 break;
 
             case EntityActionStateType.Death:

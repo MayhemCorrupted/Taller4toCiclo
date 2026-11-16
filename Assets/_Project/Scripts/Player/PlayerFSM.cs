@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-public enum PlayerState { Idle, Walking, Running, Dodging, Attacking, Skill, Blocking, UsingItem, Hurt, Knockout, Death }
+public enum PlayerState { Idle, Walking, Running, Dodging, Attacking, Skill, Blocking, UsingItem, Hurt, Knockout, Death, StandUp }
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInputs))]
 [RequireComponent(typeof(PlayerCombat))]
@@ -11,11 +11,13 @@ public class PlayerFSM : MonoBehaviour
     private PlayerInputs _playerInputs;
     private PlayerStamina _playerStamina;
     private PlayerCombat _playerCombat;
+    private PlayerAnimator _playerAnimator;
     private void Awake()
     {
         _playerInputs = GetComponent<PlayerInputs>();
         _playerStamina = GetComponent<PlayerStamina>();
         _playerCombat = GetComponent<PlayerCombat>();
+        _playerAnimator = GetComponentInChildren<PlayerAnimator>();
     }
     private void OnEnable()
     {
@@ -31,20 +33,33 @@ public class PlayerFSM : MonoBehaviour
     {
         StateEvaluations();
     }
+    private bool IsBlockedByLayingOrStandUp()
+    {
+        return _playerAnimator != null && (_playerAnimator.IsLaying || _playerAnimator.IsStandingUp);
+    }
     private void StateEvaluations()
     {
-        if (CurrentState == PlayerState.Attacking ||
+        if (IsBlockedByLayingOrStandUp() ||
+            CurrentState == PlayerState.Attacking ||
             CurrentState == PlayerState.Dodging ||
             CurrentState == PlayerState.Skill ||
             CurrentState == PlayerState.UsingItem ||
             CurrentState == PlayerState.Hurt ||
             CurrentState == PlayerState.Knockout ||
-            CurrentState == PlayerState.Death)
+            CurrentState == PlayerState.Death ||
+            CurrentState == PlayerState.StandUp)
         {
             return;
         }
 
-        if (_playerInputs.InputBlock)
+        if (CurrentState == PlayerState.Blocking && _playerAnimator != null && _playerAnimator.IsBlockHitPlaying)
+        {
+            return;
+        }
+
+        bool canBlock = _playerCombat == null || _playerCombat.IsWeaponActive;
+
+        if (_playerInputs.InputBlock && canBlock)
         {
             ChangeState(PlayerState.Blocking);
         }
@@ -59,6 +74,8 @@ public class PlayerFSM : MonoBehaviour
     }
     private void CallDodgeRequest()
     {
+        if (IsBlockedByLayingOrStandUp()) return;
+
         if (CurrentState == PlayerState.Idle ||
             CurrentState == PlayerState.Walking ||
             CurrentState == PlayerState.Running ||
@@ -72,6 +89,9 @@ public class PlayerFSM : MonoBehaviour
     }
     private void CallSkillRequest()
     {
+        if (IsBlockedByLayingOrStandUp()) return;
+        if (_playerCombat != null && !_playerCombat.IsWeaponActive) return;
+
         if (CurrentState == PlayerState.Idle || CurrentState == PlayerState.Walking || CurrentState == PlayerState.Running)
         {
             if (_playerCombat != null)

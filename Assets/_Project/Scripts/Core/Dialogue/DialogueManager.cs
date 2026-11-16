@@ -4,12 +4,14 @@ using UnityEngine.InputSystem;
 public class DialogueManager : MonoBehaviour
 {
     public event Action<string> OnDialogueEventTriggered;
+
     private DialogueUI _dialogueUI;
     private PlayerInputs _playerInputs;
     private DialogueSequence _currentSequence;
     private int _currentLineIndex;
     private bool _isDialogueActive = false;
     private bool _isWaitingForChoice = false;
+    private string _pendingUIID = null;
     private void Awake()
     {
         _playerInputs = FindAnyObjectByType<PlayerInputs>();
@@ -23,10 +25,76 @@ public class DialogueManager : MonoBehaviour
     {
         if (_playerInputs != null) _playerInputs.OnInteract -= AdvanceDialogue;
     }
+    public void SetPendingUI(string uiID)
+    {
+        _pendingUIID = uiID;
+    }
+    /// <summary>
+    /// Función principal: usa automáticamente el CustomUIID del DialogueSequence (o SetPendingUI) si existe;
+    /// de lo contrario, abre la UI por defecto. Compatible con UnityEvents de 1 parámetro en el Inspector.
+    /// </summary>
     public void StartDialogue(DialogueSequence sequence)
     {
         if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
 
+        string targetUI = !string.IsNullOrWhiteSpace(_pendingUIID)
+            ? _pendingUIID
+            : sequence.CustomUIID;
+
+        _pendingUIID = null;
+
+        if (!string.IsNullOrWhiteSpace(targetUI))
+        {
+            _dialogueUI.UseCustomUI(targetUI);
+        }
+        else
+        {
+            _dialogueUI.UseDefaultUI();
+        }
+
+        BeginDialogueInternal(sequence);
+    }
+    /// <summary>
+    /// Función adicional de 1 parámetro para el Inspector: abre la secuencia usando CustomUIID
+    /// o directamente la primera UI personalizada (índice 0) si el ScriptableObject no especifica ID.
+    /// </summary>
+    public void StartCustomDialogue(DialogueSequence sequence)
+    {
+        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+
+        _pendingUIID = null;
+
+        if (!string.IsNullOrWhiteSpace(sequence.CustomUIID))
+            _dialogueUI.UseCustomUI(sequence.CustomUIID);
+        else
+            _dialogueUI.UseCustomUI(0);
+
+        BeginDialogueInternal(sequence);
+    }
+    /// <summary>
+    /// Sobrecarga por código para especificar un uiID concreto al invocar.
+    /// </summary>
+    public void StartDialogue(DialogueSequence sequence, string uiID)
+    {
+        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+
+        _pendingUIID = null;
+        _dialogueUI.UseCustomUI(uiID);
+        BeginDialogueInternal(sequence);
+    }
+    /// <summary>
+    /// Sobrecarga por código para pasar directamente un struct DialogueUIPreset.
+    /// </summary>
+    public void StartDialogue(DialogueSequence sequence, DialogueUIPreset customUI)
+    {
+        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+
+        _pendingUIID = null;
+        _dialogueUI.UseCustomUI(customUI);
+        BeginDialogueInternal(sequence);
+    }
+    private void BeginDialogueInternal(DialogueSequence sequence)
+    {
         if (UIManager.Instance != null) UIManager.Instance.SetGameState(GameState.Dialogue);
 
         UpdateUIInteractKey();
@@ -90,6 +158,11 @@ public class DialogueManager : MonoBehaviour
         {
             string sequenceEvent = _currentSequence.SequenceEndEventID;
             if (!string.IsNullOrEmpty(sequenceEvent)) OnDialogueEventTriggered?.Invoke(sequenceEvent);
+
+            if (!string.Equals(_currentSequence.CustomUIID?.Trim(), nextSequence.CustomUIID?.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                _dialogueUI.SwitchActiveUI(nextSequence.CustomUIID);
+            }
 
             LoadSequence(nextSequence);
             _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);

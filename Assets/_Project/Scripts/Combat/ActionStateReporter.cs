@@ -1,21 +1,33 @@
 using UnityEngine;
-public enum ActionStateType { Attack, Dodge, Skill, Hurt, Knockout, Death, UsingItem }
+public enum ActionStateType { Attack, Dodge, Skill, Hurt, Knockout, Death, UsingItem, StandUp }
 public class ActionStateReporter : StateMachineBehaviour
 {
     public ActionStateType actionType;
     private PlayerAnimator _playerAnimator;
     private bool _hasExited;
-
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (_playerAnimator == null)
         {
             _playerAnimator = animator.GetComponent<PlayerAnimator>();
+            if (_playerAnimator == null)
+            {
+                _playerAnimator = animator.GetComponentInParent<PlayerAnimator>();
+            }
         }
+
         _hasExited = false;
     }
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (_playerAnimator == null)
+        {
+            _playerAnimator = animator.GetComponent<PlayerAnimator>();
+            if (_playerAnimator == null)
+            {
+                _playerAnimator = animator.GetComponentInParent<PlayerAnimator>();
+            }
+        }
         if (_playerAnimator != null && !_hasExited)
         {
             _hasExited = true;

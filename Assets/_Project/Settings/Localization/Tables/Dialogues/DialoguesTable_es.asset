@@ -18,14 +18,6 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 354246607912960
-    m_Localized: Dialogo de testeo para saber si funciona esta cosa
-    m_Metadata:
-      m_Items: []
-  - m_Id: 354246620495872
-    m_Localized: "Continuaci\xF3n del dialogo para saber si sirve a\xFAn esto wa"
-    m_Metadata:
-      m_Items: []
   - m_Id: 1020483465789440
     m_Localized: "Opci\xF3n A para ver si funciona esto"
     m_Metadata:
@@ -34,8 +26,61 @@ MonoBehaviour:
     m_Localized: "Opci\xF3n B para ver si funciona esto"
     m_Metadata:
       m_Items: []
-  - m_Id: 1020483813916672
-    m_Localized: "Finalizaci\xF3n del dialogo"
+  - m_Id: 12889339876491264
+    m_Localized: "Dichoso sea vuestro llanto, pues vos ser\xE9is consolado, y perdonad
+      que teng\xE1is que testiguar mi sentir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390656
+    m_Localized: "Yo me postr\xE9 ante mi se\xF1or, y vi alzarse su mano, mas no
+      para bendecirme. Toda mi vida os serv\xED, y toda mi vida os cre\xED."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390657
+    m_Localized: "Y no fue por pecado m\xEDo, sino por vuestro cruel solaz. Quebrantasteis
+      mi ser, como quien parte sin piedad el juguete que ya no le divierte."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390658
+    m_Localized: "Suplicando os pido clemencia, se\xF1or m\xEDo, pues no es justa
+      paga a mis afanes vuestra huida."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390659
+    m_Localized: "Hab\xE9is deshecho mi juicio en este \xE1spero trance y veo que
+      jam\xE1s gozamos de vuestra voluntad impoluta ni importamos a vuestros ojos."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390660
+    m_Localized: "M\xEDa fue la fe, y m\xEDa la ceguera. Yo ense\xF1\xE9 a mi grey
+      a doblar las rodillas, y ahora ni la duda le queda."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390661
+    m_Localized: "A quien me oiga, sea dios, sea demiurgo, sea lo que fuere, que
+      habite m\xE1s all\xE1 de este cielo cerrado..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390662
+    m_Localized: "Levantaos, mi caballero, que en las tinieblas repos\xE1is, ha durado
+      demasiado vuestro letargo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390663
+    m_Localized: "O\xEDd mi voz, aunque no sep\xE1is qui\xE9n la pronuncia."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390664
+    m_Localized: "Callad el paso, mi caballero. Esos ya no oyen raz\xF3n ni ruego."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12889340392390665
+    m_Localized: "A\xFAn no ten\xE9is con qu\xE9 herirlos. Sortead su mirada, que
+      yo os aguardo m\xE1s all\xE1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13006011530625024
+    m_Localized: Ayudadme.
     m_Metadata:
       m_Items: []
   references:

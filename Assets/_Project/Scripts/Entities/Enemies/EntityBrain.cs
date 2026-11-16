@@ -23,8 +23,10 @@ public class EntityBrain : MonoBehaviour
     private float _agonizeCooldownTimer = 0f;
     private float _passiveAgonizeTimer = 0f;
     private bool _deathAnimationNotified = false;
+    private int _activeHurtAnimationCount = 0;
     public EnemyState CurrentState => _currentState;
     public EntityData Data => _data;
+    public bool IsHurtAnimationActive => _activeHurtAnimationCount > 0;
     public bool CanTriggerAgonize =>
         _data != null &&
         _data.canAgonize &&
@@ -180,6 +182,7 @@ public class EntityBrain : MonoBehaviour
     {
         if (!CanTriggerAgonize) return;
         _passiveAgonizeTimer = 0f;
+        _activeHurtAnimationCount = 0;
         ChangeState(EnemyState.Agonizing);
     }
     public void TriggerHurt()
@@ -191,9 +194,29 @@ public class EntityBrain : MonoBehaviour
 
         OnHurtTriggered?.Invoke();
     }
+    public void NotifyHurtAnimationStarted()
+    {
+        if (_currentState == EnemyState.Death || _currentState == EnemyState.Agonizing) return;
+
+        _activeHurtAnimationCount++;
+        if (_currentState != EnemyState.Hurt)
+            ChangeState(EnemyState.Hurt);
+    }
+    public void NotifyHurtAnimationEnded()
+    {
+        _activeHurtAnimationCount = Mathf.Max(0, _activeHurtAnimationCount - 1);
+
+        if (_activeHurtAnimationCount == 0 && _currentState == EnemyState.Hurt)
+        {
+                if (_movement == null || !_movement.IsKnockbackActive)
+                EndHurt();
+        }
+    }
     public void EndHurt()
     {
         if (_currentState != EnemyState.Hurt) return;
+
+        _activeHurtAnimationCount = 0;
 
         if (_combat != null && _combat.IsInAttackRange)
             ChangeState(EnemyState.Attacking);
@@ -227,6 +250,7 @@ public class EntityBrain : MonoBehaviour
     }
     private void HandleDeath()
     {
+        _activeHurtAnimationCount = 0;
         ChangeState(EnemyState.Death);
     }
     public void ChangeState(EnemyState state)

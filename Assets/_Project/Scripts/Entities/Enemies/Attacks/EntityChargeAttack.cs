@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityChargeAttack", menuName = "Rotbound/Entity/Attack/EntityChargeAttack")]
 public class EntityChargeAttack : EntityAttack
 {
@@ -11,9 +10,11 @@ public class EntityChargeAttack : EntityAttack
     [Tooltip("Si es verdadero, el enemigo rotará hacia el jugador y el indicador actualizará su posición/orientación durante el telegrafiado.")]
     public bool trackTarget = true;
     public GameObject indicatorPrefab;
+
     private Vector3 _chargeTargetPosition;
     private GameObject _currentIndicator;
     private EntityIndicator _indicatorComp;
+    private Collider _activeMainCollider;
     private readonly Collider[] _hitBuffer = new Collider[10];
     public override void Prepare(Transform origin, Transform target)
     {
@@ -26,6 +27,7 @@ public class EntityChargeAttack : EntityAttack
 
         UpdateTargetPosition(origin);
         origin.TryGetComponent(out Health entityHealth);
+
         if (indicatorPrefab != null)
         {
             Vector3 dir = origin.forward;
@@ -72,16 +74,18 @@ public class EntityChargeAttack : EntityAttack
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        if (_currentIndicator != null) Destroy(_currentIndicator);
+        yield return WaitDamageDelay();
 
-        if (runner != null && attackDuration > 0f)
+        if (_currentIndicator != null) Destroy(_currentIndicator);
+        if (origin == null) yield break;
+
+        if (attackDuration > 0f)
         {
-            yield return runner.StartCoroutine(ChargeMovementRoutine(origin));
+            yield return ChargeMovementRoutine(origin);
         }
         else
         {
             origin.position = _chargeTargetPosition;
-            yield return null;
         }
     }
     private IEnumerator ChargeMovementRoutine(Transform origin)
@@ -90,7 +94,10 @@ public class EntityChargeAttack : EntityAttack
         float timer = 0f;
         HashSet<PlayerHealth> damagedPlayers = new();
 
-        if (origin.TryGetComponent<Collider>(out var mainCollider)) mainCollider.isTrigger = true;
+        if (origin.TryGetComponent(out _activeMainCollider))
+        {
+            _activeMainCollider.isTrigger = true;
+        }
 
         while (timer < attackDuration)
         {
@@ -102,24 +109,29 @@ public class EntityChargeAttack : EntityAttack
             int hitCount = Physics.OverlapSphereNonAlloc(origin.position, hitboxRadius, _hitBuffer);
             for (int i = 0; i < hitCount; i++)
             {
-                if (_hitBuffer[i].TryGetComponent(out PlayerHealth ph) && !damagedPlayers.Contains(ph))
+                Collider hit = _hitBuffer[i];
+                PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                if (ph != null && damagedPlayers.Add(ph))
                 {
-                    ph.TakeDamage(damage);
-                    damagedPlayers.Add(ph);
-
-                    if (_hitBuffer[i].TryGetComponent(out PlayerMovement playerMov))
-                    {
-                        playerMov.ApplyKnockback(origin.forward, knockback);
-                    }
+                    ApplyDamageAndKnockback(hit, origin.forward, origin.position);
                 }
             }
             yield return null;
         }
 
-        if (mainCollider != null) mainCollider.isTrigger = false;
+        if (_activeMainCollider != null)
+        {
+            _activeMainCollider.isTrigger = false;
+            _activeMainCollider = null;
+        }
     }
     public override void CancelAttack()
     {
         if (_currentIndicator != null) Destroy(_currentIndicator);
+        if (_activeMainCollider != null)
+        {
+            _activeMainCollider.isTrigger = false;
+            _activeMainCollider = null;
+        }
     }
 }

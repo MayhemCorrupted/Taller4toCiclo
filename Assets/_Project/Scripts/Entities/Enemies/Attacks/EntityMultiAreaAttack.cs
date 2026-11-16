@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityMultiAreaAttack", menuName = "Rotbound/Entity/Attack/EntityMultiAreaAttack")]
 public class EntityMultiAreaAttack : EntityAttack
 {
@@ -140,6 +139,9 @@ public class EntityMultiAreaAttack : EntityAttack
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
+        yield return WaitDamageDelay();
+
+        if (origin == null) yield break;
         origin.TryGetComponent(out Health entityHealth);
 
         for (int w = 0; w < waveCount; w++)
@@ -157,7 +159,7 @@ public class EntityMultiAreaAttack : EntityAttack
             }
             else
             {
-                float individualTelegraph = telegraphDuration / numberOfAreas;
+                float individualTelegraph = telegraphDuration / Mathf.Max(numberOfAreas, 1);
                 for (int i = 0; i < _calculatedCenters.Count; i++)
                 {
                     Vector3 center = _calculatedCenters[i];
@@ -175,11 +177,16 @@ public class EntityMultiAreaAttack : EntityAttack
     private void ApplyAreaDamage(Vector3 center)
     {
         int hitCount = Physics.OverlapSphereNonAlloc(center, areaRadius, _hitBuffer);
+        HashSet<PlayerHealth> processedPlayers = new();
+
         for (int i = 0; i < hitCount; i++)
         {
-            if (_hitBuffer[i].TryGetComponent(out PlayerHealth playerHealth))
+            Collider hit = _hitBuffer[i];
+            PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+            if (ph != null && processedPlayers.Add(ph))
             {
-                playerHealth.TakeDamage(damage);
+                Vector3 knockbackDir = ph.transform.position - center;
+                ApplyDamageAndKnockback(hit, knockbackDir, center);
             }
         }
     }

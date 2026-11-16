@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 using UnityEngine.Localization;
 [Serializable] public struct DialogueLine
 {
@@ -18,6 +18,10 @@ using UnityEngine.Localization;
 [CreateAssetMenu(fileName = "New Dialogue Sequence", menuName = "Rotbound/Dialogue Sequence")]
 public class DialogueSequence : ScriptableObject
 {
+    [Header("Estilo de UI (Opcional)")]
+    [Tooltip("Dejar vacío para la UI por defecto, o escribir el uiID de DialogueUI (ej: 'Pensamiento', 'Cartel').")]
+    public string CustomUIID;
+    [Header("Contenido")]
     public DialogueLine[] Lines;
     public DialogueOption[] Options;
     public string SequenceEndEventID;

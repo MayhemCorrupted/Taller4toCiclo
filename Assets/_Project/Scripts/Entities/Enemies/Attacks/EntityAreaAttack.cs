@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "EntityAreaAttack", menuName = "Rotbound/Entity/Attack/EntityAreaAttack")]
 public class EntityAreaAttack : EntityAttack
@@ -43,7 +44,6 @@ public class EntityAreaAttack : EntityAttack
             }
         }
     }
-
     private void UpdateCalculatedCenter(Transform origin, Transform target)
     {
         _calculatedCenter = (areaOrigin == AreaOrigin.Attacker || target == null) ? origin.position : target.position;
@@ -51,18 +51,23 @@ public class EntityAreaAttack : EntityAttack
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
+        yield return WaitDamageDelay();
+
         int hitCount = Physics.OverlapSphereNonAlloc(_calculatedCenter, radius, _hitBuffer);
+        HashSet<PlayerHealth> processedPlayers = new();
 
         for (int i = 0; i < hitCount; i++)
         {
-            if (_hitBuffer[i].TryGetComponent(out PlayerHealth playerHealth))
+            Collider hit = _hitBuffer[i];
+            PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+            if (ph != null && processedPlayers.Add(ph))
             {
-                playerHealth.TakeDamage(damage);
+                Vector3 knockbackDir = ph.transform.position - _calculatedCenter;
+                ApplyDamageAndKnockback(hit, knockbackDir, _calculatedCenter);
             }
         }
 
         if (_currentIndicator != null) Destroy(_currentIndicator);
-        yield return null;
     }
     public override void CancelAttack()
     {

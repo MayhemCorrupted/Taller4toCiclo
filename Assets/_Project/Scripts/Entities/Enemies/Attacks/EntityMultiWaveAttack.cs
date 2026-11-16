@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityMultiWaveAttack", menuName = "Rotbound/Entity/Attack/EntityMultiWaveAttack")]
 public class EntityMultiWaveAttack : EntityAttack
 {
@@ -138,6 +137,10 @@ public class EntityMultiWaveAttack : EntityAttack
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
+        yield return WaitDamageDelay();
+
+        if (origin == null) yield break;
+
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
@@ -160,6 +163,8 @@ public class EntityMultiWaveAttack : EntityAttack
     }
     private void ExecuteSimultaneousWave(Transform origin)
     {
+        HashSet<PlayerHealth> processedPlayers = new();
+
         foreach (var localDir in _localDirections)
         {
             Vector3 worldDir = origin.rotation * localDir;
@@ -169,10 +174,11 @@ public class EntityMultiWaveAttack : EntityAttack
             int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(worldDir));
             for (int j = 0; j < hitCount; j++)
             {
-                if (_hitBuffer[j].TryGetComponent(out PlayerHealth playerHealth))
+                Collider hit = _hitBuffer[j];
+                PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                if (ph != null && processedPlayers.Add(ph))
                 {
-                    playerHealth.TakeDamage(damage);
-                    if (_hitBuffer[j].TryGetComponent(out PlayerMovement playerMov)) playerMov.ApplyKnockback(worldDir, knockback);
+                    ApplyDamageAndKnockback(hit, worldDir, origin.position);
                 }
             }
         }
@@ -192,12 +198,15 @@ public class EntityMultiWaveAttack : EntityAttack
             Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance / 2f);
 
             int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(waveDir));
+            HashSet<PlayerHealth> processedPlayers = new();
+
             for (int j = 0; j < hitCount; j++)
             {
-                if (_hitBuffer[j].TryGetComponent(out PlayerHealth playerHealth))
+                Collider hit = _hitBuffer[j];
+                PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                if (ph != null && processedPlayers.Add(ph))
                 {
-                    playerHealth.TakeDamage(damage);
-                    if (_hitBuffer[j].TryGetComponent(out PlayerMovement playerMov)) playerMov.ApplyKnockback(waveDir, knockback);
+                    ApplyDamageAndKnockback(hit, waveDir, origin.position);
                 }
             }
 

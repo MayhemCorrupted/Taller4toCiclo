@@ -8,6 +8,8 @@ public class PlayerHUD : MonoBehaviour
     [SerializeField] private float _lerpSpeed = 10f;
 
     [Header("Interfaz de Habilidades (Ataques)")]
+    [Tooltip("Contenedor padre de la UI de ataques/habilidades que se ocultará cuando IsWeaponActive sea falso.")]
+    [SerializeField] private GameObject _attacksContainer;
     [SerializeField] private Image _skillIconImage;
     [SerializeField] private Image _skillCooldownFill;
     [SerializeField] private Sprite _distanceSkillSprite;
@@ -44,7 +46,12 @@ public class PlayerHUD : MonoBehaviour
         if (_playerHealth != null) _playerHealth.OnHealthChanged += UpdateHealthBar;
         if (_playerStamina != null) _playerStamina.OnStaminaChanged += UpdateStaminaBar;
 
-        if (_playerCombat != null) _playerCombat.OnSkillSwapped += HandleSkillSwapped;
+        if (_playerCombat != null)
+        {
+            _playerCombat.OnSkillSwapped += HandleSkillSwapped;
+            _playerCombat.OnWeaponActiveChanged += HandleWeaponActiveChanged;
+        }
+
         if (_inventoryManager != null) _inventoryManager.OnConsumableEquipped += HandleConsumableEquipped;
     }
     private void OnDisable()
@@ -52,7 +59,12 @@ public class PlayerHUD : MonoBehaviour
         if (_playerHealth != null) _playerHealth.OnHealthChanged -= UpdateHealthBar;
         if (_playerStamina != null) _playerStamina.OnStaminaChanged -= UpdateStaminaBar;
 
-        if (_playerCombat != null) _playerCombat.OnSkillSwapped -= HandleSkillSwapped;
+        if (_playerCombat != null)
+        {
+            _playerCombat.OnSkillSwapped -= HandleSkillSwapped;
+            _playerCombat.OnWeaponActiveChanged -= HandleWeaponActiveChanged;
+        }
+
         if (_inventoryManager != null) _inventoryManager.OnConsumableEquipped -= HandleConsumableEquipped;
     }
     private void Start()
@@ -68,7 +80,12 @@ public class PlayerHUD : MonoBehaviour
             _originalSkillIconY = _skillIconImage.rectTransform.anchoredPosition.y;
         }
 
-        if (_playerCombat != null) HandleSkillSwapped(_playerCombat.CurrentSkillID);
+        if (_playerCombat != null)
+        {
+            HandleWeaponActiveChanged(_playerCombat.IsWeaponActive);
+            HandleSkillSwapped(_playerCombat.CurrentSkillID);
+        }
+
         if (_inventoryManager != null) HandleConsumableEquipped(_inventoryManager.EquippedConsumable, _inventoryManager.ConsumableCount);
     }
     private void Update()
@@ -82,6 +99,13 @@ public class PlayerHUD : MonoBehaviour
         if (_playerCombat != null && _skillCooldownFill != null)
         {
             _skillCooldownFill.fillAmount = _playerCombat.GetSkillCooldownPercentage(_playerCombat.CurrentSkillID);
+        }
+    }
+    private void HandleWeaponActiveChanged(bool isWeaponActive)
+    {
+        if (_attacksContainer != null)
+        {
+            _attacksContainer.SetActive(isWeaponActive);
         }
     }
     private void UpdateHealthBar()

@@ -9,22 +9,30 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _walkSpeed = 5f;
     [SerializeField] private float _runSpeed = 10f;
+
     [Header("Dash Settings")]
     [SerializeField] private float _dashSpeed = 12f;
     [Tooltip("La curva determina el multiplicador de velocidad sincronizado con la animación. Eje X = % Animación (0 a 1), Eje Y = Multiplicador (1 a 0).")]
     [SerializeField] private AnimationCurve _dashCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
     [Space]
+
     [SerializeField] private float _accelerationRate = 5f;
     [SerializeField] private float _decelerationRate = 12f;
-    [SerializeField] [Range(0.05f, 0.5f)] private float _turnSmoothTime = 0.1f;
+    [SerializeField][Range(0.05f, 0.5f)] private float _turnSmoothTime = 0.1f;
     [SerializeField] private float _gravity = -9.81f;
     [SerializeField] private float _combatFriction = 15f;
-    [SerializeField] private float _blockedKnockbackMultiplier = 0.35f;
+
+    [Header("Knockback Settings")]
+    [Tooltip("Fricción aplicada al retroceso por golpe recibido (menor valor = mayor desplazamiento).")]
+    [SerializeField] private float _knockbackFriction = 8f;
+    [Tooltip("Multiplicador de knockback cuando el jugador bloquea exitosamente el ataque.")]
+    [SerializeField][Range(0f, 1f)] private float _blockedKnockbackMultiplier = 0.35f;
 
     private float _turnSmoothVelocity;
     private Vector3 _dashDirection;
     private Vector3 _verticalVelocity;
     private Vector3 _currentVelocity;
+    private bool _isKnockedBack;
 
     private CharacterController _characterController;
     private PlayerInputs _playerInputs;
@@ -48,12 +56,16 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-        if (UIManager.Instance.CurrentState == GameState.Gameplay) HandleMovement();
+        HandleMovement();
     }
     private void HandleMovement()
     {
-        if (_playerFSM.CurrentState == PlayerState.Dodging)
+        bool isLayingOrStandingUp = _playerAnimator != null && (_playerAnimator.IsLaying || _playerAnimator.IsStandingUp);
+
+        if (_playerFSM.CurrentState == PlayerState.Dodging && !isLayingOrStandingUp)
         {
+            _isKnockedBack = false;
+
             if (_dashDirection == Vector3.zero)
             {
                 Vector2 input = _playerInputs.MoveInput;
@@ -80,7 +92,6 @@ public class PlayerMovement : MonoBehaviour
 
             float normalizedTime = _playerAnimator != null ? _playerAnimator.DodgeNormalizedTime : 0f;
             float currentDashSpeed = _dashSpeed * _dashCurve.Evaluate(normalizedTime);
-
             currentDashSpeed *= _playerStats.SpeedMultiplier;
 
             Vector2 currentInput = _playerInputs.MoveInput;
@@ -92,6 +103,7 @@ public class PlayerMovement : MonoBehaviour
 
                 currentDashSpeed = Mathf.Max(currentDashSpeed, intendedSpeed);
             }
+
             _characterController.Move(currentDashSpeed * Time.deltaTime * _dashDirection);
             Gravity();
             return;
@@ -99,19 +111,29 @@ public class PlayerMovement : MonoBehaviour
 
         _dashDirection = Vector3.zero;
 
-        if (_playerFSM.CurrentState != PlayerState.Walking &&
-            _playerFSM.CurrentState != PlayerState.Running &&
-            _playerFSM.CurrentState != PlayerState.Idle)
+        if (isLayingOrStandingUp ||
+            (_playerFSM.CurrentState != PlayerState.Walking &&
+             _playerFSM.CurrentState != PlayerState.Running &&
+             _playerFSM.CurrentState != PlayerState.Idle))
         {
-            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, _combatFriction * Time.deltaTime);
+            float friction = _isKnockedBack ? _knockbackFriction : _combatFriction;
+            _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, friction * Time.deltaTime);
+
             if (_currentVelocity.magnitude > 0.01f)
             {
                 _characterController.Move(_currentVelocity * Time.deltaTime);
             }
+            else
+            {
+                _currentVelocity = Vector3.zero;
+                _isKnockedBack = false;
+            }
+
             Gravity();
             return;
         }
 
+        _isKnockedBack = false;
         Vector2 moveInput = _playerInputs.MoveInput;
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         Vector3 targetVelocity = Vector3.zero;
@@ -127,6 +149,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 targetAngle += _mainCameraTransform.eulerAngles.y;
             }
+
             Vector3 adjustedDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             targetVelocity = adjustedDirection * targetSpeed;
 
@@ -149,12 +172,12 @@ public class PlayerMovement : MonoBehaviour
     }
     public void ApplyCombatImpulse(float force)
     {
+        _isKnockedBack = false;
         _currentVelocity = transform.forward * force;
     }
     public void ApplyKnockback(Vector3 direction, float force)
     {
         if (_playerFSM.CurrentState == PlayerState.Dodging ||
-            _playerFSM.CurrentState == PlayerState.Hurt ||
             _playerFSM.CurrentState == PlayerState.Knockout ||
             _playerFSM.CurrentState == PlayerState.Death)
         {
@@ -170,6 +193,7 @@ public class PlayerMovement : MonoBehaviour
             appliedForce *= _blockedKnockbackMultiplier;
         }
 
+        _isKnockedBack = appliedForce > 0f;
         _currentVelocity = direction.normalized * appliedForce;
     }
     private void Gravity()

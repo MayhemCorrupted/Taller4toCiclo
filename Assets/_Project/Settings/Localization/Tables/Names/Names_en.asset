@@ -58,6 +58,14 @@ MonoBehaviour:
     m_Localized: Health points
     m_Metadata:
       m_Items: []
+  - m_Id: 8864743967834112
+    m_Localized: Lithoselle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8864743980417024
+    m_Localized: Vileutch
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

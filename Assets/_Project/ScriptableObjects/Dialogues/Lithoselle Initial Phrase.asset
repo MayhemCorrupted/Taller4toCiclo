@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: TestOptionBDialogue
+  m_Name: Lithoselle Initial Phrase
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
+  CustomUIID: 
   Lines:
   - SpeakerName:
       m_TableReference:
-        m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
       m_TableEntryReference:
-        m_KeyId: 975181471956992
+        m_KeyId: 8864743967834112
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -26,34 +27,16 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 1020483813916672
+        m_KeyId: 12889340392390662
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
     CustomTextSpeed: 0
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
-      m_TableEntryReference:
-        m_KeyId: 975181471956992
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
-        m_KeyId: 354246620495872
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    SpeakerSprite: {fileID: 0}
-    CustomTextSpeed: 0
+    LineEndEventID: 
   Options: []
+  SequenceEndEventID: 
   references:
     version: 2
     RefIds: []

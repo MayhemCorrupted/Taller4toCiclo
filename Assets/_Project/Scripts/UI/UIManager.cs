@@ -1,10 +1,13 @@
 using UnityEngine;
+
 public interface IPanel
 {
     void OpenPanel();
     void ClosePanel();
 }
+
 public enum GameState { Gameplay, Dialogue, Inventory, PauseMenu, Stadistics }
+
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -44,6 +47,8 @@ public class UIManager : MonoBehaviour
     }
     private void OnEnable()
     {
+        if (_playerInputs == null) _playerInputs = FindAnyObjectByType<PlayerInputs>();
+
         if (_playerInputs != null)
         {
             _playerInputs.OnOpenInventory += HandleInventoryToggle;
@@ -60,11 +65,18 @@ public class UIManager : MonoBehaviour
     }
     private void Start()
     {
-        UpdateCursorState();
+        SetGameState(CurrentState);
     }
     public void SetGameState(GameState newState)
     {
         CurrentState = newState;
+
+        if (_playerInputs == null) _playerInputs = FindAnyObjectByType<PlayerInputs>();
+        if (_playerInputs != null)
+        {
+            _playerInputs.ApplyGameStateInputs(newState);
+        }
+
         UpdateCursorState();
     }
     public void UpdateCursorState()

@@ -63,7 +63,7 @@ public class PlayerStats : MonoBehaviour
         ConsumableDamageBonus = amount;
         RecalculateStats();
     }
-
+    
     public void RecalculateStats()
     {
         MaxHealth = 80 + (12 * _lifeLevel);

@@ -18,10 +18,6 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 349939552632832
-    m_Localized: Lithoselle
-    m_Metadata:
-      m_Items: []
   - m_Id: 1076780030640128
     m_Localized: '[{key}] Saltar texto'
     m_Metadata:

@@ -17,6 +17,7 @@ public class PlayerInputs : MonoBehaviour
     public Vector2 MoveInput { get; private set; }
     public bool InputRun { get; private set; }
     public bool InputBlock { get; private set; }
+    public bool AreGameplayInputsEnabled { get; private set; } = true;
     public string CurrentDeviceMode { get; private set; } = "PC_KeyboardMouse";
 
     private PlayerInputActions _inputActions;
@@ -44,24 +45,64 @@ public class PlayerInputs : MonoBehaviour
 
         _inputActions.UI.OpenInventory.performed += ctx => OnOpenInventory?.Invoke();
         _inputActions.UI.Pause.performed += ctx => OnPause?.Invoke();
+
         InitializeDeviceMode();
     }
     private void OnEnable()
     {
-        _inputActions.Enable();
+        _inputActions.UI.Enable();
+
+        GameState currentState = UIManager.Instance != null ? UIManager.Instance.CurrentState : GameState.Gameplay;
+        ApplyGameStateInputs(currentState);
     }
     private void OnDisable()
     {
+        ResetContinuousInputs();
         _inputActions.Disable();
     }
     private void OnDestroy()
     {
         _inputActions.Dispose();
     }
+    public void ApplyGameStateInputs(GameState state)
+    {
+        if (_inputActions == null) return;
+
+        _inputActions.UI.Enable();
+
+        if (state == GameState.Gameplay)
+        {
+            AreGameplayInputsEnabled = true;
+            _inputActions.Gameplay.Enable();
+        }
+        else if (state == GameState.Dialogue)
+        {
+            AreGameplayInputsEnabled = false;
+            ResetContinuousInputs();
+            _inputActions.Gameplay.Disable();
+            _inputActions.Gameplay.Interact.Enable();
+        }
+        else
+        {
+            AreGameplayInputsEnabled = false;
+            ResetContinuousInputs();
+            _inputActions.Gameplay.Disable();
+        }
+    }
+    public void ResetContinuousInputs()
+    {
+        MoveInput = Vector2.zero;
+        InputRun = false;
+        InputBlock = false;
+    }
     private void Update()
     {
         DetectCurrentDevice();
-        ReadMouseScroll();
+
+        if (AreGameplayInputsEnabled)
+        {
+            ReadMouseScroll();
+        }
     }
     private void InitializeDeviceMode()
     {

@@ -26,7 +26,7 @@ MonoBehaviour:
   - vesaniaLevel: 1
     agonizeProbability: 0
     agonizeCooldown: 10
-  - vesaniaLevel: 2
+  - vesaniaLevel: 3
     agonizeProbability: 0.25
     agonizeCooldown: 10
   - vesaniaLevel: 3
@@ -41,16 +41,16 @@ MonoBehaviour:
   defaultAgonizeCooldown: 5
   defaultAgonizeProbability: 0
   detectionRadius: 8
-  attackRadius: 2
+  attackRadius: 3
   lossRadius: 14
-  minAttackCooldown: 1
-  maxAttackCooldown: 2
+  minAttackCooldown: 3
+  maxAttackCooldown: 3
   phases:
   - phaseName: 1
     healthThresholdPercentage: 1
     attackPool:
       closeRangeMax: 2
-      mediumRangeMax: 3
+      mediumRangeMax: 0
       closeRangeAttacks:
       - {fileID: 11400000, guid: 547ccba26512c2948a2e63426dddf8a0, type: 2}
       mediumRangeAttacks: []

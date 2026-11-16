@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerFSM))]

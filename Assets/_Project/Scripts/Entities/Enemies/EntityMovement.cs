@@ -27,6 +27,7 @@ public class EntityMovement : MonoBehaviour
     [SerializeField] private float _orbitDirectionChangeInterval = 3.5f;
 
     [Header("Hit Reaction & Death Settings")]
+    [Tooltip("Duración del retroceso físico (knockback) y duración de respaldo del stun si no hay animación Hurt.")]
     [SerializeField] private float _stunDuration = 0.45f;
     [SerializeField] private float _knockbackForce = 12f;
     [SerializeField] private float _knockbackFriction = 10f;
@@ -41,6 +42,7 @@ public class EntityMovement : MonoBehaviour
 
     private int _orbitDirection = 1;
     private float _orbitSwitchTimer;
+    public bool IsKnockbackActive => _stunCoroutine != null;
     private void Awake()
     {
         _NavAgent = GetComponent<NavMeshAgent>();
@@ -64,6 +66,7 @@ public class EntityMovement : MonoBehaviour
             if (_brain.CurrentState == EnemyState.Patroling) SetRandomPatrolPoint();
         }
     }
+
     private void OnDestroy()
     {
         if (_brain != null)
@@ -177,6 +180,13 @@ public class EntityMovement : MonoBehaviour
         }
 
         if (!_NavAgent.enabled) return;
+
+        if (newState == EnemyState.Hurt)
+        {
+            _NavAgent.isStopped = true;
+            _NavAgent.velocity = Vector3.zero;
+            return;
+        }
 
         if (newState == EnemyState.Patroling)
         {
@@ -356,7 +366,10 @@ public class EntityMovement : MonoBehaviour
         while (timer < _stunDuration)
         {
             if (_brain == null || _brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing)
+            {
+                _stunCoroutine = null;
                 yield break;
+            }
 
             Vector3 currentVel = _rb.linearVelocity;
             Vector3 horizontalVel = new(currentVel.x, 0f, currentVel.z);
@@ -379,9 +392,13 @@ public class EntityMovement : MonoBehaviour
             transform.position = hit.position;
 
         _NavAgent.enabled = true;
+        _NavAgent.isStopped = true;
+        _NavAgent.velocity = Vector3.zero;
         _stunCoroutine = null;
 
-        if (_brain != null && _brain.CurrentState == EnemyState.Hurt)
+        if (_brain != null && _brain.CurrentState == EnemyState.Hurt && !_brain.IsHurtAnimationActive)
+        {
             _brain.EndHurt();
+        }
     }
 }

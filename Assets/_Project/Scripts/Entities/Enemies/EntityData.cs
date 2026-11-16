@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 public enum EnemyRank { Minion, Leader, MiniBoss, Boss }
-public enum EnemyHealthBarMode { ScreenUI, WorldSpace } 
+public enum EnemyHealthBarMode { ScreenUI, WorldSpace }
 [Serializable] public class AttackDistancePool
 {
     [Header("Rangos de Distancia")]
@@ -29,7 +29,6 @@ public enum EnemyHealthBarMode { ScreenUI, WorldSpace }
     [Tooltip("Cooldown en segundos después de reproducir Agonize en este nivel de Vesania.")]
     [Min(0f)] public float agonizeCooldown;
 }
-
 [CreateAssetMenu(fileName = "EntityData", menuName = "Rotbound/Entity/EntityData")]
 public class EntityData : ScriptableObject
 {
@@ -128,13 +127,13 @@ public class EntityData : ScriptableObject
                 optimalRange = (minRange + maxRange) * 0.5f;
                 break;
 
-            case 3: 
+            case 3:
                 minRange = Mathf.Max(2.5f, mediumMax * 0.9f);
                 maxRange = Mathf.Max(minRange + 2.5f, farMax);
                 optimalRange = Mathf.Lerp(minRange, maxRange, 0.55f);
                 break;
 
-            default: 
+            default:
                 minRange = 1.2f;
                 maxRange = attackRadius;
                 optimalRange = Mathf.Clamp(attackRadius * 0.75f, minRange, maxRange);
