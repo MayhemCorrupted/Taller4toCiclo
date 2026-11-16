@@ -4,9 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Localization;
+
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
+
     public enum TutorialPhase
     {
         None,
@@ -14,7 +16,9 @@ public class TutorialManager : MonoBehaviour
         Combat,
         Inventory
     }
-    [Serializable] public class TutorialPromptEntry
+
+    [Serializable]
+    public class TutorialPromptEntry
     {
         [Tooltip("Opcional: Si se asigna, usa LanguageManager; si está vacío, usa FallbackText.")]
         public LocalizedString LocalizedText;
@@ -80,50 +84,36 @@ public class TutorialManager : MonoBehaviour
         FallbackText = "Acierta tus habilidades especiales [{skill}] en el enemigo"
     };
 
-    [Header("Parte 3: Inventario - Consumible Equipable (2 Líneas TMP)")]
+    [Header("Parte 3: Inventario Flexible (2 Líneas TMP)")]
     [SerializeField] private GameObject _inventoryContainer;
     [SerializeField] private TextMeshProUGUI[] _inventoryLinesTMP;
-    [Tooltip("Activar si el objeto de prueba no se puede equipar en acceso rápido (ej: Stat Boost) y solo se mueve entre slots generales.")]
-    [SerializeField] private bool _useGeneralSlotsOnlyMode = false;
     [SerializeField]
     private TutorialPromptEntry _openInventoryPrompt = new()
     {
         FallbackText = "Abre el inventario con [{inventory}]"
     };
     [SerializeField]
-    private TutorialPromptEntry _dragToQuickSlotPrompt = new()
+    private TutorialPromptEntry _dragSlotPrompt = new()
     {
-        FallbackText = "Arrastra el consumible al slot de acceso rápido"
+        FallbackText = "Arrastra un objeto hacia un slot permitido (acceso rápido, equipo o inventario)"
     };
     [SerializeField]
-    private TutorialPromptEntry _clickToInventorySlotPrompt = new()
+    private TutorialPromptEntry _clickSlotPrompt = new()
     {
-        FallbackText = "Haz clic en el consumible equipado y luego clic en un slot de inventario para guardarlo"
-    };
-
-    [Header("Parte 3B: Inventario - Solo Slots Generales (Stat Boost)")]
-    [SerializeField]
-    private TutorialPromptEntry _dragBetweenSlotsPrompt = new()
-    {
-        FallbackText = "Arrastra el objeto hacia otro slot de tu inventario"
-    };
-    [SerializeField]
-    private TutorialPromptEntry _clickBetweenSlotsPrompt = new()
-    {
-        FallbackText = "Haz clic en el objeto y luego clic en otro slot de inventario para moverlo"
+        FallbackText = "Haz clic en un objeto y luego clic en otro slot permitido para moverlo o equiparlo"
     };
     [SerializeField]
     private TutorialPromptEntry _armorReminderPrompt = new()
     {
-        FallbackText = "Recuerda: Los slots de equipamiento funcionan igual (arrastrar o hacer clic para equipar y desequipar)."
+        FallbackText = "Recuerda: Todos los slots de equipo, acceso rápido e inventario funcionan arrastrando o haciendo clic."
     };
+
     public TutorialPhase CurrentPhase { get; private set; } = TutorialPhase.None;
 
     private PlayerInputs _playerInputs;
     private PlayerAnimator _playerAnimator;
     private PlayerCombat _playerCombat;
     private WeaponHitbox _weaponHitbox;
-    private InventoryManager _inventoryManager;
     private SlotsUI _slotsUI;
 
     private string _lastDeviceMode;
@@ -141,6 +131,7 @@ public class TutorialManager : MonoBehaviour
     private bool _hasHitSkill1;
 
     private int _inventoryStep;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -154,7 +145,6 @@ public class TutorialManager : MonoBehaviour
         _playerAnimator = FindAnyObjectByType<PlayerAnimator>(FindObjectsInactive.Include);
         _playerCombat = FindAnyObjectByType<PlayerCombat>();
         _weaponHitbox = FindAnyObjectByType<WeaponHitbox>(FindObjectsInactive.Include);
-        _inventoryManager = FindAnyObjectByType<InventoryManager>();
         _slotsUI = FindAnyObjectByType<SlotsUI>(FindObjectsInactive.Include);
 
         if (_canvasGroup == null && _tutorialPanel != null)
@@ -165,6 +155,7 @@ public class TutorialManager : MonoBehaviour
         if (_tutorialPanel != null)
             _tutorialPanel.SetActive(false);
     }
+
     private void OnEnable()
     {
         if (_playerInputs != null)
@@ -187,6 +178,7 @@ public class TutorialManager : MonoBehaviour
         if (_slotsUI != null)
             _slotsUI.OnSlotActionProcessed += HandleInventorySlotAction;
     }
+
     private void OnDisable()
     {
         if (_playerInputs != null)
@@ -212,6 +204,7 @@ public class TutorialManager : MonoBehaviour
         UnbindAllTexts();
         if (_canvasGroup != null) LeanTween.cancel(_canvasGroup.gameObject);
     }
+
     private void Update()
     {
         if (_pendingPhaseAfterStandUp != TutorialPhase.None && !ShouldWaitForStandUp())
@@ -239,6 +232,11 @@ public class TutorialManager : MonoBehaviour
                 break;
         }
     }
+
+    // =========================================================================
+    // MÉTODOS PÚBLICOS DE INICIO Y CONTROL
+    // =========================================================================
+
     public void StartMovementTutorial()
     {
         ResetRoutineAndState();
@@ -252,6 +250,7 @@ public class TutorialManager : MonoBehaviour
 
         BeginMovementPhase();
     }
+
     public void StartCombatTutorial()
     {
         ResetRoutineAndState();
@@ -265,19 +264,12 @@ public class TutorialManager : MonoBehaviour
 
         BeginCombatPhase();
     }
+
     public void SetTutorialEnemies(Health[] enemies)
     {
         _tutorialEnemies = enemies;
     }
-    public void SetGeneralSlotsOnlyMode(bool generalOnly)
-    {
-        _useGeneralSlotsOnlyMode = generalOnly;
 
-        if (CurrentPhase == TutorialPhase.Inventory)
-        {
-            RefreshCurrentPhaseUI();
-        }
-    }
     public void StartInventoryTutorial()
     {
         ResetRoutineAndState();
@@ -291,22 +283,22 @@ public class TutorialManager : MonoBehaviour
 
         BeginInventoryPhase();
     }
-    public void StartGeneralSlotsInventoryTutorial()
-    {
-        _useGeneralSlotsOnlyMode = true;
-        StartInventoryTutorial();
-    }
+
     public void HideTutorialImmediate()
     {
         ResetRoutineAndState();
         CurrentPhase = TutorialPhase.None;
-        _useGeneralSlotsOnlyMode = false;
         UnbindAllTexts();
         SetActivePhaseContainer(TutorialPhase.None);
 
         if (_tutorialPanel != null)
             _tutorialPanel.SetActive(false);
     }
+
+    // =========================================================================
+    // CONTROL DE ANIMACIÓN DE LEVANTARSE E INICIO DE FASES
+    // =========================================================================
+
     private bool ShouldWaitForStandUp()
     {
         if (_playerAnimator == null)
@@ -314,6 +306,7 @@ public class TutorialManager : MonoBehaviour
 
         return _playerAnimator != null && (_playerAnimator.IsLaying || _playerAnimator.IsStandingUp);
     }
+
     private void HandlePlayerStandUpCompleted()
     {
         if (_pendingPhaseAfterStandUp == TutorialPhase.None || ShouldWaitForStandUp()) return;
@@ -336,6 +329,7 @@ public class TutorialManager : MonoBehaviour
                 break;
         }
     }
+
     private void BeginMovementPhase()
     {
         CurrentPhase = TutorialPhase.Movement;
@@ -346,6 +340,7 @@ public class TutorialManager : MonoBehaviour
         ShowPanel();
         RefreshCurrentPhaseUI();
     }
+
     private void BeginCombatPhase()
     {
         CurrentPhase = TutorialPhase.Combat;
@@ -358,6 +353,7 @@ public class TutorialManager : MonoBehaviour
         ShowPanel();
         RefreshCurrentPhaseUI();
     }
+
     private void BeginInventoryPhase()
     {
         CurrentPhase = TutorialPhase.Inventory;
@@ -368,6 +364,11 @@ public class TutorialManager : MonoBehaviour
         ShowPanel();
         RefreshCurrentPhaseUI();
     }
+
+    // =========================================================================
+    // EVALUACIÓN DE OBJETIVOS POR FASE
+    // =========================================================================
+
     private void EvaluateMovementTutorial()
     {
         if (_playerInputs == null || !_playerInputs.AreGameplayInputsEnabled) return;
@@ -394,6 +395,7 @@ public class TutorialManager : MonoBehaviour
             CheckMovementCompletion();
         }
     }
+
     private void HandleDodge()
     {
         if (CurrentPhase != TutorialPhase.Movement) return;
@@ -407,6 +409,7 @@ public class TutorialManager : MonoBehaviour
             CheckMovementCompletion();
         }
     }
+
     private void CheckMovementCompletion()
     {
         if (_hasMoved && _hasRan && _hasDodged)
@@ -414,6 +417,7 @@ public class TutorialManager : MonoBehaviour
             ScheduleHidePanel(_hideDelayAfterComplete);
         }
     }
+
     private void HandleMeleeHitEnemy(Health targetHealth, bool isHeavy)
     {
         if (CurrentPhase != TutorialPhase.Combat) return;
@@ -433,6 +437,7 @@ public class TutorialManager : MonoBehaviour
 
         if (changed) CheckCombatCompletion();
     }
+
     private void HandleProjectileHitEnemy(Health targetHealth)
     {
         if (CurrentPhase != TutorialPhase.Combat) return;
@@ -444,6 +449,7 @@ public class TutorialManager : MonoBehaviour
             CheckCombatCompletion();
         }
     }
+
     private void HandleAreaSkillHitEnemy(Health targetHealth)
     {
         if (CurrentPhase != TutorialPhase.Combat) return;
@@ -455,6 +461,7 @@ public class TutorialManager : MonoBehaviour
             CheckCombatCompletion();
         }
     }
+
     private void HandleSwapSkill()
     {
         if (CurrentPhase != TutorialPhase.Combat) return;
@@ -465,6 +472,7 @@ public class TutorialManager : MonoBehaviour
             CheckCombatCompletion();
         }
     }
+
     private bool IsValidTutorialEnemy(Health targetHealth)
     {
         if (targetHealth == null || targetHealth is PlayerHealth) return false;
@@ -484,10 +492,12 @@ public class TutorialManager : MonoBehaviour
 
         return true;
     }
+
     private bool IsSpecialObjectiveCompleted()
     {
         return _requireBothSpecials ? (_hasHitSkill0 && _hasHitSkill1) : (_hasHitSkill0 || _hasHitSkill1);
     }
+
     private void CheckCombatCompletion()
     {
         RefreshCurrentPhaseUI();
@@ -497,6 +507,7 @@ public class TutorialManager : MonoBehaviour
             ScheduleHidePanel(_hideDelayAfterComplete);
         }
     }
+
     private void EvaluateInventoryStep0()
     {
         if (_inventoryStep != 0) return;
@@ -507,62 +518,29 @@ public class TutorialManager : MonoBehaviour
             RefreshCurrentPhaseUI();
         }
     }
+
     private void HandleInventorySlotAction(SelectedSlotType source, SelectedSlotType target, bool isDrag)
     {
         if (CurrentPhase != TutorialPhase.Inventory) return;
-
-        if (_useGeneralSlotsOnlyMode)
-        {
-            EvaluateGeneralSlotsOnlyAction(source, target, isDrag);
-            return;
-        }
+        if (source == SelectedSlotType.None || target == SelectedSlotType.None) return;
 
         if (_inventoryStep == 1 && isDrag)
-        {
-            if (source == SelectedSlotType.General && target == SelectedSlotType.Consumable)
-            {
-                if (_inventoryManager != null && _inventoryManager.EquippedConsumable != null)
-                {
-                    _inventoryStep = 2;
-                    RefreshCurrentPhaseUI();
-                }
-                else
-                {
-                    _useGeneralSlotsOnlyMode = true;
-                    RefreshCurrentPhaseUI();
-                }
-            }
-            else if (source == SelectedSlotType.General && target == SelectedSlotType.General)
-            {
-                _useGeneralSlotsOnlyMode = true;
-                _inventoryStep = 2;
-                RefreshCurrentPhaseUI();
-            }
-        }
-        else if (_inventoryStep == 2 && !isDrag &&
-                 source == SelectedSlotType.Consumable && target == SelectedSlotType.General)
-        {
-            _inventoryStep = 3;
-            RefreshCurrentPhaseUI();
-            ScheduleHidePanel(_armorReminderDuration);
-        }
-    }
-    private void EvaluateGeneralSlotsOnlyAction(SelectedSlotType source, SelectedSlotType target, bool isDrag)
-    {
-        if (_inventoryStep == 1 && isDrag &&
-            source == SelectedSlotType.General && target == SelectedSlotType.General)
         {
             _inventoryStep = 2;
             RefreshCurrentPhaseUI();
         }
-        else if (_inventoryStep == 2 && !isDrag &&
-                 source == SelectedSlotType.General && target == SelectedSlotType.General)
+        else if (_inventoryStep == 2 && !isDrag)
         {
             _inventoryStep = 3;
             RefreshCurrentPhaseUI();
             ScheduleHidePanel(_armorReminderDuration);
         }
     }
+
+    // =========================================================================
+    // ACTUALIZACIÓN DE CONTENEDORES Y TEXTOS POR FASE
+    // =========================================================================
+
     private void RefreshCurrentPhaseUI()
     {
         UnbindAllTexts();
@@ -596,14 +574,6 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialPhase.Inventory:
-                TutorialPromptEntry step1Prompt = _useGeneralSlotsOnlyMode
-                    ? _dragBetweenSlotsPrompt
-                    : _dragToQuickSlotPrompt;
-
-                TutorialPromptEntry step2Prompt = _useGeneralSlotsOnlyMode
-                    ? _clickBetweenSlotsPrompt
-                    : _clickToInventorySlotPrompt;
-
                 if (_inventoryStep == 0)
                 {
                     SetLine(activeLines, 0, _openInventoryPrompt, false);
@@ -611,21 +581,22 @@ public class TutorialManager : MonoBehaviour
                 else if (_inventoryStep == 1)
                 {
                     SetLine(activeLines, 0, _openInventoryPrompt, true);
-                    SetLine(activeLines, 1, step1Prompt, false);
+                    SetLine(activeLines, 1, _dragSlotPrompt, false);
                 }
                 else if (_inventoryStep == 2)
                 {
-                    SetLine(activeLines, 0, step1Prompt, true);
-                    SetLine(activeLines, 1, step2Prompt, false);
+                    SetLine(activeLines, 0, _dragSlotPrompt, true);
+                    SetLine(activeLines, 1, _clickSlotPrompt, false);
                 }
                 else if (_inventoryStep == 3)
                 {
-                    SetLine(activeLines, 0, step2Prompt, true);
+                    SetLine(activeLines, 0, _clickSlotPrompt, true);
                     SetLine(activeLines, 1, _armorReminderPrompt, false);
                 }
                 break;
         }
     }
+
     private void SetActivePhaseContainer(TutorialPhase phase)
     {
         if (_movementContainer != null)
@@ -637,6 +608,7 @@ public class TutorialManager : MonoBehaviour
         if (_inventoryContainer != null)
             _inventoryContainer.SetActive(phase == TutorialPhase.Inventory);
     }
+
     private TextMeshProUGUI[] GetLinesArrayForPhase(TutorialPhase phase)
     {
         return phase switch
@@ -647,6 +619,7 @@ public class TutorialManager : MonoBehaviour
             _ => null
         };
     }
+
     private void SetLine(TextMeshProUGUI[] targetArray, int lineIndex, TutorialPromptEntry entry, bool isCompleted)
     {
         if (targetArray == null || lineIndex < 0 || lineIndex >= targetArray.Length) return;
@@ -674,6 +647,7 @@ public class TutorialManager : MonoBehaviour
             tmp.text = isCompleted ? $"<s>{formatted}</s>" : formatted;
         }
     }
+
     private void UnbindAllTexts()
     {
         if (LanguageManager.Instance == null) return;
@@ -682,6 +656,7 @@ public class TutorialManager : MonoBehaviour
         UnbindTextArray(_combatLinesTMP);
         UnbindTextArray(_inventoryLinesTMP);
     }
+
     private static void UnbindTextArray(TextMeshProUGUI[] lines)
     {
         if (lines == null) return;
@@ -692,6 +667,11 @@ public class TutorialManager : MonoBehaviour
                 LanguageManager.Instance.UnbindText(lines[i]);
         }
     }
+
+    // =========================================================================
+    // VISIBILIDAD DEL PANEL Y REEMPLAZO DE TECLAS
+    // =========================================================================
+
     private void ShowPanel()
     {
         if (_tutorialPanel == null) return;
@@ -706,11 +686,13 @@ public class TutorialManager : MonoBehaviour
             LeanTween.alphaCanvas(_canvasGroup, 1f, _fadeDuration).setEaseOutCubic();
         }
     }
+
     private void ScheduleHidePanel(float delay)
     {
         if (_sequenceCoroutine != null) StopCoroutine(_sequenceCoroutine);
         _sequenceCoroutine = StartCoroutine(HidePanelRoutine(delay));
     }
+
     private IEnumerator HidePanelRoutine(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
@@ -727,16 +709,17 @@ public class TutorialManager : MonoBehaviour
             FinalizeHidePanel();
         }
     }
+
     private void FinalizeHidePanel()
     {
         CurrentPhase = TutorialPhase.None;
-        _useGeneralSlotsOnlyMode = false;
         UnbindAllTexts();
         SetActivePhaseContainer(TutorialPhase.None);
 
         if (_tutorialPanel != null)
             _tutorialPanel.SetActive(false);
     }
+
     private void ResetRoutineAndState()
     {
         _pendingPhaseAfterStandUp = TutorialPhase.None;
@@ -747,6 +730,7 @@ public class TutorialManager : MonoBehaviour
             _sequenceCoroutine = null;
         }
     }
+
     private string ReplaceKeyPlaceholders(string text)
     {
         if (string.IsNullOrEmpty(text)) return string.Empty;

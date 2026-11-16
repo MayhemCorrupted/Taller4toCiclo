@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+
 public class DoorController : MonoBehaviour, IInteractable
 {
     [Header("Door Settings")]
@@ -9,26 +10,31 @@ public class DoorController : MonoBehaviour, IInteractable
     [SerializeField] private float _doorSpeed = 0.5f;
 
     [Header("Lock Settings")]
-    [Tooltip("Si está activo, la puerta no podrá abrirse hasta desbloquearla.")]
+    [Tooltip("Si está activo, el jugador no podrá abrirla interactuando directamente hasta desbloquearla.")]
     [SerializeField] private bool _isLocked = false;
-    [Tooltip("Opcional: Se ejecuta cuando el jugador intenta interactuar con la puerta mientras está bloqueada.")]
+    [Tooltip("Se ejecuta cuando el jugador intenta interactuar con la puerta mientras está bloqueada.")]
     public UnityEvent OnInteractWhileLocked;
+    [Tooltip("Se ejecuta cuando la puerta pasa de bloqueada a desbloqueada.")]
+    public UnityEvent OnDoorUnlocked;
 
     [Header("Direction Restrictions")]
     [SerializeField] private bool _revertDirection = false;
     [SerializeField][Range(-1, 1)] private int _forcedDirection = 0;
+
     public bool IsLocked
     {
         get => _isLocked;
-        set => _isLocked = value;
+        set => SetLocked(value);
     }
     public bool IsOpen => _isOpen;
     public bool IsMoving => _isMoving;
+
     private Quaternion _closedRotation;
     private bool _isOpen = false;
     private bool _isMoving = false;
     private Transform _playerTransform;
     private Coroutine _moveCoroutine;
+
     private void Awake()
     {
         if (_hinge == null)
@@ -80,6 +86,20 @@ public class DoorController : MonoBehaviour, IInteractable
         float targetAngle = side * _openAngle;
         StartDoorMovement(targetAngle, targetOpenState: true);
     }
+    public void UnlockAndOpenDoor()
+    {
+        SetLocked(false);
+
+        if (_isOpen && !_isMoving) return;
+
+        int side = CalculateSide();
+        float targetAngle = side * _openAngle;
+        StartDoorMovement(targetAngle, targetOpenState: true);
+    }
+    public void ForceOpenDoor()
+    {
+        UnlockAndOpenDoor();
+    }
     public void CloseDoor()
     {
         if (!_isOpen && !_isMoving) return;
@@ -93,20 +113,21 @@ public class DoorController : MonoBehaviour, IInteractable
     }
     public void LockDoor()
     {
-        _isLocked = true;
+        SetLocked(true);
     }
     public void UnlockDoor()
     {
-        _isLocked = false;
+        SetLocked(false);
     }
     public void SetLocked(bool locked)
     {
+        if (_isLocked == locked) return;
+
         _isLocked = locked;
-    }
-    public void UnlockAndOpenDoor()
-    {
-        _isLocked = false;
-        OpenDoor();
+        if (!_isLocked)
+        {
+            OnDoorUnlocked?.Invoke();
+        }
     }
     private int CalculateSide()
     {
@@ -131,17 +152,26 @@ public class DoorController : MonoBehaviour, IInteractable
         if (_moveCoroutine != null)
         {
             StopCoroutine(_moveCoroutine);
+            _moveCoroutine = null;
         }
 
-        _moveCoroutine = StartCoroutine(MoveDoorRoutine(targetAngle, targetOpenState));
+        Quaternion endRot = _closedRotation * Quaternion.Euler(0f, targetAngle, 0f);
+
+        if (!isActiveAndEnabled || _doorSpeed <= 0f)
+        {
+            _hinge.localRotation = endRot;
+            _isOpen = targetOpenState;
+            _isMoving = false;
+            return;
+        }
+
+        _moveCoroutine = StartCoroutine(MoveDoorRoutine(endRot, targetOpenState));
     }
-    private IEnumerator MoveDoorRoutine(float targetAngle, bool targetOpenState)
+    private IEnumerator MoveDoorRoutine(Quaternion endRot, bool targetOpenState)
     {
         _isMoving = true;
 
         Quaternion startRot = _hinge.localRotation;
-        Quaternion endRot = _closedRotation * Quaternion.Euler(0f, targetAngle, 0f);
-
         float elapsed = 0f;
 
         while (elapsed < _doorSpeed)
