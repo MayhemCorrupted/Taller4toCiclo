@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.016
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -3960,12 +3960,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46838acd8b23bef4e8e62845c1d1aeeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenuUI
-  _menuAnimator: {fileID: 643514345}
   _mainPauseContainer: {fileID: 1724346327}
   _optionsContainer: {fileID: 2038507037}
   _quitContainer: {fileID: 749882731}
-  _ConfigContainer: {fileID: 416960200}
+  _configContainer: {fileID: 0}
   _resumeButton: {fileID: 1488896666}
+  _transitionDuration: 0.35
+  _easeIn: 12
+  _easeOut: 13
 --- !u!1001 &229606702
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13671,6 +13673,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d61b5113196b3a4c8dd597c2d061d4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  OnVesaniaChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLifeLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerRespawnedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGameOverEvent:
+    m_PersistentCalls:
+      m_Calls: []
   _player: {fileID: 0}
   _vesaniaSpawnGroups:
   - requiredVesaniaLevel: 0
@@ -53139,6 +53153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
+  _tagRequirements: []
   _stateSequence:
   - requiredStateValue: 0
     onStateTriggered:
@@ -54472,6 +54487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueUI
   _playerHUD: {fileID: 438135530}
   _dialoguePanel: {fileID: 1863666169}
+  _canvasGroup: {fileID: 0}
   _speakerNameTMP: {fileID: 1704020201}
   _dialogueTextTMP: {fileID: 1419789774}
   _speakerPortrait: {fileID: 1453253771}
@@ -54503,6 +54519,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  _fadePanelDuration: 0.3
   _skipPromptDelay: 3
   _nextPromptDelay: 1
   defaultTextSpeed: 0.03
@@ -57490,7 +57507,10 @@ MonoBehaviour:
   _accessibilitySectionButton: {fileID: 1255813587}
   _optionsButton: {fileID: 654808328}
   _returnButton: {fileID: 981556690}
-  _optionsAnimator: {fileID: 2038507041}
+  _transitionDuration: 0.35
+  _fastReturnBtnDuration: 0.12
+  _easeIn: 12
+  _easeOut: 13
 --- !u!114 &1724346332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57505,12 +57525,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ExitPanelUI
   _pausePanelUI: {fileID: 225891066}
   _optionsPanelUI: {fileID: 1724346331}
-  _quitAnimator: {fileID: 749882735}
   _quitPanel: {fileID: 749882731}
   _quitButton: {fileID: 562364648}
   _leaveGameButton: {fileID: 967492035}
-  _ContinueButton: {fileID: 1026104231}
+  _continueButton: {fileID: 0}
   sceneName: 
+  _transitionDuration: 0.35
+  _easeIn: 12
+  _easeOut: 13
 --- !u!114 &1724346333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57531,7 +57553,10 @@ MonoBehaviour:
   _controlsSection: {fileID: 316685223}
   _accessibilitySection: {fileID: 585141155}
   _returnButton: {fileID: 107014469}
-  _configAnimator: {fileID: 416960204}
+  _transitionDuration: 0.35
+  _fastReturnBtnDuration: 0.12
+  _easeIn: 12
+  _easeOut: 13
 --- !u!1001 &1726812490
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60769,6 +60794,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   _pauseMenuUI: {fileID: 225891066}
   _inventoryPanelUI: {fileID: 110998165}
+  _panelToggleCooldown: 0.1
+  _gameplayCursorTexture: {fileID: 0}
+  _gameplayCursorHotspot: {x: 16, y: 16}
+  _uiCursorTexture: {fileID: 0}
+  _uiCursorHotspot: {x: 0, y: 0}
 --- !u!1 &1773690193
 GameObject:
   m_ObjectHideFlags: 0
@@ -71507,6 +71537,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ded70407f7c0a82419b76bf6e4af5410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
+  defaultSequence: {fileID: 0}
+  conditionalOverrides: []
+  loopDialogue: 0
   OnInteractDialogue:
     m_PersistentCalls:
       m_Calls:
@@ -71522,7 +71555,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  loopDialogue: 0
 --- !u!1001 &2145508548
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71939,6 +71971,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f8a7cff09a20964090f3456644d49d9, type: 3}
+--- !u!1001 &2100594146125918655
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 152.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.2409
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -129.4085
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8319533800963874715, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_Name
+      value: "VOLUM\xC9TRICO"
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
 --- !u!33 &2445968178502006866
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -73025,3 +73114,4 @@ SceneRoots:
   - {fileID: 1027649352}
   - {fileID: 137282115}
   - {fileID: 348194960}
+  - {fileID: 2100594146125918655}
