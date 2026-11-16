@@ -8590,6 +8590,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: _blockedKnockbackMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709493934481547533, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _dashCurve.m_Curve.Array.data[1].inSlope
       value: -0.85342973
       objectReference: {fileID: 0}
