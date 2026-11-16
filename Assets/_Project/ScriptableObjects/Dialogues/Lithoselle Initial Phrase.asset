@@ -18,7 +18,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
       m_TableEntryReference:
-        m_KeyId: 8864743967834112
+        m_KeyId: 9003239739113472
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -32,11 +32,11 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 0}
+    SpeakerSprite: {fileID: -255916515, guid: b3fe72aa6101bda448847006d1adfd2e, type: 3}
     CustomTextSpeed: 0
     LineEndEventID: 
   Options: []
-  SequenceEndEventID: 
+  SequenceEndEventID: StartMoveTutorial
   references:
     version: 2
     RefIds: []

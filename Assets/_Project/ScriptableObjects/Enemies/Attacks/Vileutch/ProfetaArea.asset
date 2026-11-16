@@ -9,26 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e627ee81cf037cd43af8a1ee05414efa, type: 3}
-  m_Name: EntityMultiAreaAttack
-  m_EditorClassIdentifier: Assembly-CSharp::EntityMultiAreaAttack
-  damage: 10
-  knockback: 1
-  telegraphDuration: 3
+  m_Script: {fileID: 11500000, guid: 79ec6f7cd15c6124a9c05f91b1f0abd8, type: 3}
+  m_Name: ProfetaArea
+  m_EditorClassIdentifier: Assembly-CSharp::EntityAreaAttack
+  damage: 55
+  knockback: 0
+  telegraphDuration: 2
   attackDuration: 1
-  trackTargetUntil: 0.8
+  trackTargetUntil: 0.7
   overrideBaseArmor: 1
-  armorState: 2
-  hyperarmorDamageMultiplier: 1
+  armorState: 1
+  hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
-  executionStyle: 0
+  damageDelay: 0
   areaOrigin: 1
-  patternType: 2
-  numberOfAreas: 12
-  areaRadius: 2
-  scatterRadius: 4
-  delayBetweenAreas: 0.2
+  radius: 5
   trackTarget: 1
-  waveCount: 2
-  delayBetweenWaves: 0.5
   indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}

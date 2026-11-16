@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c8d2d224f3e0d1499f125f32d7a27d0, type: 3}
-  m_Name: EntityChargeAttack
+  m_Name: ProfetaCharge
   m_EditorClassIdentifier: Assembly-CSharp::EntityChargeAttack
-  damage: 5
-  knockback: 2
-  telegraphDuration: 2
+  damage: 40
+  knockback: 10
+  telegraphDuration: 3
   attackDuration: 1
-  trackTargetUntil: 0.8
-  overrideBaseArmor: 0
-  armorState: 1
-  hyperarmorDamageMultiplier: 0.5
+  trackTargetUntil: 0.7
+  overrideBaseArmor: 1
+  armorState: 2
+  hyperarmorDamageMultiplier: 0.9
   animationTrigger: 
-  maxChargeDistance: 10
-  hitboxRadius: 1.5
+  damageDelay: 0
+  maxChargeDistance: 15
+  hitboxRadius: 3
   trackTarget: 1
   indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

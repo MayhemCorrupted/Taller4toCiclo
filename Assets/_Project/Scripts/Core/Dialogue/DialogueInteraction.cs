@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 [Serializable] public struct ConditionalDialogue
@@ -14,6 +15,11 @@ using UnityEngine.Events;
 }
 public class DialogueInteraction : MonoBehaviour, IInteractable
 {
+    private struct DynamicDialogueEntry
+    {
+        public DialogueSequence Sequence;
+        public string OverrideUIID;
+    }
     [Header("Secuencia Base")]
     [Tooltip("La secuencia por defecto si no se cumplen condiciones especiales.")]
     public DialogueSequence defaultSequence;
@@ -29,29 +35,111 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
     [Header("Opciones")]
     [SerializeField] private bool loopDialogue = false;
 
-    [Header("Eventos Nativos")]
-    [Tooltip("Conectar directamente a DialogueManager.StartDialogue (soporta UI Default y Custom automáticamente).")]
-    public UnityEvent<DialogueSequence> OnInteractDialogue;
-
+    [Header("Eventos Externos (Opcional)")]
+    [Tooltip("Se ejecuta al interactuar, además de iniciar el diálogo automáticamente (útil para sonidos, puertas, dar ítems, etc.).")]
+    public UnityEvent OnInteract;
+    public bool HasBeenUsed
+    {
+        get => _hasBeenUsed;
+        set
+        {
+            _hasBeenUsed = value;
+            enabled = !_hasBeenUsed || loopDialogue || _dynamicSequences.Count > 0;
+        }
+    }
     private DialogueManager _dialogueManager;
     private bool _hasBeenUsed = false;
+    private readonly Queue<DynamicDialogueEntry> _dynamicSequences = new();
     private void Awake()
     {
         _dialogueManager = FindAnyObjectByType<DialogueManager>();
     }
     public void Interact()
     {
-        if (!_hasBeenUsed || loopDialogue)
-        {
-            DialogueSequence finalSequence = EvaluateConditions(out string sceneUIID);
-            InvokeDialogue(finalSequence, sceneUIID);
+        if (UIManager.Instance != null && UIManager.Instance.CurrentState == GameState.Dialogue)
+            return;
 
-            if (!loopDialogue)
-            {
-                _hasBeenUsed = true;
-                enabled = false;
-            }
+        bool hasDynamic = _dynamicSequences.Count > 0;
+        if (_hasBeenUsed && !loopDialogue && !hasDynamic)
+            return;
+
+        DialogueSequence finalSequence;
+        string sceneUIID;
+
+        if (hasDynamic)
+        {
+            DynamicDialogueEntry dynamicEntry = _dynamicSequences.Dequeue();
+            finalSequence = dynamicEntry.Sequence;
+            sceneUIID = !string.IsNullOrWhiteSpace(dynamicEntry.OverrideUIID)
+                ? dynamicEntry.OverrideUIID
+                : _overrideUIID;
         }
+        else
+        {
+            finalSequence = EvaluateConditions(out sceneUIID);
+        }
+
+        if (finalSequence == null) return;
+
+        InvokeDialogue(finalSequence, sceneUIID);
+
+        if (_dynamicSequences.Count > 0)
+        {
+            _hasBeenUsed = false;
+            enabled = true;
+        }
+        else if (!loopDialogue)
+        {
+            _hasBeenUsed = true;
+            enabled = false;
+        }
+    }
+    public void ResetInteraction()
+    {
+        _hasBeenUsed = false;
+        enabled = true;
+    }
+    public void SetDynamicSequence(DialogueSequence newSequence)
+    {
+        SetDynamicSequence(newSequence, null);
+    }
+    public void SetDynamicSequence(DialogueSequence newSequence, string customUIID)
+    {
+        if (newSequence == null) return;
+
+        _dynamicSequences.Clear();
+        _dynamicSequences.Enqueue(new DynamicDialogueEntry
+        {
+            Sequence = newSequence,
+            OverrideUIID = customUIID
+        });
+
+        ResetInteraction();
+    }
+    public void EnqueueDynamicSequence(DialogueSequence newSequence)
+    {
+        EnqueueDynamicSequence(newSequence, null);
+    }
+    public void EnqueueDynamicSequence(DialogueSequence newSequence, string customUIID)
+    {
+        if (newSequence == null) return;
+
+        _dynamicSequences.Enqueue(new DynamicDialogueEntry
+        {
+            Sequence = newSequence,
+            OverrideUIID = customUIID
+        });
+
+        ResetInteraction();
+    }
+    public void SetDefaultSequence(DialogueSequence newSequence)
+    {
+        defaultSequence = newSequence;
+        ResetInteraction();
+    }
+    public void ClearDynamicSequences()
+    {
+        _dynamicSequences.Clear();
     }
     private DialogueSequence EvaluateConditions(out string sceneUIID)
     {
@@ -75,21 +163,21 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
     }
     private bool CheckGameState(string flag)
     {
-        if (StateManager.Instance != null)
-        {
-            return StateManager.Instance.CheckFlag(flag);
-        }
-
-        return false;
+        return StateManager.Instance != null && StateManager.Instance.CheckFlag(flag);
     }
     private void InvokeDialogue(DialogueSequence sequenceToPlay, string sceneUIID)
     {
-        if (!string.IsNullOrWhiteSpace(sceneUIID))
+        if (_dialogueManager == null)
+            _dialogueManager = FindAnyObjectByType<DialogueManager>();
+
+        if (_dialogueManager != null)
         {
-            if (_dialogueManager == null) _dialogueManager = FindAnyObjectByType<DialogueManager>();
-            if (_dialogueManager != null) _dialogueManager.SetPendingUI(sceneUIID);
+            if (!string.IsNullOrWhiteSpace(sceneUIID))
+                _dialogueManager.StartDialogue(sequenceToPlay, sceneUIID);
+            else
+                _dialogueManager.StartDialogue(sequenceToPlay);
         }
 
-        OnInteractDialogue?.Invoke(sequenceToPlay);
+        OnInteract?.Invoke();
     }
 }

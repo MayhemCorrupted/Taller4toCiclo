@@ -63,6 +63,10 @@ MonoBehaviour:
     m_Key: BOSS_NAME
     m_Metadata:
       m_Items: []
+  - m_Id: 9003239739113472
+    m_Key: ANON_NAME
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

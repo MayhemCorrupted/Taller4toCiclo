@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 681d7c993d20bd04e94b539d5bfac36b, type: 3}
   m_Name: MeleeErrante
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
-  damage: 20
+  damage: 10
   knockback: 7
   telegraphDuration: 1
   attackDuration: 2
-  trackTargetUntil: 0.5
+  trackTargetUntil: 0.9
   overrideBaseArmor: 1
   armorState: 1
-  hyperarmorDamageMultiplier: 0.5
+  hyperarmorDamageMultiplier: 0
   animationTrigger: Melee
-  damageDelay: 1
+  damageDelay: 2
   isRadial: 0
   radius: 2
-  hitboxMeasurements: {x: 1, y: 1.5, z: 2}
+  hitboxMeasurements: {x: 1, y: 1.5, z: 1.5}
   verticalOffset: 1
   indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

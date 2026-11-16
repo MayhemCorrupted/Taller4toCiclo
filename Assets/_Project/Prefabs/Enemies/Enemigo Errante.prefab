@@ -140,12 +140,12 @@ MonoBehaviour:
   _combat: {fileID: 2981225711452780749}
   _obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   _patrolWaitingTime: 1
   _patrolRadius: 5
   _enableOrbitalMovement: 1
   _orbitStrafeDistance: 2.5
-  _orbitDirectionChangeInterval: 3.5
+  _orbitDirectionChangeInterval: 2
   _stunDuration: 0.5
   _knockbackForce: 9.5
   _knockbackFriction: 8

@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic; 
+using UnityEngine;
+using System;
 [RequireComponent(typeof(Collider))]
 public class PlayerProjectile : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class PlayerProjectile : MonoBehaviour
     private float _damage;
     private bool _isInitialized = false;
     private readonly HashSet<Health> _hitEnemies = new();
+    public static event Action<Health> OnAnyProjectileHitEnemy;
     public void Init(Vector3 direction, float damageAmount)
     {
         _direction = direction.normalized;
@@ -35,13 +37,12 @@ public class PlayerProjectile : MonoBehaviour
         }
         if ((otherLayer & _enemyLayer) != 0)
         {
-            if (other.TryGetComponent(out Health enemyHealth))
+            Health enemyHealth = other.GetComponentInParent<Health>();
+            if (enemyHealth != null && !_hitEnemies.Contains(enemyHealth))
             {
-                if (!_hitEnemies.Contains(enemyHealth))
-                {
-                    enemyHealth.TakeDamage(_damage);
-                    _hitEnemies.Add(enemyHealth);
-                }
+                enemyHealth.TakeDamage(_damage);
+                _hitEnemies.Add(enemyHealth);
+                OnAnyProjectileHitEnemy?.Invoke(enemyHealth);
             }
         }
     }

@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.Events;
 public class DoorController : MonoBehaviour, IInteractable
 {
     [Header("Door Settings")]
@@ -7,14 +8,27 @@ public class DoorController : MonoBehaviour, IInteractable
     [SerializeField] private float _openAngle = 90f;
     [SerializeField] private float _doorSpeed = 0.5f;
 
+    [Header("Lock Settings")]
+    [Tooltip("Si está activo, la puerta no podrá abrirse hasta desbloquearla.")]
+    [SerializeField] private bool _isLocked = false;
+    [Tooltip("Opcional: Se ejecuta cuando el jugador intenta interactuar con la puerta mientras está bloqueada.")]
+    public UnityEvent OnInteractWhileLocked;
+
     [Header("Direction Restrictions")]
     [SerializeField] private bool _revertDirection = false;
     [SerializeField][Range(-1, 1)] private int _forcedDirection = 0;
-
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => _isLocked = value;
+    }
+    public bool IsOpen => _isOpen;
+    public bool IsMoving => _isMoving;
     private Quaternion _closedRotation;
     private bool _isOpen = false;
     private bool _isMoving = false;
     private Transform _playerTransform;
+    private Coroutine _moveCoroutine;
     private void Awake()
     {
         if (_hinge == null)
@@ -28,6 +42,7 @@ public class DoorController : MonoBehaviour, IInteractable
                 return;
             }
         }
+
         _closedRotation = _hinge.localRotation;
     }
     private void Start()
@@ -44,6 +59,12 @@ public class DoorController : MonoBehaviour, IInteractable
 
         if (!_isOpen)
         {
+            if (_isLocked)
+            {
+                OnInteractWhileLocked?.Invoke();
+                return;
+            }
+
             OpenDoor();
         }
         else
@@ -51,33 +72,70 @@ public class DoorController : MonoBehaviour, IInteractable
             CloseDoor();
         }
     }
-    private void OpenDoor()
+    public void OpenDoor()
     {
+        if (_isLocked || _isOpen) return;
+
         int side = CalculateSide();
         float targetAngle = side * _openAngle;
-        StartCoroutine(MoveDoorRoutine(targetAngle));
+        StartDoorMovement(targetAngle, targetOpenState: true);
     }
-
-    private void CloseDoor()
+    public void CloseDoor()
     {
-        StartCoroutine(MoveDoorRoutine(0f));
-    }
+        if (!_isOpen && !_isMoving) return;
 
+        StartDoorMovement(0f, targetOpenState: false);
+    }
+    public void ToggleDoor()
+    {
+        if (_isOpen) CloseDoor();
+        else OpenDoor();
+    }
+    public void LockDoor()
+    {
+        _isLocked = true;
+    }
+    public void UnlockDoor()
+    {
+        _isLocked = false;
+    }
+    public void SetLocked(bool locked)
+    {
+        _isLocked = locked;
+    }
+    public void UnlockAndOpenDoor()
+    {
+        _isLocked = false;
+        OpenDoor();
+    }
     private int CalculateSide()
     {
         if (_forcedDirection != 0) return _forcedDirection;
 
-        if (_playerTransform == null) return 1;
+        if (_playerTransform == null)
+        {
+            PlayerMovement player = FindAnyObjectByType<PlayerMovement>();
+            if (player != null) _playerTransform = player.transform;
+            else return 1;
+        }
 
         Vector3 localPlayerPos = transform.InverseTransformPoint(_playerTransform.position);
-
         int side = localPlayerPos.z >= 0 ? 1 : -1;
 
         if (_revertDirection) side *= -1;
 
         return side;
     }
-    private IEnumerator MoveDoorRoutine(float targetAngle)
+    private void StartDoorMovement(float targetAngle, bool targetOpenState)
+    {
+        if (_moveCoroutine != null)
+        {
+            StopCoroutine(_moveCoroutine);
+        }
+
+        _moveCoroutine = StartCoroutine(MoveDoorRoutine(targetAngle, targetOpenState));
+    }
+    private IEnumerator MoveDoorRoutine(float targetAngle, bool targetOpenState)
     {
         _isMoving = true;
 
@@ -95,7 +153,8 @@ public class DoorController : MonoBehaviour, IInteractable
         }
 
         _hinge.localRotation = endRot;
-        _isOpen = (targetAngle != 0f);
+        _isOpen = targetOpenState;
         _isMoving = false;
+        _moveCoroutine = null;
     }
 }

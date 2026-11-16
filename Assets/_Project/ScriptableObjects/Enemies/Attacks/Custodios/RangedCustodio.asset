@@ -10,14 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34c2c791b144d564899d395130d0640c, type: 3}
-  m_Name: RangedProfeta
+  m_Name: RangedCustodio
   m_EditorClassIdentifier: Assembly-CSharp::EnemyRangedAtk
-  damage: 75
-  knockback: 5.5
-  cooldown: 2
+  damage: 45
+  knockback: 1.5
+  telegraphDuration: 2
+  attackDuration: 1
+  trackTargetUntil: 0.6
+  overrideBaseArmor: 1
+  armorState: 1
+  hyperarmorDamageMultiplier: 0.5
+  animationTrigger: Fire
+  damageDelay: 0
   projectileInstance: {fileID: 7495063903542279499, guid: e3a25f02c0fc8b7478319e4d75556d27, type: 3}
-  projectileSpeed: 5
+  projectileSpeed: 8.5
   lifetime: 10
-  precisionFactor: 1
-  maxDeviation: 1
   verticalOffset: 0.75
+  predictionIntensity: 1
+  maxEvaluationDistance: 15

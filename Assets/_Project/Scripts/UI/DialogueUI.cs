@@ -308,12 +308,12 @@ public class DialogueUI : MonoBehaviour
         float presetTextSpeed = _activeUI.defaultTextSpeed > 0f ? _activeUI.defaultTextSpeed : 0.03f;
         _currentTextSpeed = line.CustomTextSpeed > 0f ? line.CustomTextSpeed : presetTextSpeed;
 
-        if (_activeUI.speakerNameTMP != null)
+        if (_activeUI.speakerNameTMP != null && LanguageManager.Instance != null)
         {
             LanguageManager.Instance.BindText(_activeUI.speakerNameTMP, line.SpeakerName);
         }
 
-        if (_activeUI.dialogueTextTMP != null)
+        if (_activeUI.dialogueTextTMP != null && LanguageManager.Instance != null)
         {
             LanguageManager.Instance.BindText(_activeUI.dialogueTextTMP, line.DialogueText, (text) =>
             {
@@ -396,7 +396,7 @@ public class DialogueUI : MonoBehaviour
     }
     public void ShowOptions(DialogueOption[] options, Action<DialogueSequence> onOptionSelected)
     {
-        HideAllOptions();
+        HidePresetOptions(_activeUI);
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
         if (_activeUI.interactionPromptTMP != null) _activeUI.interactionPromptTMP.gameObject.SetActive(false);
@@ -410,7 +410,7 @@ public class DialogueUI : MonoBehaviour
             int index = i;
             _activeUI.optionButtons[index].gameObject.SetActive(true);
 
-            if (_activeUI.optionTMP != null && index < _activeUI.optionTMP.Length && _activeUI.optionTMP[index] != null)
+            if (LanguageManager.Instance != null && _activeUI.optionTMP != null && index < _activeUI.optionTMP.Length && _activeUI.optionTMP[index] != null)
             {
                 LanguageManager.Instance.BindText(_activeUI.optionTMP[index], options[index].OptionText);
             }
@@ -422,7 +422,12 @@ public class DialogueUI : MonoBehaviour
             });
         }
 
-        if (options.Length > 0 && _activeUI.optionButtons.Length > 0 && _activeUI.optionButtons[0] != null)
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetDialogueOptionsVisible(options.Length > 0);
+        }
+
+        if (options.Length > 0 && _activeUI.optionButtons.Length > 0 && _activeUI.optionButtons[0] != null && EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(_activeUI.optionButtons[0].gameObject);
@@ -431,6 +436,11 @@ public class DialogueUI : MonoBehaviour
     public void HideAllOptions()
     {
         HidePresetOptions(_activeUI);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetDialogueOptionsVisible(false);
+        }
     }
     private void HidePresetOptions(DialogueUIPreset preset)
     {
@@ -465,7 +475,7 @@ public class DialogueUI : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        if (_activeUI.interactionPromptTMP == null) yield break;
+        if (_activeUI.interactionPromptTMP == null || LanguageManager.Instance == null) yield break;
 
         LocalizedString targetString = IsTyping
             ? (!_activeUI.skipTypingLocalizedString.IsEmpty ? _activeUI.skipTypingLocalizedString : _defaultUI.skipTypingLocalizedString)

@@ -13,11 +13,17 @@ MonoBehaviour:
   m_Name: MeleeProfeta
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 75
-  knockback: 11
-  cooldown: 0.5
+  knockback: 22
   telegraphDuration: 1
+  attackDuration: 0
+  trackTargetUntil: 0.9
+  overrideBaseArmor: 1
+  armorState: 2
+  hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
+  damageDelay: 0
   isRadial: 0
   radius: 2
-  hitboxMeasurements: {x: 6, y: 6, z: 1}
+  hitboxMeasurements: {x: 1, y: 6, z: 6}
   verticalOffset: 1
+  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

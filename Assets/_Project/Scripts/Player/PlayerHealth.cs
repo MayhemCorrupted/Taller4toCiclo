@@ -136,11 +136,11 @@ public class PlayerHealth : Health
             _currentHealth = 0;
             Die();
         }
-        else
-        {
-            _playerFSM.ChangeState(PlayerState.Hurt);
-            OnHurt?.Invoke();
-        }
+        //else
+        //{
+        //    _playerFSM.ChangeState(PlayerState.Hurt);
+        //    OnHurt?.Invoke();
+        //}
     }
     protected override void Die()
     {

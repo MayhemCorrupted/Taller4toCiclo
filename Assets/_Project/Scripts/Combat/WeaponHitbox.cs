@@ -6,8 +6,10 @@ using System.Collections.Generic;
 public class WeaponHitbox : MonoBehaviour
 {
     public event Action OnEntityHit;
+    public event Action<Health, bool> OnHitTarget;
     private float _currentDamage;
     private Collider _hitboxCollider;
+    private bool _isHeavyAttack;
     private readonly List<Health> _alreadyHitEntities = new();
     private void Awake()
     {
@@ -15,9 +17,10 @@ public class WeaponHitbox : MonoBehaviour
         _hitboxCollider.isTrigger = true;
         _hitboxCollider.enabled = false;
     }
-    public void SetDamage(float damage)
+    public void SetDamage(float damage, bool isHeavy = false)
     {
         _currentDamage = damage;
+        _isHeavyAttack = isHeavy;
     }
     public void EnableHitbox()
     {
@@ -42,6 +45,7 @@ public class WeaponHitbox : MonoBehaviour
 
         _alreadyHitEntities.Add(targetHealth);
         OnEntityHit?.Invoke();
+        OnHitTarget?.Invoke(targetHealth, _isHeavyAttack);
 #if UNITY_EDITOR
         Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
 #endif

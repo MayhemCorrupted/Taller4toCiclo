@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
-
-[Serializable]
-public class InventorySlot
+[Serializable] public class InventorySlot
 {
     public ItemData Item;
     public int Quantity;
@@ -21,6 +19,7 @@ public class InventoryManager : MonoBehaviour
     public event Action<ConsumableItem, int> OnConsumableEquipped;
     public event Action<InventorySlot[]> OnInventoryUpdated;
     public event Action<InventorySlot[]> OnArmorInventoryUpdated;
+    public event Action<ItemData, int> OnItemAdded;
     public InventorySlot[] GeneralSlots => _generalSlots;
     public InventorySlot[] ArmorInventorySlots => _armorInventorySlots;
     public ArmorItem EquippedArmor => _equippedArmor;
@@ -61,11 +60,23 @@ public class InventoryManager : MonoBehaviour
     {
         if (_playerInputs != null) _playerInputs.OnUseItem -= UseEquippedConsumable;
     }
-    public void AddItemToInventory(ItemData item, int amount)
+    public void AddItem(ItemData item)
     {
+        TryAddItem(item, 1);
+    }
+    public void AddItemToInventory(ItemData item, int amount = 1)
+    {
+        TryAddItem(item, amount);
+    }
+    public bool TryAddItem(ItemData item, int amount = 1)
+    {
+        if (item == null || amount <= 0) return false;
+
+        bool added;
+
         if (item is ArmorItem)
         {
-            AddToSpecificArray(_armorInventorySlots, item, amount, OnArmorInventoryUpdated);
+            added = AddToSpecificArray(_armorInventorySlots, item, amount, OnArmorInventoryUpdated, allowStacking: false);
         }
         else if (item is ConsumableItem consumable)
         {
@@ -73,33 +84,70 @@ public class InventoryManager : MonoBehaviour
             {
                 _consumableCount += amount;
                 OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
+                added = true;
             }
             else
             {
-                AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated);
+                added = AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated, allowStacking: true);
             }
         }
         else
         {
-            AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated);
-        }
-    }
-    private void AddToSpecificArray(InventorySlot[] slotArray, ItemData item, int amount, Action<InventorySlot[]> updateEvent)
-    {
-        InventorySlot existingSlot = slotArray.FirstOrDefault(s => !s.IsEmpty && s.Item.ItemID == item.ItemID);
-        if (existingSlot != null)
-        {
-            existingSlot.Quantity += amount;
-            updateEvent?.Invoke(slotArray);
-            return;
+            added = AddToSpecificArray(_generalSlots, item, amount, OnInventoryUpdated, allowStacking: true);
         }
 
-        InventorySlot emptySlot = slotArray.FirstOrDefault(s => s.IsEmpty);
-        if (emptySlot != null)
+        if (added)
         {
-            emptySlot.Item = item;
-            emptySlot.Quantity = amount;
+            OnItemAdded?.Invoke(item, amount);
+        }
+        else
+        {
+            Debug.LogWarning($"[InventoryManager] Inventario lleno. No se pudo añadir '{item.name}' (x{amount}).");
+        }
+
+        return added;
+    }
+    private bool AddToSpecificArray(InventorySlot[] slotArray, ItemData item, int amount, Action<InventorySlot[]> updateEvent, bool allowStacking)
+    {
+        if (allowStacking)
+        {
+            InventorySlot existingSlot = slotArray.FirstOrDefault(s => !s.IsEmpty && s.Item.ItemID == item.ItemID);
+            if (existingSlot != null)
+            {
+                existingSlot.Quantity += amount;
+                updateEvent?.Invoke(slotArray);
+                return true;
+            }
+
+            InventorySlot emptySlot = slotArray.FirstOrDefault(s => s.IsEmpty);
+            if (emptySlot != null)
+            {
+                emptySlot.Item = item;
+                emptySlot.Quantity = amount;
+                updateEvent?.Invoke(slotArray);
+                return true;
+            }
+
+            return false;
+        }
+        else
+        {
+            int freeSlots = slotArray.Count(s => s.IsEmpty);
+            if (freeSlots < amount) return false;
+
+            int remaining = amount;
+            for (int i = 0; i < slotArray.Length && remaining > 0; i++)
+            {
+                if (slotArray[i].IsEmpty)
+                {
+                    slotArray[i].Item = item;
+                    slotArray[i].Quantity = 1;
+                    remaining--;
+                }
+            }
+
             updateEvent?.Invoke(slotArray);
+            return true;
         }
     }
     public void EquipArmorFromSlot(int slotIndex)
@@ -136,9 +184,10 @@ public class InventoryManager : MonoBehaviour
         if (consumable.EffectType == ConsumableEffectType.StatBoost)
         {
             Debug.LogWarning("[InventoryManager] Las pociones StatBoost no pueden equiparse. Deben canjearse.");
-            OnInventoryUpdated?.Invoke(_generalSlots); 
+            OnInventoryUpdated?.Invoke(_generalSlots);
             return;
         }
+
         ConsumableItem previousConsumable = _equippedConsumable;
         int previousCount = _consumableCount;
 
@@ -168,13 +217,14 @@ public class InventoryManager : MonoBehaviour
     public void SwapArmorInventorySlots(int indexA, int indexB)
     {
         if (indexA < 0 || indexA >= _armorInventorySlots.Length || indexB < 0 || indexB >= _armorInventorySlots.Length) return;
+
         (_armorInventorySlots[indexB], _armorInventorySlots[indexA]) = (_armorInventorySlots[indexA], _armorInventorySlots[indexB]);
         OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
     }
     public void UnequipArmor(int targetSlotIndex)
     {
-        if (_equippedArmor == null || targetSlotIndex < 0 || targetSlotIndex >= _generalSlots.Length) return;
-        if (!_generalSlots[targetSlotIndex].IsEmpty) return;
+        if (_equippedArmor == null || targetSlotIndex < 0 || targetSlotIndex >= _armorInventorySlots.Length) return;
+        if (!_armorInventorySlots[targetSlotIndex].IsEmpty) return;
 
         _armorInventorySlots[targetSlotIndex].Item = _equippedArmor;
         _armorInventorySlots[targetSlotIndex].Quantity = 1;
@@ -211,12 +261,14 @@ public class InventoryManager : MonoBehaviour
         {
             return;
         }
+
         if (_equippedConsumable.EffectType == ConsumableEffectType.Heal &&
             _playerHealth != null && _playerHealth.CurrentHealth >= _playerHealth.MaxHealth)
         {
             Debug.Log("[Inventory] La salud ya está al máximo.");
             return;
         }
+
         _playerFSM.ChangeState(PlayerState.UsingItem);
     }
     public void ApplyConsumableEffect()
@@ -251,7 +303,6 @@ public class InventoryManager : MonoBehaviour
             OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
         }
     }
-
     private IEnumerator GradualHealRoutine(float totalHeal, float duration)
     {
         float healedAmount = 0;
@@ -273,7 +324,7 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < durationInSeconds; i++)
         {
             yield return new WaitForSeconds(second);
-            _playerHealth.TakeDirectDamage(2f); 
+            _playerHealth.TakeDirectDamage(2f);
         }
 
         _playerStats.ApplyTemporaryDamageBoost(0f);

@@ -10,19 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34c2c791b144d564899d395130d0640c, type: 3}
-  m_Name: EntityRangeAttack
-  m_EditorClassIdentifier: Assembly-CSharp::EntityRangeAttack
-  damage: 14
-  knockback: 3
-  telegraphDuration: 2
-  attackDuration: 1
-  trackTargetUntil: 0.8
+  m_Name: RangedProfeta
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyRangedAtk
+  damage: 40
+  knockback: 10
+  telegraphDuration: 3
+  attackDuration: 0
+  trackTargetUntil: 1
   overrideBaseArmor: 0
   armorState: 1
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
+  damageDelay: 0
   projectileInstance: {fileID: 7495063903542279499, guid: e3a25f02c0fc8b7478319e4d75556d27, type: 3}
-  projectileSpeed: 10
+  projectileSpeed: 5
   lifetime: 10
-  verticalOffset: 0
+  verticalOffset: 0.75
+  predictionIntensity: 1
   maxEvaluationDistance: 15

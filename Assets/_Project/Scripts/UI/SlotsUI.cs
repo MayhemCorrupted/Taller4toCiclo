@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class SlotsUI : MonoBehaviour
 {
     public event Action<ItemData> OnItemSelected;
+    public event Action<SelectedSlotType, SelectedSlotType, bool> OnSlotActionProcessed;
     private InventoryManager _inventoryManager;
     [SerializeField] private Button[] _generalSlotButtons = new Button[6];
     [SerializeField] private Image[] _generalSlotIcons = new Image[6];
@@ -145,7 +146,7 @@ public class SlotsUI : MonoBehaviour
     public void HandleDrop(SelectedSlotType targetType, int targetIndex)
     {
         if (!_isDragging) return;
-        ProcessAction(_dragSourceType, _dragSourceIndex, targetType, targetIndex);
+        ProcessAction(_dragSourceType, _dragSourceIndex, targetType, targetIndex, true);
     }
     public void HandleSlotClick(SelectedSlotType type, int index)
     {
@@ -158,11 +159,11 @@ public class SlotsUI : MonoBehaviour
         }
         else
         {
-            ProcessAction(_currentSelectionType, _selectedGeneralIndex, type, index);
+            ProcessAction(_currentSelectionType, _selectedGeneralIndex, type, index, false);
             ClearSelection();
         }
     }
-    private void ProcessAction(SelectedSlotType source, int sourceIdx, SelectedSlotType target, int targetIdx)
+    private void ProcessAction(SelectedSlotType source, int sourceIdx, SelectedSlotType target, int targetIdx, bool isDrag)
     {
         if (source == target && sourceIdx == targetIdx) return;
         ItemData sourceItem = GetItemData(source, sourceIdx);
@@ -194,6 +195,7 @@ public class SlotsUI : MonoBehaviour
             if (targetItem == null) _inventoryManager.UnequipArmor(targetIdx);
             else if (targetItem is ArmorItem) _inventoryManager.EquipArmorFromSlot(targetIdx);
         }
+        OnSlotActionProcessed?.Invoke(source, target, isDrag);
     }
     private ItemData GetItemData(SelectedSlotType type, int index)
     {

@@ -2,6 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 public class PlayerHUD : MonoBehaviour
 {
+    [Header("Visibilidad Dormida (Recomendado)")]
+    [Tooltip("Opcional: Si se asigna, el HUD se oculta con alpha=0 fuera de Gameplay sin desactivar el GameObject, manteniéndose siempre sincronizado.")]
+    [SerializeField] private CanvasGroup _hudCanvasGroup;
+    [SerializeField] private bool _hideOutsideGameplay = true;
+
     [Header("Barras de Estado")]
     [SerializeField] private Image _healthFillImage;
     [SerializeField] private Image _staminaFillImage;
@@ -30,29 +35,41 @@ public class PlayerHUD : MonoBehaviour
     private PlayerStats _playerStats;
     private PlayerCombat _playerCombat;
     private InventoryManager _inventoryManager;
+
     private float _targetHealthFill;
     private float _targetStaminaFill;
     private float _originalSkillIconY;
+    private bool _hasCapturedOriginalY;
+    private bool _lastDormantHiddenState;
     private void Awake()
     {
-        _playerHealth = FindAnyObjectByType<PlayerHealth>();
-        _playerStamina = FindAnyObjectByType<PlayerStamina>();
-        _playerStats = FindAnyObjectByType<PlayerStats>();
-        _playerCombat = FindAnyObjectByType<PlayerCombat>();
-        _inventoryManager = FindAnyObjectByType<InventoryManager>();
+        ResolveReferences();
+
+        if (_hudCanvasGroup == null)
+            _hudCanvasGroup = GetComponentInChildren<CanvasGroup>();
+
+        if (_skillIconImage != null && !_hasCapturedOriginalY)
+        {
+            _originalSkillIconY = _skillIconImage.rectTransform.anchoredPosition.y;
+            _hasCapturedOriginalY = true;
+        }
     }
     private void OnEnable()
     {
+        ResolveReferences();
+
         if (_playerHealth != null) _playerHealth.OnHealthChanged += UpdateHealthBar;
         if (_playerStamina != null) _playerStamina.OnStaminaChanged += UpdateStaminaBar;
 
         if (_playerCombat != null)
         {
-            _playerCombat.OnSkillSwapped += HandleSkillSwapped;
+            _playerCombat.OnSkillSwapped += HandleSkillSwappedAnimated;
             _playerCombat.OnWeaponActiveChanged += HandleWeaponActiveChanged;
         }
 
         if (_inventoryManager != null) _inventoryManager.OnConsumableEquipped += HandleConsumableEquipped;
+
+        SyncAllHUDData();
     }
     private void OnDisable()
     {
@@ -61,7 +78,7 @@ public class PlayerHUD : MonoBehaviour
 
         if (_playerCombat != null)
         {
-            _playerCombat.OnSkillSwapped -= HandleSkillSwapped;
+            _playerCombat.OnSkillSwapped -= HandleSkillSwappedAnimated;
             _playerCombat.OnWeaponActiveChanged -= HandleWeaponActiveChanged;
         }
 
@@ -69,37 +86,73 @@ public class PlayerHUD : MonoBehaviour
     }
     private void Start()
     {
+        SyncAllHUDData();
+    }
+    private void Update()
+    {
+        UpdateDormantVisibility();
+
+        float dt = Time.unscaledDeltaTime;
+
+        if (_healthFillImage != null)
+            _healthFillImage.fillAmount = Mathf.Lerp(_healthFillImage.fillAmount, _targetHealthFill, dt * _lerpSpeed);
+
+        if (_staminaFillImage != null)
+            _staminaFillImage.fillAmount = Mathf.Lerp(_staminaFillImage.fillAmount, _targetStaminaFill, dt * _lerpSpeed);
+
+        if (_playerCombat != null && _skillCooldownFill != null)
+        {
+            _skillCooldownFill.fillAmount = _playerCombat.GetSkillCooldownPercentage(_playerCombat.CurrentSkillID);
+        }
+    }
+    private void ResolveReferences()
+    {
+        if (_playerHealth == null) _playerHealth = FindAnyObjectByType<PlayerHealth>();
+        if (_playerStamina == null) _playerStamina = FindAnyObjectByType<PlayerStamina>();
+        if (_playerStats == null) _playerStats = FindAnyObjectByType<PlayerStats>();
+        if (_playerCombat == null) _playerCombat = FindAnyObjectByType<PlayerCombat>();
+        if (_inventoryManager == null) _inventoryManager = FindAnyObjectByType<InventoryManager>();
+    }
+    public void SyncAllHUDData()
+    {
+        ResolveReferences();
+
+        if (_skillIconImage != null && !_hasCapturedOriginalY)
+        {
+            _originalSkillIconY = _skillIconImage.rectTransform.anchoredPosition.y;
+            _hasCapturedOriginalY = true;
+        }
+
         UpdateStaminaBar();
         UpdateHealthBar();
 
         if (_healthFillImage != null) _healthFillImage.fillAmount = _targetHealthFill;
         if (_staminaFillImage != null) _staminaFillImage.fillAmount = _targetStaminaFill;
 
-        if (_skillIconImage != null)
-        {
-            _originalSkillIconY = _skillIconImage.rectTransform.anchoredPosition.y;
-        }
-
         if (_playerCombat != null)
         {
             HandleWeaponActiveChanged(_playerCombat.IsWeaponActive);
-            HandleSkillSwapped(_playerCombat.CurrentSkillID);
+            ApplySkillSprite(_playerCombat.CurrentSkillID, playPunchAnimation: false);
         }
 
-        if (_inventoryManager != null) HandleConsumableEquipped(_inventoryManager.EquippedConsumable, _inventoryManager.ConsumableCount);
-    }
-    private void Update()
-    {
-        if (_healthFillImage != null)
-            _healthFillImage.fillAmount = Mathf.Lerp(_healthFillImage.fillAmount, _targetHealthFill, Time.deltaTime * _lerpSpeed);
-
-        if (_staminaFillImage != null)
-            _staminaFillImage.fillAmount = Mathf.Lerp(_staminaFillImage.fillAmount, _targetStaminaFill, Time.deltaTime * _lerpSpeed);
-
-        if (_playerCombat != null && _skillCooldownFill != null)
+        if (_inventoryManager != null)
         {
-            _skillCooldownFill.fillAmount = _playerCombat.GetSkillCooldownPercentage(_playerCombat.CurrentSkillID);
+            HandleConsumableEquipped(_inventoryManager.EquippedConsumable, _inventoryManager.ConsumableCount);
         }
+
+        UpdateDormantVisibility(force: true);
+    }
+    private void UpdateDormantVisibility(bool force = false)
+    {
+        if (_hudCanvasGroup == null || !_hideOutsideGameplay) return;
+
+        bool shouldHide = UIManager.Instance != null && UIManager.Instance.CurrentState != GameState.Gameplay;
+        if (!force && shouldHide == _lastDormantHiddenState) return;
+
+        _lastDormantHiddenState = shouldHide;
+        _hudCanvasGroup.alpha = shouldHide ? 0f : 1f;
+        _hudCanvasGroup.interactable = !shouldHide;
+        _hudCanvasGroup.blocksRaycasts = !shouldHide;
     }
     private void HandleWeaponActiveChanged(bool isWeaponActive)
     {
@@ -118,23 +171,31 @@ public class PlayerHUD : MonoBehaviour
         if (_playerStamina == null || _playerStats == null || _playerStats.MaxStamina <= 0) return;
         _targetStaminaFill = _playerStamina.CurrentStamina / _playerStats.MaxStamina;
     }
-    private void HandleSkillSwapped(int skillID)
+    private void HandleSkillSwappedAnimated(int skillID)
+    {
+        bool isGameplay = UIManager.Instance == null || UIManager.Instance.CurrentState == GameState.Gameplay;
+        ApplySkillSprite(skillID, playPunchAnimation: isGameplay && gameObject.activeInHierarchy);
+    }
+    private void ApplySkillSprite(int skillID, bool playPunchAnimation)
     {
         if (_skillIconImage == null) return;
 
         _skillIconImage.sprite = (skillID == 0) ? _distanceSkillSprite : _areaSkillSprite;
 
         LeanTween.cancel(_skillIconImage.gameObject);
-
         _skillIconImage.rectTransform.localScale = Vector3.one;
+
         Vector2 currentAnchoredPos = _skillIconImage.rectTransform.anchoredPosition;
         _skillIconImage.rectTransform.anchoredPosition = new Vector2(currentAnchoredPos.x, _originalSkillIconY);
 
-        LeanTween.scale(_skillIconImage.rectTransform, _skillSwapPunchScale, _skillSwapTweenDuration)
-            .setEasePunch();
-        float targetY = _originalSkillIconY + _skillSwapPunchDistanceY;
-        LeanTween.moveY(_skillIconImage.rectTransform, targetY, _skillSwapTweenDuration)
-            .setEasePunch();
+        if (playPunchAnimation)
+        {
+            LeanTween.scale(_skillIconImage.rectTransform, _skillSwapPunchScale, _skillSwapTweenDuration)
+                .setEasePunch();
+            float targetY = _originalSkillIconY + _skillSwapPunchDistanceY;
+            LeanTween.moveY(_skillIconImage.rectTransform, targetY, _skillSwapTweenDuration)
+                .setEasePunch();
+        }
     }
     private void HandleConsumableEquipped(ConsumableItem item, int count)
     {

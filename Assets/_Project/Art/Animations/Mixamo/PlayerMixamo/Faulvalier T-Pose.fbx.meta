@@ -395,52 +395,12 @@ ModelImporter:
       position: {x: -0, y: 0, z: -1}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 0.01, y: 0.01, z: 0.01}
-    - name: helmet
+    - name: bandage_Left
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: greaves
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: pauldron
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: Tassets
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: vambrace_Right
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: vambrace_Left
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: knee_armor_Right
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: knee_armor_Left
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: couter_Right1
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: Girdle
+    - name: bandage_Right
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
@@ -455,12 +415,12 @@ ModelImporter:
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: sallet
+    - name: couter_Right1
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: bandage_Right
+    - name: crest
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
@@ -470,22 +430,52 @@ ModelImporter:
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
+    - name: Girdle
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
     - name: glove_Left
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: bandage_Left
+    - name: glove_Right
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: greaves
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: helmet
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: knee_armor_Left
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: knee_armor_Right
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: pauldron
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: sallet
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Simbolo
-      parentName: Faulvalier_Low
-      position: {x: -0, y: 0, z: 100}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: glove_Right
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
@@ -500,7 +490,17 @@ ModelImporter:
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: crest
+    - name: Tassets
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: vambrace_Left
+      parentName: Faulvalier_Low
+      position: {x: -0, y: 0, z: 100}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: vambrace_Right
       parentName: Faulvalier_Low
       position: {x: -0, y: 0, z: 100}
       rotation: {x: 0, y: -0, z: -0, w: 1}
@@ -525,6 +525,21 @@ ModelImporter:
       position: {x: -0, y: 0.12983605, z: -1.110223e-16}
       rotation: {x: 0, y: -1.2621775e-29, z: 8.67747e-29, w: 1}
       scale: {x: 1, y: 1, z: 1}
+    - name: mixamorig:Neck
+      parentName: mixamorig:Spine2
+      position: {x: -0, y: 0.1460655, z: -0.000000048053394}
+      rotation: {x: 0.039020434, y: 3.372495e-14, z: 2.2893796e-13, w: 0.99923843}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mixamorig:Head
+      parentName: mixamorig:Neck
+      position: {x: -4.2500725e-17, y: 0.058807015, z: 0.022507906}
+      rotation: {x: 0, y: 3.1554436e-30, z: -5.8901498e-30, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mixamorig:HeadTop_End
+      parentName: mixamorig:Head
+      position: {x: -1.4658413e-16, y: 0.20293856, z: 0.0776732}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:LeftShoulder
       parentName: mixamorig:Spine2
       position: {x: -0.06118353, y: 0.120508075, z: 0.008214222}
@@ -548,7 +563,7 @@ ModelImporter:
     - name: mixamorig:LeftHandThumb1
       parentName: mixamorig:LeftHand
       position: {x: 0.021245081, y: 0.047586728, z: -1.6039792e-10}
-      rotation: {x: -0.22304286, y: 0.07826587, z: -0.29966238, w: 0.92429906}
+      rotation: {x: -0.02265258, y: 0.0049654017, z: -0.32929093, w: 0.94394374}
       scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:LeftHandThumb2
       parentName: mixamorig:LeftHandThumb1
@@ -608,7 +623,7 @@ ModelImporter:
     - name: mixamorig:RightHandThumb1
       parentName: mixamorig:RightHand
       position: {x: -0.025892384, y: 0.04366002, z: -0.000000003131293}
-      rotation: {x: -0.20071228, y: -0.070125274, z: 0.26935095, w: 0.93928015}
+      rotation: {x: -0.03726682, y: -0.010049822, z: 0.33711728, w: 0.94067115}
       scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:RightHandThumb2
       parentName: mixamorig:RightHandThumb1
@@ -643,21 +658,6 @@ ModelImporter:
     - name: mixamorig:RightHandIndex4
       parentName: mixamorig:RightHandIndex3
       position: {x: -0.0018675199, y: 0.022142446, z: -5.551115e-17}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: mixamorig:Neck
-      parentName: mixamorig:Spine2
-      position: {x: -0, y: 0.1460655, z: -0.000000048053394}
-      rotation: {x: 0.039020434, y: 3.372495e-14, z: 2.2893796e-13, w: 0.99923843}
-      scale: {x: 1, y: 1, z: 1}
-    - name: mixamorig:Head
-      parentName: mixamorig:Neck
-      position: {x: -4.2500725e-17, y: 0.058807015, z: 0.022507906}
-      rotation: {x: 0, y: 3.1554436e-30, z: -5.8901498e-30, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: mixamorig:HeadTop_End
-      parentName: mixamorig:Head
-      position: {x: -1.4658413e-16, y: 0.20293856, z: 0.0776732}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:LeftUpLeg
@@ -723,7 +723,7 @@ ModelImporter:
     hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  autoGenerateAvatarMappingIfUnspecified: 1
+  autoGenerateAvatarMappingIfUnspecified: 0
   animationType: 3
   humanoidOversampling: 1
   avatarSetup: 1

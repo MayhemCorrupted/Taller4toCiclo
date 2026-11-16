@@ -1,6 +1,8 @@
 using UnityEngine;
+using System;
 public class PlayerAnimator : MonoBehaviour
 {
+    public event Action OnStandUpCompleted;
     public bool HasWeapon { get; set; } = true;
     public bool IsBlockHitPlaying => _isBlockHitPlaying;
     public bool IsLaying { get; private set; }
@@ -288,6 +290,7 @@ public class PlayerAnimator : MonoBehaviour
                 {
                     _playerFSM.ChangeState(PlayerState.Idle);
                 }
+                OnStandUpCompleted?.Invoke();
             }
         }
     }
@@ -316,6 +319,7 @@ public class PlayerAnimator : MonoBehaviour
     }
     private void CompleteStandUp()
     {
+        bool wasStandingUp = IsStandingUp;
         IsStandingUp = false;
 
         if (_animator != null)
@@ -330,6 +334,10 @@ public class PlayerAnimator : MonoBehaviour
             if (_playerFSM != null && _playerFSM.CurrentState == PlayerState.StandUp)
             {
                 _playerFSM.ChangeState(PlayerState.Idle);
+            }
+            if (wasStandingUp)
+            {
+                OnStandUpCompleted?.Invoke();
             }
         }
     }

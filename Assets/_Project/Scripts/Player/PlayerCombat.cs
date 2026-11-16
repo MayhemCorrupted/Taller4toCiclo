@@ -12,6 +12,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerCombat : MonoBehaviour
 {
+    public event Action<Health> OnAreaSkillHitEnemy;
     [Header("Estado de Arma Equipada")]
     [Tooltip("Si es falso, el jugador no podrá atacar, bloquear ni usar habilidades, y se ocultará el contenedor de ataques.")]
     [SerializeField] private bool _isWeaponActive = true;
@@ -281,6 +282,7 @@ public class PlayerCombat : MonoBehaviour
                 if (_hitEnemiesBuffer[i].TryGetComponent(out Health enemyHealth))
                 {
                     enemyHealth.TakeDamage(damage);
+                    OnAreaSkillHitEnemy?.Invoke(enemyHealth);
                 }
             }
         }
@@ -358,7 +360,7 @@ public class PlayerCombat : MonoBehaviour
 
         if (_weaponHitbox != null)
         {
-            _weaponHitbox.SetDamage(grossDamage);
+            _weaponHitbox.SetDamage(grossDamage, isHeavyAttack);
             _weaponHitbox.EnableHitbox();
         }
 

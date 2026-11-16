@@ -9,23 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da9390a1fb9bb534abf67d68af4bc36c, type: 3}
-  m_Name: MultiChargeAttck
-  m_EditorClassIdentifier: Assembly-CSharp::EntityMultiChargeAttack
-  damage: 15
-  knockback: 5
-  telegraphDuration: 1.5
-  attackDuration: 2
+  m_Script: {fileID: 11500000, guid: aa5d89171a65814479fdf93bc72c9191, type: 3}
+  m_Name: EntityWaveAttack
+  m_EditorClassIdentifier: Assembly-CSharp::EntityWaveAttack
+  damage: 30
+  knockback: 15
+  telegraphDuration: 2
+  attackDuration: 1
   trackTargetUntil: 0.8
   overrideBaseArmor: 0
   armorState: 2
   hyperarmorDamageMultiplier: 0.5
   animationTrigger: 
-  numberOfCharges: 4
-  maxChargeDistance: 10
+  damageDelay: 0
+  waveDistance: 10
   hitboxRadius: 1.5
   trackTarget: 1
-  delayBetweenCharges: 0.2
-  waveCount: 2
-  delayBetweenWaves: 1
   indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

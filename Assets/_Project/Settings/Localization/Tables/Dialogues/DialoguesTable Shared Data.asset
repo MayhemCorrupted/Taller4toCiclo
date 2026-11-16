@@ -59,16 +59,80 @@ MonoBehaviour:
     m_Key: LITHOSELLE_INITIAL
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390663
-    m_Key: LITHOSELLE_TUTORIAL1
+  - m_Id: 13087623505133568
+    m_Key: LITHOSELLE_INDICATION
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390664
-    m_Key: LITHOSELLE_TUTORIAL2
+  - m_Id: 13087623656128512
+    m_Key: LITHOSELLE_WARNING1
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390665
-    m_Key: LITHOSELLE_TUTORIAL3
+  - m_Id: 13087623656128513
+    m_Key: LITHOSELLE_WARNING2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128514
+    m_Key: LITHOSELLE_PRESENTATION1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128515
+    m_Key: LITHOSELLE_PRESENTATION2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128516
+    m_Key: LITHOSELLE_ANATHEMA1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128517
+    m_Key: LITHOSELLE_ANATHEMA2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128518
+    m_Key: LITHOSELLE_ANATHEMA3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128519
+    m_Key: LITHOSELLE_PILLAR1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128520
+    m_Key: LITHOSELLE_PILLAR2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128521
+    m_Key: LITHOSELLE_PILLAR3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128522
+    m_Key: LITHOSELLE_PILLAR4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128523
+    m_Key: LITHOSELLE_PILLAR5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128524
+    m_Key: LITHOSELLE_OPTION_REDOMA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128525
+    m_Key: LITHOSELLE_OPTION_OIL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128526
+    m_Key: LITHOSELLE_OPTION_MEMORY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128527
+    m_Key: LITHOSELLE_GIFT_REDOMA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128528
+    m_Key: LITHOSELLE_GIFT_OIL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128529
+    m_Key: LITHOSELLE_GIFT_MEMORY
     m_Metadata:
       m_Items: []
   m_Metadata:

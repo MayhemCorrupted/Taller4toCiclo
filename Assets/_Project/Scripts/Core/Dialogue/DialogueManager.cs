@@ -11,6 +11,7 @@ public class DialogueManager : MonoBehaviour
     private int _currentLineIndex;
     private bool _isDialogueActive = false;
     private bool _isWaitingForChoice = false;
+    private bool _isTransitioning = false;
     private string _pendingUIID = null;
     private void Awake()
     {
@@ -29,13 +30,9 @@ public class DialogueManager : MonoBehaviour
     {
         _pendingUIID = uiID;
     }
-    /// <summary>
-    /// Función principal: usa automáticamente el CustomUIID del DialogueSequence (o SetPendingUI) si existe;
-    /// de lo contrario, abre la UI por defecto. Compatible con UnityEvents de 1 parámetro en el Inspector.
-    /// </summary>
     public void StartDialogue(DialogueSequence sequence)
     {
-        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+        if (!CanStartDialogue(sequence)) return;
 
         string targetUI = !string.IsNullOrWhiteSpace(_pendingUIID)
             ? _pendingUIID
@@ -54,13 +51,9 @@ public class DialogueManager : MonoBehaviour
 
         BeginDialogueInternal(sequence);
     }
-    /// <summary>
-    /// Función adicional de 1 parámetro para el Inspector: abre la secuencia usando CustomUIID
-    /// o directamente la primera UI personalizada (índice 0) si el ScriptableObject no especifica ID.
-    /// </summary>
     public void StartCustomDialogue(DialogueSequence sequence)
     {
-        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+        if (!CanStartDialogue(sequence)) return;
 
         _pendingUIID = null;
 
@@ -71,38 +64,49 @@ public class DialogueManager : MonoBehaviour
 
         BeginDialogueInternal(sequence);
     }
-    /// <summary>
-    /// Sobrecarga por código para especificar un uiID concreto al invocar.
-    /// </summary>
     public void StartDialogue(DialogueSequence sequence, string uiID)
     {
-        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+        if (!CanStartDialogue(sequence)) return;
 
         _pendingUIID = null;
         _dialogueUI.UseCustomUI(uiID);
         BeginDialogueInternal(sequence);
     }
-    /// <summary>
-    /// Sobrecarga por código para pasar directamente un struct DialogueUIPreset.
-    /// </summary>
     public void StartDialogue(DialogueSequence sequence, DialogueUIPreset customUI)
     {
-        if (sequence == null || sequence.Lines.Length == 0 || _isDialogueActive) return;
+        if (!CanStartDialogue(sequence)) return;
 
         _pendingUIID = null;
         _dialogueUI.UseCustomUI(customUI);
         BeginDialogueInternal(sequence);
     }
+    private bool CanStartDialogue(DialogueSequence sequence)
+    {
+        return sequence != null &&
+               sequence.Lines != null &&
+               sequence.Lines.Length > 0 &&
+               !_isDialogueActive &&
+               !_isTransitioning;
+    }
     private void BeginDialogueInternal(DialogueSequence sequence)
     {
-        if (UIManager.Instance != null) UIManager.Instance.SetGameState(GameState.Dialogue);
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetDialogueOptionsVisible(false);
+            UIManager.Instance.SetGameState(GameState.Dialogue);
+        }
 
         UpdateUIInteractKey();
         LoadSequence(sequence);
+        _isTransitioning = true;
 
         _dialogueUI.OpenUI(() =>
         {
-            _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
+            _isTransitioning = false;
+            if (_isDialogueActive && _currentSequence != null && _currentLineIndex < _currentSequence.Lines.Length)
+            {
+                _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
+            }
         });
     }
     private void LoadSequence(DialogueSequence sequence)
@@ -111,55 +115,82 @@ public class DialogueManager : MonoBehaviour
         _currentLineIndex = 0;
         _isDialogueActive = true;
         _isWaitingForChoice = false;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.SetDialogueOptionsVisible(false);
     }
     private void AdvanceDialogue()
     {
-        if (!_isDialogueActive || _isWaitingForChoice) return;
+        if (!_isDialogueActive || _isWaitingForChoice || _isTransitioning) return;
+        if (_currentSequence == null || _currentSequence.Lines == null) return;
 
         UpdateUIInteractKey();
 
         if (_dialogueUI.IsTyping)
         {
             _dialogueUI.SkipTypingEffect();
+            return;
+        }
+
+        if (_currentLineIndex < 0 || _currentLineIndex >= _currentSequence.Lines.Length)
+        {
+            EndDialogue();
+            return;
+        }
+
+        DialogueSequence sequenceBeforeEvent = _currentSequence;
+        string currentLineEvent = _currentSequence.Lines[_currentLineIndex].LineEndEventID;
+
+        if (!string.IsNullOrEmpty(currentLineEvent))
+        {
+            OnDialogueEventTriggered?.Invoke(currentLineEvent);
+
+            if (_currentSequence != sequenceBeforeEvent || !_isDialogueActive) return;
+        }
+
+        _currentLineIndex++;
+
+        if (_currentLineIndex < _currentSequence.Lines.Length)
+        {
+            _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
         }
         else
         {
-            string currentLineEvent = _currentSequence.Lines[_currentLineIndex].LineEndEventID;
-            if (!string.IsNullOrEmpty(currentLineEvent))
+            if (_currentSequence.Options != null && _currentSequence.Options.Length > 0)
             {
-                OnDialogueEventTriggered?.Invoke(currentLineEvent);
-            }
+                _isWaitingForChoice = true;
+                if (UIManager.Instance != null)
+                    UIManager.Instance.SetDialogueOptionsVisible(true);
 
-            _currentLineIndex++;
-
-            if (_currentLineIndex < _currentSequence.Lines.Length)
-            {
-                _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
+                _dialogueUI.ShowOptions(_currentSequence.Options, HandleOptionSelected);
             }
             else
             {
-                if (_currentSequence.Options != null && _currentSequence.Options.Length > 0)
-                {
-                    _isWaitingForChoice = true;
-                    _dialogueUI.ShowOptions(_currentSequence.Options, HandleOptionSelected);
-                }
-                else
-                {
-                    EndDialogue();
-                }
+                EndDialogue();
             }
         }
     }
     private void HandleOptionSelected(DialogueSequence nextSequence)
     {
+        _isWaitingForChoice = false;
+        if (UIManager.Instance != null)
+            UIManager.Instance.SetDialogueOptionsVisible(false);
+
         _dialogueUI.HideAllOptions();
 
-        if (nextSequence != null)
+        if (nextSequence != null && nextSequence.Lines != null && nextSequence.Lines.Length > 0)
         {
-            string sequenceEvent = _currentSequence.SequenceEndEventID;
-            if (!string.IsNullOrEmpty(sequenceEvent)) OnDialogueEventTriggered?.Invoke(sequenceEvent);
+            DialogueSequence sequenceBeforeEvent = _currentSequence;
+            string sequenceEvent = _currentSequence != null ? _currentSequence.SequenceEndEventID : null;
 
-            if (!string.Equals(_currentSequence.CustomUIID?.Trim(), nextSequence.CustomUIID?.Trim(), StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(sequenceEvent))
+            {
+                OnDialogueEventTriggered?.Invoke(sequenceEvent);
+                if (_currentSequence != sequenceBeforeEvent) return;
+            }
+
+            if (_currentSequence != null &&
+                !string.Equals(_currentSequence.CustomUIID?.Trim(), nextSequence.CustomUIID?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
                 _dialogueUI.SwitchActiveUI(nextSequence.CustomUIID);
             }
@@ -174,16 +205,33 @@ public class DialogueManager : MonoBehaviour
     }
     private void EndDialogue()
     {
-        string sequenceEvent = _currentSequence.SequenceEndEventID;
-        if (!string.IsNullOrEmpty(sequenceEvent)) OnDialogueEventTriggered?.Invoke(sequenceEvent);
+        if (!_isDialogueActive && _isTransitioning) return;
+
+        DialogueSequence finishedSequence = _currentSequence;
+
+        _isDialogueActive = false;
+        _isWaitingForChoice = false;
+        _currentSequence = null;
+        _isTransitioning = true;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.SetDialogueOptionsVisible(false);
+
+        string sequenceEvent = finishedSequence != null ? finishedSequence.SequenceEndEventID : null;
+        if (!string.IsNullOrEmpty(sequenceEvent))
+        {
+            OnDialogueEventTriggered?.Invoke(sequenceEvent);
+        }
+
+        if (_isDialogueActive) return;
 
         _dialogueUI.CloseUI(() =>
         {
-            _isDialogueActive = false;
-            _currentSequence = null;
-            _isWaitingForChoice = false;
-
-            if (UIManager.Instance != null) UIManager.Instance.SetGameState(GameState.Gameplay);
+            _isTransitioning = false;
+            if (!_isDialogueActive && UIManager.Instance != null)
+            {
+                UIManager.Instance.SetGameState(GameState.Gameplay);
+            }
         });
     }
     private void UpdateUIInteractKey()

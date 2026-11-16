@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 public interface IInteractable
 {
@@ -7,12 +8,16 @@ public interface IInteractable
 [RequireComponent(typeof(PlayerFSM))]
 public class PlayerInteraction : MonoBehaviour
 {
-    [SerializeField] private LayerMask interactLayer;
-    [SerializeField] private float interactRange = 3;
+    public event Action<bool> OnCanInteractChanged;
+    public bool CanInteract { get; private set; }
 
-    readonly private Collider[] _interactBuffer = new Collider[5];
+    [SerializeField] private LayerMask interactLayer;
+    [SerializeField] private float interactRange = 3f;
+
+    private readonly Collider[] _interactBuffer = new Collider[8];
     private PlayerFSM _playerFSM;
     private PlayerInputs _playerInputs;
+    private IInteractable _currentClosestInteractable;
 
     private void Awake()
     {
@@ -21,39 +26,80 @@ public class PlayerInteraction : MonoBehaviour
     }
     private void OnEnable()
     {
-        _playerInputs.OnInteract += TryInteract;
+        if (_playerInputs != null)
+            _playerInputs.OnInteract += TryInteract;
     }
     private void OnDisable()
     {
-        _playerInputs.OnInteract -= TryInteract;
+        if (_playerInputs != null)
+            _playerInputs.OnInteract -= TryInteract;
+
+        _currentClosestInteractable = null;
+        SetCanInteractState(false);
+    }
+    private void Update()
+    {
+        _currentClosestInteractable = FindClosestValidInteractable();
+        SetCanInteractState(_currentClosestInteractable != null);
     }
     private void TryInteract()
     {
+        IInteractable target = _currentClosestInteractable ?? FindClosestValidInteractable();
+        target?.Interact();
+    }
+    private IInteractable FindClosestValidInteractable()
+    {
+        if (_playerFSM == null) return null;
+
+        if (UIManager.Instance != null && UIManager.Instance.CurrentState != GameState.Gameplay)
+            return null;
+
         if (_playerFSM.CurrentState != PlayerState.Idle &&
             _playerFSM.CurrentState != PlayerState.Walking &&
             _playerFSM.CurrentState != PlayerState.Running)
         {
-            return;
+            return null;
         }
-        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, interactRange, _interactBuffer, interactLayer);
 
-        if (hitCount == 0) return;
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, interactRange, _interactBuffer, interactLayer);
+        if (hitCount == 0) return null;
 
         float closestDistance = Mathf.Infinity;
         IInteractable closestInteractable = null;
 
         for (int i = 0; i < hitCount; i++)
         {
-            if (_interactBuffer[i].TryGetComponent(out IInteractable interactable))
+            Collider col = _interactBuffer[i];
+            if (col == null) continue;
+
+            IInteractable interactable = col.GetComponent<IInteractable>();
+            interactable ??= col.GetComponentInParent<IInteractable>();
+
+            if (interactable == null) continue;
+
+            if (interactable is Behaviour behaviour && !behaviour.enabled)
+                continue;
+
+            float distance = Vector3.Distance(transform.position, col.transform.position);
+            if (distance < closestDistance)
             {
-                float distance = Vector3.Distance(transform.position, _interactBuffer[i].transform.position);
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closestInteractable = interactable;
-                }
+                closestDistance = distance;
+                closestInteractable = interactable;
             }
         }
-        closestInteractable?.Interact();
+
+        return closestInteractable;
+    }
+    private void SetCanInteractState(bool newState)
+    {
+        if (CanInteract == newState) return;
+
+        CanInteract = newState;
+        OnCanInteractChanged?.Invoke(CanInteract);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetInteractableCursor(CanInteract);
+        }
     }
 }

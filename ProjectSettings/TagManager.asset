@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - Errante
   - Pillar
+  - Boss
   layers:
   - Default
   - TransparentFX

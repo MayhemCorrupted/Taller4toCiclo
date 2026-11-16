@@ -159,7 +159,7 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
-    CustomTextSpeed: 0.05
+    CustomTextSpeed: 0.1
     LineEndEventID: 
   Options: []
   SequenceEndEventID: StartFade

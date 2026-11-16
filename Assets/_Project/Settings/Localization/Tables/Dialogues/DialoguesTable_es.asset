@@ -62,25 +62,114 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 12889340392390662
-    m_Localized: "Levantaos, mi caballero, que en las tinieblas repos\xE1is, ha durado
-      demasiado vuestro letargo."
-    m_Metadata:
-      m_Items: []
-  - m_Id: 12889340392390663
-    m_Localized: "O\xEDd mi voz, aunque no sep\xE1is qui\xE9n la pronuncia."
-    m_Metadata:
-      m_Items: []
-  - m_Id: 12889340392390664
-    m_Localized: "Callad el paso, mi caballero. Esos ya no oyen raz\xF3n ni ruego."
-    m_Metadata:
-      m_Items: []
-  - m_Id: 12889340392390665
-    m_Localized: "A\xFAn no ten\xE9is con qu\xE9 herirlos. Sortead su mirada, que
-      yo os aguardo m\xE1s all\xE1"
+    m_Localized: "Alzaos ya, mi buen caballero, que en estas tinieblas repos\xE1is;
+      harto ha durado vuestro letargo y el fr\xEDo de la niebla no es lecho para
+      vos."
     m_Metadata:
       m_Items: []
   - m_Id: 13006011530625024
     m_Localized: Ayudadme.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623505133568
+    m_Localized: "O\xEDd mi voz y acogedla en vuestro pecho, aunque a\xFAn no sep\xE1is
+      qu\xE9 rostro la pronuncia ni desde d\xF3nde os llama."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128512
+    m_Localized: "Contened el paso y guardad silencio, mi buen caballero. Esas sombras
+      que errantes vagan perdieron ha tiempo el juicio; ya no atienden a raz\xF3n
+      ni a ruego alguno."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128513
+    m_Localized: "Desarmado vais y a\xFAn no ten\xE9is con qu\xE9 hacerles frente.
+      Sortead su mirada con cautela y apresuraos, que yo os aguardo a salvo m\xE1s
+      all\xE1 de la espesura."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128514
+    m_Localized: "Al fin lleg\xE1is a mi cobijo, mi buen caballero. Soy apenas un
+      alma cautiva en esta piedra, mas el destino ha querido que sea yo quien vele
+      por vuestros pasos."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128515
+    m_Localized: "Bien veis que de m\xED no resta sino este m\xE1rmol agrietado y
+      mi palabra; mas tened por cierto que mi voz no os desamparar\xE1 y ser\xE1
+      lumbre y gu\xEDa en vuestra desventura."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128516
+    m_Localized: 'No quiero veros indefenso ante esos pobres desdichados que han
+      perdido el alma. '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128517
+    m_Localized: Tomad esta hoja, llamada Anathema; mas aferraos a ella aunque sus
+      espinas os hieran, pues solo su filo comparte vuestra misma condena.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128518
+    m_Localized: "Probad su temple contra aquellos que osen cerrar vuestro paso y
+      tornad luego a mi lado, que bajo mi sombra siempre hallar\xE9is reposo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128519
+    m_Localized: "Mucho agradezco el valor con que hab\xE9is librado la senda, mi
+      buen caballero, mas vuestra carga a\xFAn no concluye."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128520
+    m_Localized: "Tornad al bosque y quebrad con vuestro acero los tres pilares luminosos
+      que sellan el paso; solo as\xED se os franquear\xE1n las puertas de la Catedral."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128521
+    m_Localized: "Una vez dentro, habr\xE9is de buscar a quien desat\xF3 toda esta
+      desdicha. Hallad al Profeta y dadle muerte, os lo ruego; ayudadme a poner fin
+      a su extrav\xEDo para que, al cabo de tantos a\xF1os, pueda salir de su miseria
+      de una vez por todas."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128522
+    m_Localized: "Mas no part\xE1is a\xFAn con las manos vac\xEDas, amigo m\xEDo;
+      antes dejadme entregaros un humilde presente de mi parte para socorreros cuando
+      la senda se torne m\xE1s cruenta."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128523
+    m_Localized: "Escoged con tiento seg\xFAn lo que vuestro esp\xEDritu demande,
+      pues solo de una de estas reliquias puedo desprenderme:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128524
+    m_Localized: "L\xE1grima de Redoma: Sana lentamente vuestras heridas."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128525
+    m_Localized: "\xD3leo de la Carro\xF1a: Da pujanza al acero a costa de vuestra
+      salud."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128526
+    m_Localized: 'Agua de la Memoria: Despierta vuestro vigor y acrecienta una aptitud.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128527
+    m_Localized: "Prudente elecci\xF3n, mi buen caballero. Guardadla cerca de vuestro
+      pecho y bebedla cuando sint\xE1is que la oscuridad os reclama."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128528
+    m_Localized: "Osado sois al abrazar el dolor a cambio de mayor pujanza. Mas no
+      olvid\xE9is que aqu\xED todo poder exige un tributo; no dej\xE9is que el \xF3leo
+      os devore por entero."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13087623656128529
+    m_Localized: "Aferraos pues a ese eco de vuestro pasado. Que el recuerdo de lo
+      que alguna vez fuisteis os d\xE9 firmeza para no sucumbir en la Catedral"
     m_Metadata:
       m_Items: []
   references:
