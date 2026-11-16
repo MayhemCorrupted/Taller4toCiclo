@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.016
+  m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -71971,63 +71971,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f8a7cff09a20964090f3456644d49d9, type: 3}
---- !u!1001 &2100594146125918655
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 152.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.2409
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -129.4085
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8319533800963874715, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
-      propertyPath: m_Name
-      value: "VOLUM\xC9TRICO"
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
 --- !u!33 &2445968178502006866
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -73114,4 +73057,3 @@ SceneRoots:
   - {fileID: 1027649352}
   - {fileID: 137282115}
   - {fileID: 348194960}
-  - {fileID: 2100594146125918655}
