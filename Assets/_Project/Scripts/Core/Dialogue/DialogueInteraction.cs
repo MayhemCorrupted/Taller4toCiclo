@@ -2,16 +2,29 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-[Serializable] public struct ConditionalDialogue
+[Serializable] public class StateDialogueBranch
 {
-    [Tooltip("El nombre de la bandera guardada en el StateManager (ej: 'Mision_Slimes_Completada')")]
-    public string requiredStateFlag;
+    [Tooltip("Estado (int) requerido en el StateManager para activar este diálogo.")]
+    public int requiredState = 0;
 
-    [Tooltip("La secuencia que se disparará si esta bandera existe.")]
-    public DialogueSequence overrideSequence;
+    [Tooltip("Opcional: Bandera adicional para ramificar dentro del mismo estado (Ej: 'MatoEnemigosSinPilares').")]
+    public string optionalFlag;
 
-    [Tooltip("Opcional: Sobrescribe el uiID si esta condición requiere otra interfaz.")]
+    [Tooltip("Secuencia de diálogo que se reproducirá.")]
+    public DialogueSequence sequence;
+
+    [Tooltip("Opcional: Sobrescribe el uiID si esta rama requiere otra interfaz.")]
     public string overrideUIID;
+
+    [Header("Evento Único de Interacción")]
+    [Tooltip("ID único para evitar que el UnityEvent se repita. Si se deja vacío, se genera automáticamente con el estado y nombre del diálogo.")]
+    public string uniqueEventID;
+
+    [Tooltip("Si está activo, onDialogueTriggered solo se ejecutará la primera vez que se active este diálogo/estado.")]
+    public bool triggerEventOnlyOnce = true;
+
+    [Tooltip("Evento que se ejecuta al iniciar esta rama de diálogo (dar ítems, abrir puertas, cambiar estado, etc.).")]
+    public UnityEvent onDialogueTriggered;
 }
 public class DialogueInteraction : MonoBehaviour, IInteractable
 {
@@ -20,24 +33,23 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
         public DialogueSequence Sequence;
         public string OverrideUIID;
     }
-    [Header("Secuencia Base")]
-    [Tooltip("La secuencia por defecto si no se cumplen condiciones especiales.")]
+
+    [Header("Secuencia por Defecto (Respaldo)")]
+    [Tooltip("Se usa si ningún estado configurado coincide con el CurrentState actual.")]
     public DialogueSequence defaultSequence;
 
+    [Header("Diálogos por Estado (Int) y Ramificaciones")]
+    [Tooltip("Configura qué diálogo y qué evento único se dispara según el estado actual.")]
+    public StateDialogueBranch[] stateDialogues;
+
     [Header("Sobrescritura de UI en Escena (Opcional)")]
-    [Tooltip("Opcional: Fuerza un uiID específico en este objeto sin modificar el ScriptableObject.")]
     [SerializeField] private string _overrideUIID;
 
-    [Header("Secuencias Condicionales (Sobrescritura)")]
-    [Tooltip("Si alguna de estas condiciones se cumple en el StateManager, se reproducirá esta secuencia. Se evalúan de arriba a abajo.")]
-    public ConditionalDialogue[] conditionalOverrides;
-
     [Header("Opciones")]
-    [SerializeField] private bool loopDialogue = false;
+    [SerializeField] private bool loopDialogue = true;
 
-    [Header("Eventos Externos (Opcional)")]
-    [Tooltip("Se ejecuta al interactuar, además de iniciar el diálogo automáticamente (útil para sonidos, puertas, dar ítems, etc.).")]
-    public UnityEvent OnInteract;
+    [Header("Evento General (Opcional - Se ejecuta en cada interacción)")]
+    public UnityEvent OnInteractEveryTime;
     public bool HasBeenUsed
     {
         get => _hasBeenUsed;
@@ -65,6 +77,7 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
 
         DialogueSequence finalSequence;
         string sceneUIID;
+        StateDialogueBranch matchedBranch = null;
 
         if (hasDynamic)
         {
@@ -76,12 +89,19 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
         }
         else
         {
-            finalSequence = EvaluateConditions(out sceneUIID);
+            matchedBranch = EvaluateStateBranch(out finalSequence, out sceneUIID);
         }
 
         if (finalSequence == null) return;
 
-        InvokeDialogue(finalSequence, sceneUIID);
+        StartDialogueSequence(finalSequence, sceneUIID);
+
+        if (matchedBranch != null)
+        {
+            TryInvokeBranchEvent(matchedBranch);
+        }
+
+        OnInteractEveryTime?.Invoke();
 
         if (_dynamicSequences.Count > 0)
         {
@@ -94,78 +114,67 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
             enabled = false;
         }
     }
-    public void ResetInteraction()
+    private StateDialogueBranch EvaluateStateBranch(out DialogueSequence sequence, out string sceneUIID)
     {
-        _hasBeenUsed = false;
-        enabled = true;
-    }
-    public void SetDynamicSequence(DialogueSequence newSequence)
-    {
-        SetDynamicSequence(newSequence, null);
-    }
-    public void SetDynamicSequence(DialogueSequence newSequence, string customUIID)
-    {
-        if (newSequence == null) return;
-
-        _dynamicSequences.Clear();
-        _dynamicSequences.Enqueue(new DynamicDialogueEntry
-        {
-            Sequence = newSequence,
-            OverrideUIID = customUIID
-        });
-
-        ResetInteraction();
-    }
-    public void EnqueueDynamicSequence(DialogueSequence newSequence)
-    {
-        EnqueueDynamicSequence(newSequence, null);
-    }
-    public void EnqueueDynamicSequence(DialogueSequence newSequence, string customUIID)
-    {
-        if (newSequence == null) return;
-
-        _dynamicSequences.Enqueue(new DynamicDialogueEntry
-        {
-            Sequence = newSequence,
-            OverrideUIID = customUIID
-        });
-
-        ResetInteraction();
-    }
-    public void SetDefaultSequence(DialogueSequence newSequence)
-    {
-        defaultSequence = newSequence;
-        ResetInteraction();
-    }
-    public void ClearDynamicSequences()
-    {
-        _dynamicSequences.Clear();
-    }
-    private DialogueSequence EvaluateConditions(out string sceneUIID)
-    {
+        sequence = defaultSequence;
         sceneUIID = _overrideUIID;
 
-        if (conditionalOverrides != null)
-        {
-            foreach (var condition in conditionalOverrides)
-            {
-                if (CheckGameState(condition.requiredStateFlag))
-                {
-                    if (!string.IsNullOrWhiteSpace(condition.overrideUIID))
-                        sceneUIID = condition.overrideUIID;
+        if (stateDialogues == null || stateDialogues.Length == 0 || StateManager.Instance == null)
+            return null;
 
-                    return condition.overrideSequence;
+        int currentState = StateManager.Instance.CurrentState;
+        StateDialogueBranch fallbackStateMatch = null;
+
+        for (int i = 0; i < stateDialogues.Length; i++)
+        {
+            StateDialogueBranch branch = stateDialogues[i];
+            if (branch == null || branch.sequence == null) continue;
+            if (branch.requiredState != currentState) continue;
+
+            bool requiresFlag = !string.IsNullOrWhiteSpace(branch.optionalFlag);
+
+            if (requiresFlag)
+            {
+                if (StateManager.Instance.CheckFlag(branch.optionalFlag))
+                {
+                    sequence = branch.sequence;
+                    if (!string.IsNullOrWhiteSpace(branch.overrideUIID))
+                        sceneUIID = branch.overrideUIID;
+                    return branch;
                 }
             }
+            else fallbackStateMatch ??= branch;
         }
 
-        return defaultSequence;
+        if (fallbackStateMatch != null)
+        {
+            sequence = fallbackStateMatch.sequence;
+            if (!string.IsNullOrWhiteSpace(fallbackStateMatch.overrideUIID))
+                sceneUIID = fallbackStateMatch.overrideUIID;
+            return fallbackStateMatch;
+        }
+
+        return null;
     }
-    private bool CheckGameState(string flag)
+    private void TryInvokeBranchEvent(StateDialogueBranch branch)
     {
-        return StateManager.Instance != null && StateManager.Instance.CheckFlag(flag);
+        if (branch.onDialogueTriggered == null) return;
+
+        string eventKey = !string.IsNullOrWhiteSpace(branch.uniqueEventID)
+            ? branch.uniqueEventID
+            : $"{gameObject.name}_State_{branch.requiredState}_{branch.optionalFlag}_{branch.sequence.name}";
+
+        if (branch.triggerEventOnlyOnce && StateManager.Instance != null)
+        {
+            if (StateManager.Instance.HasEventTriggered(eventKey))
+                return;
+
+            StateManager.Instance.MarkEventAsTriggered(eventKey);
+        }
+
+        branch.onDialogueTriggered.Invoke();
     }
-    private void InvokeDialogue(DialogueSequence sequenceToPlay, string sceneUIID)
+    private void StartDialogueSequence(DialogueSequence sequenceToPlay, string sceneUIID)
     {
         if (_dialogueManager == null)
             _dialogueManager = FindAnyObjectByType<DialogueManager>();
@@ -177,7 +186,23 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
             else
                 _dialogueManager.StartDialogue(sequenceToPlay);
         }
-
-        OnInteract?.Invoke();
+    }
+    public void ResetInteraction()
+    {
+        _hasBeenUsed = false;
+        enabled = true;
+    }
+    public void SetDynamicSequence(DialogueSequence newSequence, string customUIID = null)
+    {
+        if (newSequence == null) return;
+        _dynamicSequences.Clear();
+        _dynamicSequences.Enqueue(new DynamicDialogueEntry { Sequence = newSequence, OverrideUIID = customUIID });
+        ResetInteraction();
+    }
+    public void EnqueueDynamicSequence(DialogueSequence newSequence, string customUIID = null)
+    {
+        if (newSequence == null) return;
+        _dynamicSequences.Enqueue(new DynamicDialogueEntry { Sequence = newSequence, OverrideUIID = customUIID });
+        ResetInteraction();
     }
 }

@@ -457,12 +457,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1489273649}
   - {fileID: 851241652}
   - {fileID: 1876121609}
   - {fileID: 1768172765}
   - {fileID: 645243785}
   - {fileID: 493622541}
-  - {fileID: 1489273649}
   - {fileID: 908257635}
   - {fileID: 1563363927}
   m_Father: {fileID: 0}
@@ -24854,7 +24854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &448358090
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28062,6 +28062,7 @@ MonoBehaviour:
   _player: {fileID: 1291526395}
   _startingLives: 3
   _vesania4HealthThreshold: 0.2
+  _resetVesaniaOnPurify: 1
   _vesaniaSpawnGroups:
   - requiredVesaniaLevel: 2
     objectsToActivate: []
@@ -82404,175 +82405,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
-  _tagRequirements:
-  - requiredTag: Pillar
-    requiredCount: 3
-    isInteraction: 0
-    flagToUnlock: Pillares_Rotos
-    onRequirementMet:
+  _objectiveRules: []
+  _stateEvents:
+  - stateValue: 0
+    onStateEntered:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
+        - m_Target: {fileID: 1768172764}
+          m_TargetAssemblyTypeName: 
+          m_MethodName: 
+          m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 4
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    hasBeenMet: 0
-  - requiredTag: ErrantesBosque
-    requiredCount: 2
-    isInteraction: 0
-    flagToUnlock: CompleteCombatTutorial
-    onRequirementMet:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: ResetInteraction
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_ObjectArgumentAssemblyTypeName: 
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 3
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 493622542}
-          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-          m_MethodName: ActivateCheckpoint
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    hasBeenMet: 0
-  - requiredTag: Boss
-    requiredCount: 1
-    isInteraction: 0
-    flagToUnlock: CompleteGame
-    onRequirementMet:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 755469869}
-          m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
-          m_MethodName: OpenVictoryPanel
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    hasBeenMet: 0
-  _stateSequence:
-  - requiredStateValue: 0
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 851241653}
-          m_TargetAssemblyTypeName: DialogueManager, Assembly-CSharp
-          m_MethodName: StartCustomDialogue
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 61f134e704c374b49bb180a5d82079f6, type: 2}
-            m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - requiredStateValue: 4
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 2118185936}
-          m_TargetAssemblyTypeName: DoorController, Assembly-CSharp
-          m_MethodName: UnlockAndOpenDoor
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 430152123}
-          m_TargetAssemblyTypeName: DoorController, Assembly-CSharp
-          m_MethodName: UnlockAndOpenDoor
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: SetDynamicSequence
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 6e2e7fa1494e2484dbabe25a19aa761d, type: 2}
-            m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: ResetInteraction
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  _currentProgression:
-    EntitiesKilled: 0
-    TotalEntities: 26
-    InteractionsCompleted: 0
-    TotalInteractions: 2
-  _progressionMilestones: []
-  onCombatCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onInteractionsCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onTotalProgressionCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!43 &1501869636
 Mesh:
   m_ObjectHideFlags: 0
@@ -93049,12 +92899,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1717894869}
-  - component: {fileID: 1717894868}
-  - component: {fileID: 1717894867}
   - component: {fileID: 1717894866}
   - component: {fileID: 1717894865}
   m_Layer: 8
-  m_Name: Sphere
+  m_Name: SanctuaryItemArmor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -93095,63 +92943,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1717894867
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1717894864}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1717894868
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1717894864}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1717894869
 Transform:
   m_ObjectHideFlags: 0
@@ -93164,7 +92955,8 @@ Transform:
   m_LocalPosition: {x: 361.86105, y: 6.548861, z: -167.71863}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1923932229}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1720964773
@@ -102797,6 +102589,68 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1001 &1923932228
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1717894869}
+    m_Modifications:
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7626139322179216226, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+      propertyPath: m_Name
+      value: LootDrop
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+--- !u!4 &1923932229 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3611579213298384197, guid: dc33e45a4bb28854c941caca0629dcce, type: 3}
+  m_PrefabInstance: {fileID: 1923932228}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &1925063257
 Mesh:
   m_ObjectHideFlags: 0
@@ -113829,30 +113683,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
   defaultSequence: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
+  stateDialogues: []
   _overrideUIID: 
-  conditionalOverrides:
-  - requiredStateFlag: CompleteCombatTutorial
-    overrideSequence: {fileID: 11400000, guid: 5dbacfe0ce262b9468582ae04bade181, type: 2}
-    overrideUIID: 
-  - requiredStateFlag: FirstStageComplete
-    overrideSequence: {fileID: 11400000, guid: 6e2e7fa1494e2484dbabe25a19aa761d, type: 2}
-    overrideUIID: 
   loopDialogue: 0
-  OnInteract:
+  OnInteractEveryTime:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1489273650}
-        m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-        m_MethodName: RegisterInteraction
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Statue
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &2146065897
 GameObject:
   m_ObjectHideFlags: 0

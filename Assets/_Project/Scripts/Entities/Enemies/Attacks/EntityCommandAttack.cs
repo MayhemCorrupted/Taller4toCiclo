@@ -54,6 +54,7 @@ public class EntityCommandAttack : EntityAttack
             EntityDirector.Instance.CommandAlliesToAttack(targetRankToCommand, commandDuration, bossHoldsStandoffDuringCommand);
         }
 
-        yield return new WaitForSeconds(0.25f);
+        WaitForSeconds waitForSeconds = new(0.25f);
+        yield return waitForSeconds;
     }
 }

@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     [Tooltip("Porcentaje de vida máximo (0.2 = 20%) para activar Vesania 4 estando en Vesania 3.")]
     [Range(0.01f, 1f)]
     [SerializeField] private float _vesania4HealthThreshold = 0.2f;
+    [Tooltip("Si es true, purificarse en la Estatua también reinicia la Vesania base a 0.")]
+    [SerializeField] private bool _resetVesaniaOnPurify = true;
 
     [Header("Vesania World Spawns")]
     [Tooltip("Configura aquí los objetos que se activan o desactivan con cada nivel de Vesania.")]
@@ -72,6 +74,7 @@ public class GameManager : MonoBehaviour
 
     private readonly Dictionary<GameObject, bool> _resolvedObjectStates = new();
     private readonly List<VesaniaSpawnGroup> _sortedGroups = new();
+
     public bool IsCheckpointActivated => _isCheckpointActivated;
     public int CurrentLives => _currentLives;
     public int BaseVesania => _baseVesania;
@@ -106,6 +109,7 @@ public class GameManager : MonoBehaviour
     {
         UnsubscribePlayerHealth();
     }
+
     private void Start()
     {
         ResolvePlayerReferences();
@@ -113,8 +117,29 @@ public class GameManager : MonoBehaviour
             CaptureInitialSpawnPoint();
 
         SubscribePlayerHealth();
+
+        // Sincroniza estado si venimos de "Continuar Partida" o de cambiar de Stage 1 a Stage 2
+        SyncFromSaveManager();
+
         EvaluateVesaniaState(forceNotify: true);
     }
+
+    private void SyncFromSaveManager()
+    {
+        if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession) return;
+
+        PlayerSaveData pData = SaveManager.Instance.CurrentRun.player;
+        _isCheckpointActivated = pData.isCheckpointActivated;
+        _currentLives = pData.remainingLives;
+        _baseVesania = Mathf.Clamp(pData.baseVesania, 0, MaxBaseVesania);
+
+        if (SaveManager.Instance.IsLoadingFromDisk && _isCheckpointActivated && _statueCheckpointTransform != null)
+        {
+            TeleportPlayerTo(_statueCheckpointTransform.position, _statueCheckpointTransform.rotation);
+            SaveManager.Instance.ConsumeDiskLoadFlag();
+        }
+    }
+
     private void ResolvePlayerReferences()
     {
         if (_player == null)
@@ -122,7 +147,7 @@ public class GameManager : MonoBehaviour
             _player = GameObject.FindGameObjectWithTag("Player");
             if (_player == null)
             {
-                Debug.LogError("GameManager: No se encontró ningún GameObject con el Tag 'Player'.");
+                GameLogger.LogError("GameManager: No se encontró ningún GameObject con el Tag 'Player'.");
                 return;
             }
         }
@@ -134,6 +159,7 @@ public class GameManager : MonoBehaviour
                 _playerHealth = _player.GetComponentInChildren<PlayerHealth>();
         }
     }
+
     private void CaptureInitialSpawnPoint()
     {
         if (_player == null) return;
@@ -142,6 +168,7 @@ public class GameManager : MonoBehaviour
         _initialSpawnRotation = _player.transform.rotation;
         _hasCapturedInitialSpawn = true;
     }
+
     private void SubscribePlayerHealth()
     {
         if (_playerHealth == null) return;
@@ -149,6 +176,7 @@ public class GameManager : MonoBehaviour
         _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
         _playerHealth.OnHealthChanged += HandlePlayerHealthChanged;
     }
+
     private void UnsubscribePlayerHealth()
     {
         if (_playerHealth == null) return;
@@ -160,6 +188,7 @@ public class GameManager : MonoBehaviour
     {
         EvaluateVesaniaState();
     }
+
     public void ActivateCheckpoint()
     {
         if (_isCheckpointActivated) return;
@@ -172,7 +201,14 @@ public class GameManager : MonoBehaviour
 
         OnCheckpointActivated?.Invoke();
         OnCheckpointActivatedEvent?.Invoke();
+
+        // Guardado automático al activar la Estatua por primera vez
+        if (SaveManager.Instance != null)
+        {
+            _ = SaveManager.Instance.AutoSaveRunAsync();
+        }
     }
+
     public void ActivateCheckpoint(Transform newCheckpointTransform)
     {
         if (newCheckpointTransform != null)
@@ -182,6 +218,41 @@ public class GameManager : MonoBehaviour
 
         ActivateCheckpoint();
     }
+
+    /// <summary>
+    /// Conectar a la opción "Curar / Purificar" en el diálogo de Lithoselle.
+    /// Restaura las 3 vidas, cura HP al máximo y guarda el progreso.
+    /// </summary>
+    public void PurifyAtStatue()
+    {
+        if (!_isCheckpointActivated)
+        {
+            ActivateCheckpoint();
+        }
+        else
+        {
+            _currentLives = _startingLives;
+            if (_resetVesaniaOnPurify)
+            {
+                _baseVesania = 0;
+            }
+            EvaluateVesaniaState(forceNotify: true);
+        }
+
+        if (_playerHealth == null)
+            ResolvePlayerReferences();
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.Heal(_playerHealth.MaxHealth);
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            _ = SaveManager.Instance.AutoSaveRunAsync();
+        }
+    }
+
     public void ProcessPlayerDeath()
     {
         if (_isGameOver) return;
@@ -201,6 +272,13 @@ public class GameManager : MonoBehaviour
 
             EvaluateVesaniaState();
 
+            // Guardado inmediato anti-save-scum: registra la pérdida de vida y subida de Vesania en disco
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.RegisterPartialDeath();
+                _ = SaveManager.Instance.AutoSaveRunAsync();
+            }
+
             OnLifeLost?.Invoke();
             OnLifeLostEvent?.Invoke();
         }
@@ -210,6 +288,7 @@ public class GameManager : MonoBehaviour
             TriggerGameOver();
         }
     }
+
     private void EvaluateVesaniaState(bool forceNotify = false)
     {
         int targetVesania = 0;
@@ -232,6 +311,7 @@ public class GameManager : MonoBehaviour
             UpdateVesaniaObjects();
         }
     }
+
     private bool IsPlayerInLowHealthThreshold()
     {
         if (_playerHealth == null)
@@ -246,20 +326,30 @@ public class GameManager : MonoBehaviour
         float healthRatio = _playerHealth.CurrentHealth / _playerHealth.MaxHealth;
         return healthRatio <= _vesania4HealthThreshold;
     }
+
     private void TriggerGameOver()
     {
-        Debug.Log(_isCheckpointActivated
+        GameLogger.LogInfo(_isCheckpointActivated
             ? "Muerte definitiva. Las 3 vidas se han agotado."
             : "Muerte antes de activar el checkpoint. Reinicio requerido.");
+
+        Vector3 deathPosition = _player != null ? _player.transform.position : Vector3.zero;
+
+        // Ejecuta el protocolo de Permadeath (File.Delete + envío al Ranking y Global_Remains)
+        if (SaveManager.Instance != null)
+        {
+            _ = SaveManager.Instance.HandlePermadeathAsync(deathPosition);
+        }
 
         OnGameOver?.Invoke();
         OnGameOverEvent?.Invoke();
     }
+
     public void RespawnPlayerAtCheckpoint()
     {
         if (_player == null)
         {
-            Debug.LogWarning("GameManager: No hay referencia al GameObject Raíz del jugador para reaparecer.");
+            GameLogger.LogWarning("GameManager: No hay referencia al GameObject Raíz del jugador para reaparecer.");
             return;
         }
 
@@ -271,12 +361,7 @@ public class GameManager : MonoBehaviour
             _statueCheckpointTransform.GetPositionAndRotation(out targetPos, out targetRot);
         }
 
-        if (_player.TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
-
-        _player.transform.SetPositionAndRotation(targetPos, targetRot);
-        Physics.SyncTransforms();
-
-        if (cc != null) cc.enabled = true;
+        TeleportPlayerTo(targetPos, targetRot);
 
         if (_playerHealth == null)
             ResolvePlayerReferences();
@@ -297,6 +382,19 @@ public class GameManager : MonoBehaviour
         OnPlayerRespawned?.Invoke();
         OnPlayerRespawnedEvent?.Invoke();
     }
+
+    private void TeleportPlayerTo(Vector3 targetPos, Quaternion targetRot)
+    {
+        if (_player == null) return;
+
+        if (_player.TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
+
+        _player.transform.SetPositionAndRotation(targetPos, targetRot);
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true;
+    }
+
     public void ResetLivesAndVesania()
     {
         _isGameOver = false;
@@ -306,6 +404,7 @@ public class GameManager : MonoBehaviour
 
         EvaluateVesaniaState(forceNotify: true);
     }
+
     private void UpdateVesaniaObjects()
     {
         if (_vesaniaSpawnGroups == null || _vesaniaSpawnGroups.Length == 0) return;
