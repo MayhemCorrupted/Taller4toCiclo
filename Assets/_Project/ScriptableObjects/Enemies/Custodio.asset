@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Custodio
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   rank: 1
-  combatArchetype: 1
-  preferredCombatRange: 2
   healthBarMode: 1
   health: 140
   defense: 40
@@ -24,17 +22,25 @@ MonoBehaviour:
   defaultHyperarmorMultiplier: 0.5
   canAgonize: 1
   vesaniaAgonizeSettings:
+  - vesaniaLevel: 1
+    agonizeProbability: 0
+    agonizeCooldown: 10
   - vesaniaLevel: 2
-    agonizeProbability: 0.5
-    agonizeCooldown: 5
+    agonizeProbability: 0.25
+    agonizeCooldown: 10
   - vesaniaLevel: 3
-    agonizeProbability: 0.75
+    agonizeProbability: 0.5
+    agonizeCooldown: 10
+  - vesaniaLevel: 4
+    agonizeProbability: 0.9
     agonizeCooldown: 10
   defaultAgonizeCooldown: 10
-  defaultAgonizeProbability: 0.25
+  defaultAgonizeProbability: 0
   phases:
   - phaseName: 1
     healthThresholdPercentage: 1
+    combatArchetype: 1
+    preferredCombatRange: 2
     attackPool:
       closeRangeAttacks:
       - {fileID: 11400000, guid: 25cde97416944df498033ec21e687bc7, type: 2}

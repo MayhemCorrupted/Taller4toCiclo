@@ -87,6 +87,8 @@ public class EntityMultiChargeAttack : EntityAttack
             }
 
             ClearIndicatorsFor(root);
+            SpawnImpactVfx(GetTelegraphOrigin(root), root.rotation);
+
             Vector3 chargeDir = root.forward;
             Vector3 startPos = root.position;
             Vector3 targetPos = GetSafeChargeDestination(root, chargeDir, maxChargeDistance, agentRadius);
@@ -124,5 +126,6 @@ public class EntityMultiChargeAttack : EntityAttack
             UpdatePreparation(root, target, prepTimer / Mathf.Max(telegraphDuration, 0.001f));
             yield return null;
         }
+        SetIndicatorsImminentFor(root);
     }
 }

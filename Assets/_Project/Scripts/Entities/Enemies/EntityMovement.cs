@@ -126,7 +126,6 @@ public class EntityMovement : MonoBehaviour
         _navAgent.velocity = Vector3.zero;
         if (_navAgent.hasPath) _navAgent.ResetPath();
     }
-
     private void FlattenRotation()
     {
         Vector3 euler = transform.eulerAngles;
@@ -403,6 +402,7 @@ public class EntityMovement : MonoBehaviour
         resultPoint = hit.position;
         return true;
     }
+
     private void HandleHurtTriggered()
     {
         if (_brain == null || _brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing)
@@ -411,6 +411,7 @@ public class EntityMovement : MonoBehaviour
         if (_stunCoroutine != null) StopCoroutine(_stunCoroutine);
         _stunCoroutine = StartCoroutine(StunAndKnockbackRoutine());
     }
+
     private IEnumerator StunAndKnockbackRoutine()
     {
         _navAgent.enabled = false;

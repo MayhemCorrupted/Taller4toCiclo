@@ -9,9 +9,14 @@ public class EntityDirector : MonoBehaviour
     private readonly List<EntityCombat> _registeredEnemies = new();
     private readonly List<EntityCombat> _attackWaitList = new();
     private EntityCombat _currentAttacker;
+    private EntityCombat _currentBossAttacker;
 
-    [Header("Turnos y Cadencia Global")]
+    [Header("Turnos y Cadencia Global (Enemigos Menores)")]
     [Min(0f)] public float globalAttackDelay = 0.45f;
+
+    [Header("Cadencia Independiente del Jefe")]
+    [Min(0f)] public float bossAttackDelay = 0.25f;
+    [Min(4f)] public float bossPassiveStandoffRadius = 13.0f;
 
     [Header("Formación Melee (Rodeo y Corte de Paso)")]
     [Min(0.5f)] public float meleeSurroundRadius = 2.8f;
@@ -21,14 +26,16 @@ public class EntityDirector : MonoBehaviour
     [Min(1f)] public float rangedLineDistance = 8.5f;
     [Min(0.5f)] public float rangedLineSpacing = 2.2f;
 
-    [Header("Jerarquía, Escolta y Boss")]
+    [Header("Jerarquía y Escolta")]
     [Min(0.5f)] public float minSeparationDistance = 2.2f;
     [Min(1f)] public float bodyguardRadius = 2.6f;
     [Min(1.5f)] public float shieldRingRadius = 4.2f;
-    [Min(4f)] public float bossPassiveStandoffRadius = 13.0f;
+
     private float _nextGlobalAttackTime = 0f;
+    private float _nextBossAttackTime = 0f;
     private bool _isBossCommandActive = false;
-    private EnemyRank _commandedMaxRank = EnemyRank.Boss;
+    private bool _bossHoldsStandoff = false;
+    private EnemyRank _commandedMaxRank = EnemyRank.MiniBoss;
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -50,7 +57,7 @@ public class EntityDirector : MonoBehaviour
 
         _attackWaitList.Remove(enemy);
 
-        if (_currentAttacker == enemy)
+        if (_currentAttacker == enemy || _currentBossAttacker == enemy)
             NotifyAttackFinished(enemy);
     }
     public EnemyRank GetHighestRankPresent()
@@ -90,18 +97,20 @@ public class EntityDirector : MonoBehaviour
 
         if (highestRank == EnemyRank.Boss)
         {
-            EntityCombat boss = GetHighestRankLeaderEntity(EnemyRank.Boss);
             if (enemy.Rank == EnemyRank.Boss)
             {
-                if (_isBossCommandActive)
-                    return GetArchetypeCombatPosition(enemy, playerPos, predictedPlayerPos);
+                if (_isBossCommandActive && _bossHoldsStandoff)
+                {
+                    Vector3 awayFromPlayer = enemy.transform.position - playerPos;
+                    awayFromPlayer.y = 0f;
+                    awayFromPlayer = awayFromPlayer.sqrMagnitude > 0.01f ? awayFromPlayer.normalized : -targetTransform.forward;
+                    return playerPos + awayFromPlayer * bossPassiveStandoffRadius;
+                }
 
-                Vector3 awayFromPlayer = (enemy.transform.position - playerPos);
-                awayFromPlayer.y = 0f;
-                awayFromPlayer = awayFromPlayer.sqrMagnitude > 0.01f ? awayFromPlayer.normalized : -targetTransform.forward;
-                return playerPos + awayFromPlayer * bossPassiveStandoffRadius;
+                return GetArchetypeCombatPosition(enemy, playerPos, predictedPlayerPos);
             }
 
+            EntityCombat boss = GetHighestRankLeaderEntity(EnemyRank.Boss);
             if (!_isBossCommandActive && boss != null)
             {
                 return GetEscortPositionAroundVIP(enemy, boss.transform.position, playerPos, bodyguardRadius);
@@ -190,7 +199,7 @@ public class EntityDirector : MonoBehaviour
             Vector3 lineNormal = fromPlayerToLine.sqrMagnitude > 0.01f ? fromPlayerToLine.normalized : -enemy.transform.forward;
             Vector3 lineTangent = Vector3.Cross(Vector3.up, lineNormal).normalized;
 
-            float lineDist = Mathf.Max(preferredRadius, rangedLineDistance);
+            float lineDist = preferredRadius > 0f ? preferredRadius : rangedLineDistance;
             float lateralOffset = (index - (count - 1) * 0.5f) * rangedLineSpacing;
 
             return playerPos + (lineNormal * lineDist) + (lineTangent * lateralOffset);
@@ -202,7 +211,7 @@ public class EntityDirector : MonoBehaviour
 
         int meleeCount = Mathf.Max(1, meleeGroup.Count);
         int meleeIndex = Mathf.Max(0, meleeGroup.IndexOf(enemy));
-        float surroundRadius = Mathf.Max(preferredRadius, meleeSurroundRadius);
+        float surroundRadius = preferredRadius > 0f ? preferredRadius : meleeSurroundRadius;
 
         if (meleeCount > 4)
             surroundRadius += (meleeCount - 4) * 0.35f;
@@ -232,14 +241,32 @@ public class EntityDirector : MonoBehaviour
     }
     public bool RequestAttackPermission(EntityCombat enemy)
     {
-        EnemyRank highestRank = GetHighestRankPresent();
+        if (enemy == null) return false;
 
+        if (enemy.Rank == EnemyRank.Boss)
+        {
+            if (_isBossCommandActive && _bossHoldsStandoff)
+                return false;
+
+            if (_currentBossAttacker == enemy)
+                return true;
+
+            if ((_currentBossAttacker == null || !_currentBossAttacker.HasTarget) && Time.time >= _nextBossAttackTime)
+            {
+                _currentBossAttacker = enemy;
+                return true;
+            }
+
+            return false;
+        }
+
+        EnemyRank highestRank = GetHighestRankPresent();
         if (highestRank == EnemyRank.Boss)
         {
             if (!_isBossCommandActive)
                 return false;
 
-            if (enemy.Rank > _commandedMaxRank && enemy.Rank != EnemyRank.Boss)
+            if (enemy.Rank > _commandedMaxRank)
                 return false;
         }
 
@@ -269,22 +296,33 @@ public class EntityDirector : MonoBehaviour
     }
     public void NotifyAttackFinished(EntityCombat enemy)
     {
+        if (enemy != null && enemy.Rank == EnemyRank.Boss)
+        {
+            if (_currentBossAttacker == enemy || _currentBossAttacker == null)
+            {
+                _currentBossAttacker = null;
+                _nextBossAttackTime = Time.time + bossAttackDelay;
+            }
+            return;
+        }
+
         if (_currentAttacker == enemy || _currentAttacker == null)
         {
             _currentAttacker = null;
             _nextGlobalAttackTime = Time.time + globalAttackDelay;
         }
     }
-    public void CommandAlliesToAttack(EnemyRank targetRank, float duration)
+    public void CommandAlliesToAttack(EnemyRank targetRank, float duration, bool bossHoldsStandoff = false)
     {
         _isBossCommandActive = true;
+        _bossHoldsStandoff = bossHoldsStandoff;
         _commandedMaxRank = targetRank;
         CancelInvoke(nameof(ResetBossCommand));
         Invoke(nameof(ResetBossCommand), duration);
     }
-
     private void ResetBossCommand()
     {
         _isBossCommandActive = false;
+        _bossHoldsStandoff = false;
     }
 }

@@ -23,6 +23,11 @@ public enum AttackRangeCategory { None, Close, Medium, Far }
 {
     public string phaseName = "Fase 1";
     [Range(0f, 1f)] public float healthThresholdPercentage = 1.0f;
+
+    [Header("Arquetipo y Rango Preferido de la Fase")]
+    public EnemyCombatArchetype combatArchetype = EnemyCombatArchetype.Melee;
+    public AttackRangeCategory preferredCombatRange = AttackRangeCategory.None;
+
     public AttackDistancePool attackPool = new();
 }
 [Serializable] public struct VesaniaAgonizeSetting
@@ -34,10 +39,8 @@ public enum AttackRangeCategory { None, Close, Medium, Far }
 [CreateAssetMenu(fileName = "EntityData", menuName = "Rotbound/Entity/EntityData")]
 public class EntityData : ScriptableObject
 {
-    [Header("Identidad, Rango y Arquetipo")]
+    [Header("Identidad y Rango")]
     public EnemyRank rank = EnemyRank.Weak;
-    public EnemyCombatArchetype combatArchetype = EnemyCombatArchetype.Melee;
-    public AttackRangeCategory preferredCombatRange = AttackRangeCategory.None;
 
     [Header("Interfaz de Vida")]
     public EnemyHealthBarMode healthBarMode = EnemyHealthBarMode.WorldSpace;
@@ -60,7 +63,6 @@ public class EntityData : ScriptableObject
 
     [Header("Fases de Combate (Ordenadas de > % HP a < % HP)")]
     public List<EnemyPhase> phases = new();
-
     public void GetAgonizeParameters(int vesaniaLevel, out float probability, out float cooldown)
     {
         probability = defaultAgonizeProbability;

@@ -1,26 +1,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityAreaAttack", menuName = "Rotbound/Entity/Attack/EntityAreaAttack")]
 public class EntityAreaAttack : EntityAttack
 {
-    public enum AreaOrigin { Attacker, Target }
+    public enum AreaCenterMode { Attacker, Target, OffsetFromTarget }
+
     [Header("Propiedades de Área")]
-    public AreaOrigin areaOrigin = AreaOrigin.Attacker;
-    [Min(0.1f)] public float radius = 3f;
+    public AreaCenterMode centerMode = AreaCenterMode.Target;
+    [Min(0.1f)] public float radius = 3.0f;
+    public Vector3 targetOffset = Vector3.zero;
     public bool trackTarget = true;
     private readonly Dictionary<int, Vector3> _centersByInstance = new();
-    private readonly Collider[] _hitBuffer = new Collider[12];
+    private readonly Collider[] _hitBuffer = new Collider[16];
+    private Vector3 ComputeCenter(Transform root, Transform target)
+    {
+        if (centerMode == AreaCenterMode.Attacker || target == null)
+            return GetTelegraphOrigin(root);
+
+        Vector3 rawPos = centerMode == AreaCenterMode.Target
+            ? target.position
+            : target.position + targetOffset;
+
+        return GetGroundPosition(rawPos, root);
+    }
     public override void Prepare(Transform origin, Transform target)
     {
         Transform root = GetRootTransform(origin);
         if (root == null) return;
 
         ClearIndicatorsFor(root);
+        if (target != null && centerMode == AreaCenterMode.Attacker)
+            RotateRootTowards(root, target.position);
+
         Vector3 center = ComputeCenter(root, target);
         _centersByInstance[root.GetInstanceID()] = center;
-
         SpawnIndicatorFor(root, center, Quaternion.identity, new Vector3(radius * 2f, 0.1f, radius * 2f), telegraphDuration);
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
@@ -28,26 +42,18 @@ public class EntityAreaAttack : EntityAttack
         Transform root = GetRootTransform(origin);
         if (root == null) return;
 
-        if (trackTarget && normalizedTime <= trackTargetUntil)
+        if (trackTarget && target != null && normalizedTime <= trackTargetUntil)
         {
-            if (target != null) RotateRootTowards(root, target.position);
+            if (centerMode == AreaCenterMode.Attacker)
+                RotateRootTowards(root, target.position);
+
             Vector3 center = ComputeCenter(root, target);
             _centersByInstance[root.GetInstanceID()] = center;
 
             List<GameObject> inds = GetIndicatorsFor(root);
             if (inds != null && inds.Count > 0 && inds[0] != null)
-            {
                 inds[0].transform.position = center;
-                inds[0].transform.localScale = new Vector3(radius * 2f, 0.1f, radius * 2f);
-            }
         }
-    }
-    private Vector3 ComputeCenter(Transform root, Transform target)
-    {
-        if (areaOrigin == AreaOrigin.Attacker || target == null)
-            return GetTelegraphOrigin(root);
-
-        return GetGroundPosition(target.position, root);
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {

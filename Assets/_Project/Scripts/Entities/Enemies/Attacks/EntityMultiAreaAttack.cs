@@ -155,6 +155,7 @@ public class EntityMultiAreaAttack : EntityAttack
             {
                 Prepare(root, target);
                 yield return new WaitForSeconds(telegraphDuration);
+                SetIndicatorsImminentFor(root);
             }
 
             _centersByInstance.TryGetValue(root.GetInstanceID(), out List<Vector3> centers);
@@ -173,6 +174,7 @@ public class EntityMultiAreaAttack : EntityAttack
                     Vector3 center = centers[i];
                     SpawnIndicatorFor(root, center, Quaternion.identity, new Vector3(areaRadius * 2f, 0.1f, areaRadius * 2f), individualTelegraph);
                     yield return new WaitForSeconds(individualTelegraph);
+                    SetIndicatorsImminentFor(root);
                     ApplyAreaDamage(center);
                     ClearIndicatorsFor(root);
                     if (i < centers.Count - 1 && delayBetweenAreas > 0) yield return new WaitForSeconds(delayBetweenAreas);

@@ -2,9 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
 public enum ArmorType { None, Superarmor, Hyperarmor }
-
 public abstract class EntityAttack : ScriptableObject
 {
     [Header("Daño y Empuje")]
@@ -34,8 +32,8 @@ public abstract class EntityAttack : ScriptableObject
     [Header("Armadura durante el Ataque")]
     public bool overrideBaseArmor = false;
     public ArmorType armorState = ArmorType.None;
+    [Range(0f, 1f)] public float armorActivationPercent = 0.0f;
     [Range(0f, 1f)] public float hyperarmorDamageMultiplier = 0.5f;
-
     private readonly Dictionary<int, List<GameObject>> _activeIndicatorsByInstance = new();
     public virtual void Prepare(Transform origin, Transform target) { }
     public virtual void UpdatePreparation(Transform origin, Transform target, float normalizedTime) { }
@@ -47,6 +45,22 @@ public abstract class EntityAttack : ScriptableObject
     public virtual void CancelAttackFor(Transform origin)
     {
         ClearIndicatorsFor(origin);
+    }
+    public void SetIndicatorsImminentFor(Transform origin)
+    {
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
+
+        if (_activeIndicatorsByInstance.TryGetValue(root.GetInstanceID(), out List<GameObject> list))
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] != null && list[i].TryGetComponent(out EntityIndicator indicator))
+                {
+                    indicator.TriggerImminentAttackColor();
+                }
+            }
+        }
     }
     protected GameObject SpawnImpactVfx(Vector3 basePosition, Quaternion directionRotation)
     {

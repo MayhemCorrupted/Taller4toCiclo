@@ -15,7 +15,7 @@ MonoBehaviour:
   damage: 75
   knockback: 22
   indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}
-  telegraphDuration: 1
+  telegraphDuration: 2
   trackTargetUntil: 0.9
   groundLayer:
     serializedVersion: 2
@@ -34,8 +34,9 @@ MonoBehaviour:
   activeMotionDuration: 0.4
   overrideBaseArmor: 1
   armorState: 2
+  armorActivationPercent: 0
   hyperarmorDamageMultiplier: 0.5
-  isRadial: 0
-  radius: 2
+  isRadial: 1
+  radius: 3
   hitboxMeasurements: {x: 1, y: 6, z: 6}
   hitboxVerticalOffset: 0.8

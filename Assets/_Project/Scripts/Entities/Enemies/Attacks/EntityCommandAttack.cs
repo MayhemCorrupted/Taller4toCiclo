@@ -7,8 +7,11 @@ public class EntityCommandAttack : EntityAttack
     [Tooltip("Rango máximo de subordinados al que va dirigida la orden de asalto.")]
     public EnemyRank targetRankToCommand = EnemyRank.Leader;
 
-    [Tooltip("Duración (en segundos) durante la cual el Boss libera la formación pasiva y ordena atacar.")]
+    [Tooltip("Duración (en segundos) durante la cual los subordinados tienen permiso para atacar.")]
     [Min(0.5f)] public float commandDuration = 6.0f;
+
+    [Tooltip("Si está activo, el Jefe retrocede a distancia pasiva y deja de atacar mientras dura la orden. Si está desactivado, el Jefe sigue atacando junto a sus aliados.")]
+    public bool bossHoldsStandoffDuringCommand = false;
 
     [Header("Orientación Visual")]
     [Min(1f)] public float turnSpeedDuringCommand = 8.0f;
@@ -43,12 +46,14 @@ public class EntityCommandAttack : EntityAttack
         Transform root = GetRootTransform(origin);
         ClearIndicatorsFor(root);
 
+        if (root != null)
+            SpawnImpactVfx(GetTelegraphOrigin(root), root.rotation);
+
         if (EntityDirector.Instance != null)
         {
-            EntityDirector.Instance.CommandAlliesToAttack(targetRankToCommand, commandDuration);
+            EntityDirector.Instance.CommandAlliesToAttack(targetRankToCommand, commandDuration, bossHoldsStandoffDuringCommand);
         }
 
-        WaitForSeconds waitForSeconds = new(0.25f);
-        yield return waitForSeconds;
+        yield return new WaitForSeconds(0.25f);
     }
 }

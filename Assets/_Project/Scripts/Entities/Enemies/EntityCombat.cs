@@ -40,6 +40,7 @@ public class EntityCombat : MonoBehaviour
     private Coroutine _detectionCoroutine;
     private Coroutine _attackCoroutine;
     private bool _isPerformingAttack = false;
+    private float _currentTelegraphProgress = 0f;
     private EntityAttack _currentAttackLogic;
 
     private int _activeAttackAnimationCount = 0;
@@ -49,8 +50,29 @@ public class EntityCombat : MonoBehaviour
     public Vector3 TargetVelocity { get; private set; }
     public EntityData Data => _entityData;
     public EnemyRank Rank => _entityData != null ? _entityData.rank : EnemyRank.Weak;
-    public EnemyCombatArchetype CombatArchetype => _entityData != null ? _entityData.combatArchetype : EnemyCombatArchetype.Melee;
-    public AttackRangeCategory PreferredCombatRange => _entityData != null ? _entityData.preferredCombatRange : AttackRangeCategory.None;
+
+    public EnemyCombatArchetype CombatArchetype
+    {
+        get
+        {
+            if (_currentPhase != null) return _currentPhase.combatArchetype;
+            if (_entityData != null && _entityData.phases != null && _entityData.phases.Count > 0)
+                return _entityData.phases[0].combatArchetype;
+            return EnemyCombatArchetype.Melee;
+        }
+    }
+
+    public AttackRangeCategory PreferredCombatRange
+    {
+        get
+        {
+            if (_currentPhase != null) return _currentPhase.preferredCombatRange;
+            if (_entityData != null && _entityData.phases != null && _entityData.phases.Count > 0)
+                return _entityData.phases[0].preferredCombatRange;
+            return AttackRangeCategory.None;
+        }
+    }
+
     public EnemyPhase CurrentPhase => _currentPhase;
     public bool IsPerformingAttack => _isPerformingAttack;
     public bool IsAttackAnimationPlaying => _activeAttackAnimationCount > 0;
@@ -87,10 +109,7 @@ public class EntityCombat : MonoBehaviour
         get
         {
             if (!_isPerformingAttack) return false;
-            ArmorType currentArmor = (_currentAttackLogic != null && _currentAttackLogic.overrideBaseArmor)
-                ? _currentAttackLogic.armorState
-                : (_entityData != null ? _entityData.defaultArmorState : ArmorType.None);
-            return currentArmor != ArmorType.None;
+            return GetEffectiveCurrentArmor(out _) != ArmorType.None;
         }
     }
     private void Awake()
@@ -137,10 +156,14 @@ public class EntityCombat : MonoBehaviour
     private void Start()
     {
         if (EntityDirector.Instance != null) EntityDirector.Instance.RegisterEnemy(this);
+        if (_entityData != null && _currentPhase == null)
+            EvaluatePhaseChange(0);
     }
     public void SetData(EntityData data)
     {
         _entityData = data;
+        _currentPhaseIndex = -1;
+        _currentPhase = null;
         EnsureComponentsInitialized();
         EvaluatePhaseChange(0);
         ApplyCurrentArmorState();
@@ -424,6 +447,7 @@ public class EntityCombat : MonoBehaviour
 
         _activeAttackAnimationCount = 0;
         _attackAnimationStateEntered = false;
+        _currentTelegraphProgress = 0f;
 
         if (_isPerformingAttack)
         {
@@ -481,7 +505,7 @@ public class EntityCombat : MonoBehaviour
     }
     private void EvaluatePhaseChange(float damageTaken)
     {
-        if (_entityData == null || _entityData.phases.Count == 0) return;
+        if (_entityData == null || _entityData.phases == null || _entityData.phases.Count == 0) return;
         EnsureComponentsInitialized();
         if (_health == null || _health.MaxHealth <= 0) return;
 
@@ -490,7 +514,8 @@ public class EntityCombat : MonoBehaviour
 
         for (int i = 0; i < _entityData.phases.Count; i++)
         {
-            if (currentHpPercent <= _entityData.phases[i].healthThresholdPercentage) targetPhaseIndex = i;
+            if (currentHpPercent <= _entityData.phases[i].healthThresholdPercentage)
+                targetPhaseIndex = i;
         }
 
         if (targetPhaseIndex != _currentPhaseIndex)
@@ -502,9 +527,38 @@ public class EntityCombat : MonoBehaviour
             _farAttackIndex = 0;
         }
     }
+    private ArmorType GetEffectiveCurrentArmor(out float damageMultiplier)
+    {
+        damageMultiplier = (_entityData != null && _entityData.defaultArmorState == ArmorType.Hyperarmor)
+            ? _entityData.defaultHyperarmorMultiplier
+            : 1.0f;
+
+        ArmorType baseArmor = _entityData != null ? _entityData.defaultArmorState : ArmorType.None;
+
+        if (!_isPerformingAttack || _currentAttackLogic == null || !_currentAttackLogic.overrideBaseArmor)
+            return baseArmor;
+
+        if (_currentTelegraphProgress < _currentAttackLogic.armorActivationPercent)
+            return baseArmor;
+
+        damageMultiplier = _currentAttackLogic.armorState == ArmorType.Hyperarmor
+            ? _currentAttackLogic.hyperarmorDamageMultiplier
+            : 1.0f;
+
+        return _currentAttackLogic.armorState;
+    }
+    private void ApplyDynamicAttackArmorState()
+    {
+        EnsureComponentsInitialized();
+        if (_health == null) return;
+
+        ArmorType effectiveArmor = GetEffectiveCurrentArmor(out float mult);
+        _health.SetDamageMultiplier(effectiveArmor == ArmorType.Hyperarmor ? mult : 1.0f);
+    }
     private IEnumerator PerformAttackRoutine(AttackRangeCategory bandCategory)
     {
         _isPerformingAttack = true;
+        _currentTelegraphProgress = 0f;
         _activeAttackAnimationCount = 0;
         _attackAnimationStateEntered = false;
         _currentAttackLogic = GetNextRotatedAttack(bandCategory);
@@ -518,7 +572,10 @@ public class EntityCombat : MonoBehaviour
             yield break;
         }
 
-        ApplyAttackArmorState(_currentAttackLogic);
+        if (_currentAttackLogic.telegraphDuration <= 0f)
+            _currentTelegraphProgress = 1f;
+
+        ApplyDynamicAttackArmorState();
         _currentAttackLogic.Prepare(transform, _target);
 
         float prepTimer = 0f;
@@ -533,9 +590,15 @@ public class EntityCombat : MonoBehaviour
 
             prepTimer += Time.deltaTime;
             float normalizedTime = Mathf.Clamp01(prepTimer / Mathf.Max(_currentAttackLogic.telegraphDuration, 0.001f));
+            _currentTelegraphProgress = normalizedTime;
+            ApplyDynamicAttackArmorState();
             _currentAttackLogic.UpdatePreparation(transform, _target, normalizedTime);
             yield return null;
         }
+
+        _currentTelegraphProgress = 1f;
+        ApplyDynamicAttackArmorState();
+        _currentAttackLogic.SetIndicatorsImminentFor(transform);
 
         if (!IsTargetAlive() || (_brain != null && (_brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Death)))
         {
@@ -577,6 +640,7 @@ public class EntityCombat : MonoBehaviour
             }
         }
 
+        _currentTelegraphProgress = 0f;
         ApplyCurrentArmorState();
         StartBandCooldown(bandCategory);
         _isPerformingAttack = false;
@@ -592,14 +656,6 @@ public class EntityCombat : MonoBehaviour
         if (_health == null || _entityData == null) return;
         _health.SetDamageMultiplier(_entityData.defaultArmorState == ArmorType.Hyperarmor ? _entityData.defaultHyperarmorMultiplier : 1.0f);
     }
-    private void ApplyAttackArmorState(EntityAttack attack)
-    {
-        EnsureComponentsInitialized();
-        if (_health == null) return;
-        ArmorType effectiveArmor = attack.overrideBaseArmor ? attack.armorState : _entityData.defaultArmorState;
-        float mult = attack.overrideBaseArmor ? attack.hyperarmorDamageMultiplier : _entityData.defaultHyperarmorMultiplier;
-        _health.SetDamageMultiplier(effectiveArmor == ArmorType.Hyperarmor ? mult : 1.0f);
-    }
     private void HandleBrainStateChanged(EnemyState newState)
     {
         if (newState == EnemyState.Death || newState == EnemyState.Agonizing)
@@ -610,11 +666,7 @@ public class EntityCombat : MonoBehaviour
 
         if (newState == EnemyState.Hurt)
         {
-            ArmorType currentArmor = (_currentAttackLogic != null && _currentAttackLogic.overrideBaseArmor)
-                ? _currentAttackLogic.armorState
-                : (_entityData != null ? _entityData.defaultArmorState : ArmorType.None);
-
-            if (_isPerformingAttack && currentArmor == ArmorType.None)
+            if (_isPerformingAttack && GetEffectiveCurrentArmor(out _) == ArmorType.None)
             {
                 AbortCurrentAttack();
             }

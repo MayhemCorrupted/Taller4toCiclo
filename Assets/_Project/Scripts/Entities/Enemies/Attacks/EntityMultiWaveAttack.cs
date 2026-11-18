@@ -128,6 +128,7 @@ public class EntityMultiWaveAttack : EntityAttack
             {
                 Prepare(root, target);
                 yield return new WaitForSeconds(telegraphDuration);
+                SetIndicatorsImminentFor(root);
             }
 
             if (!_directionsByInstance.TryGetValue(root.GetInstanceID(), out List<Vector3> dirs)) yield break;

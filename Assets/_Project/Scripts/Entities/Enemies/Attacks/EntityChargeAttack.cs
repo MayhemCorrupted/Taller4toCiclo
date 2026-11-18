@@ -58,6 +58,8 @@ public class EntityChargeAttack : EntityAttack
         ClearIndicatorsFor(root);
         if (root == null) yield break;
 
+        SpawnImpactVfx(GetTelegraphOrigin(root), root.rotation);
+
         float agentRadius = root.TryGetComponent(out NavMeshAgent agent) ? agent.radius : 0.5f;
         Vector3 destination = _chargeDestByInstance.TryGetValue(root.GetInstanceID(), out Vector3 saved)
             ? saved

@@ -38,6 +38,8 @@ public class EntityRangeAttack : EntityAttack
         shootDirection = shootDirection.sqrMagnitude > 0.001f ? shootDirection.normalized : Vector3.forward;
 
         Vector3 spawnPos = rootTransform.position + (Vector3.up * verticalOffset) + (shootDirection * forwardSpawnOffset);
+        SpawnImpactVfx(spawnPos, Quaternion.LookRotation(shootDirection));
+
         GameObject projectileObj = Instantiate(projectileInstance, spawnPos, Quaternion.LookRotation(shootDirection));
 
         if (projectileObj.TryGetComponent(out EntityProjectile projectileComp))
