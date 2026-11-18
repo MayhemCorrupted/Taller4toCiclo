@@ -9,8 +9,11 @@ public class EntityAnimator : MonoBehaviour
     [SerializeField] private NavMeshAgent _navAgent;
 
     [Header("Suavizado de Locomoción")]
-    [SerializeField] private float _speedDampTime = 0.1f;
-    [SerializeField] private float _directionalLerpSpeed = 10f;
+    [SerializeField] private float _speedDampTime = 0.08f;
+    [SerializeField] private float _directionalLerpSpeed = 12f;
+
+    [Header("Anclaje del Modelo Hijo")]
+    [SerializeField] private bool _lockChildModelToRoot = true;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int InputXHash = Animator.StringToHash("InputX");
@@ -22,6 +25,9 @@ public class EntityAnimator : MonoBehaviour
     private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
 
     private Transform _entityRoot;
+    private Transform _modelTransform;
+    private Vector3 _initialModelLocalPos;
+    private Quaternion _initialModelLocalRot;
     private float _currentInputX;
     private float _currentInputY;
     private void Awake()
@@ -32,6 +38,18 @@ public class EntityAnimator : MonoBehaviour
         if (_navAgent == null) _navAgent = GetComponentInParent<NavMeshAgent>();
 
         _entityRoot = _brain != null ? _brain.transform : transform;
+
+        if (_animator != null)
+        {
+            _animator.applyRootMotion = false;
+            _modelTransform = _animator.transform;
+
+            if (_modelTransform != _entityRoot)
+            {
+                _initialModelLocalPos = _modelTransform.localPosition;
+                _initialModelLocalRot = _modelTransform.localRotation;
+            }
+        }
     }
     private void OnEnable()
     {
@@ -53,17 +71,30 @@ public class EntityAnimator : MonoBehaviour
     {
         if (_animator == null) return;
 
-        if (_brain != null && (_brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Hurt))
+        bool isActionLocked = (_brain != null && (_brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Hurt))
+                              || (_combat != null && _combat.IsPerformingAttack);
+
+        if (isActionLocked)
         {
             _animator.SetFloat(SpeedHash, 0f);
             _animator.SetFloat(InputXHash, 0f);
             _animator.SetFloat(InputYHash, 0f);
-            if (_brain.CurrentState == EnemyState.Death)
+            _currentInputX = 0f;
+            _currentInputY = 0f;
+
+            if (_brain != null && _brain.CurrentState == EnemyState.Death)
                 _animator.SetBool(IsLockedOnHash, false);
             return;
         }
 
         SyncLocomotion();
+    }
+    private void LateUpdate()
+    {
+        if (_lockChildModelToRoot && _modelTransform != null && _modelTransform != _entityRoot)
+        {
+            _modelTransform.SetLocalPositionAndRotation(_initialModelLocalPos, _initialModelLocalRot);
+        }
     }
     private void SyncLocomotion()
     {

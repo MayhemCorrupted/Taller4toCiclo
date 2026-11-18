@@ -1,59 +1,67 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [CreateAssetMenu(fileName = "EntityAreaAttack", menuName = "Rotbound/Entity/Attack/EntityAreaAttack")]
 public class EntityAreaAttack : EntityAttack
 {
     public enum AreaOrigin { Attacker, Target }
-    [Header("AREA PROPERTIES")]
+    [Header("Propiedades de Área")]
     public AreaOrigin areaOrigin = AreaOrigin.Attacker;
     [Min(0.1f)] public float radius = 3f;
-    [Tooltip("Si es verdadero, el centro del área seguirá al jugador o la posición del enemigo durante el telegrafiado.")]
     public bool trackTarget = true;
-    public GameObject indicatorPrefab;
-    private Vector3 _calculatedCenter;
-    private GameObject _currentIndicator;
-    private readonly Collider[] _hitBuffer = new Collider[10];
+    private readonly Dictionary<int, Vector3> _centersByInstance = new();
+    private readonly Collider[] _hitBuffer = new Collider[12];
     public override void Prepare(Transform origin, Transform target)
     {
-        UpdateCalculatedCenter(origin, target);
-        origin.TryGetComponent(out Health entityHealth);
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        if (indicatorPrefab != null)
-        {
-            _currentIndicator = Instantiate(indicatorPrefab, _calculatedCenter, Quaternion.identity);
-            _currentIndicator.transform.localScale = new Vector3(radius * 2f, 0.1f, radius * 2f);
+        ClearIndicatorsFor(root);
+        Vector3 center = ComputeCenter(root, target);
+        _centersByInstance[root.GetInstanceID()] = center;
 
-            if (_currentIndicator.TryGetComponent(out EntityIndicator indicator))
-            {
-                indicator.Init(entityHealth);
-                indicator.AnimateIndicator(telegraphDuration);
-            }
-        }
+        SpawnIndicatorFor(root, center, Quaternion.identity, new Vector3(radius * 2f, 0.1f, radius * 2f), telegraphDuration);
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && normalizedTime <= trackTargetUntil)
-        {
-            UpdateCalculatedCenter(origin, target);
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-            if (_currentIndicator != null)
+        if (trackTarget && normalizedTime <= trackTargetUntil)
+        {
+            if (target != null) RotateRootTowards(root, target.position);
+            Vector3 center = ComputeCenter(root, target);
+            _centersByInstance[root.GetInstanceID()] = center;
+
+            List<GameObject> inds = GetIndicatorsFor(root);
+            if (inds != null && inds.Count > 0 && inds[0] != null)
             {
-                _currentIndicator.transform.position = _calculatedCenter;
-                _currentIndicator.transform.localScale = new Vector3(radius * 2f, 0.1f, radius * 2f);
+                inds[0].transform.position = center;
+                inds[0].transform.localScale = new Vector3(radius * 2f, 0.1f, radius * 2f);
             }
         }
     }
-    private void UpdateCalculatedCenter(Transform origin, Transform target)
+    private Vector3 ComputeCenter(Transform root, Transform target)
     {
-        _calculatedCenter = (areaOrigin == AreaOrigin.Attacker || target == null) ? origin.position : target.position;
-        _calculatedCenter.y = origin.position.y;
+        if (areaOrigin == AreaOrigin.Attacker || target == null)
+            return GetTelegraphOrigin(root);
+
+        return GetGroundPosition(target.position, root);
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        yield return WaitDamageDelay();
+        yield return WaitForImpactTiming(origin);
 
-        int hitCount = Physics.OverlapSphereNonAlloc(_calculatedCenter, radius, _hitBuffer);
+        Transform root = GetRootTransform(origin);
+        Vector3 center = (root != null && _centersByInstance.TryGetValue(root.GetInstanceID(), out Vector3 saved))
+            ? saved
+            : ComputeCenter(root, target);
+
+        ClearIndicatorsFor(root);
+        SpawnImpactVfx(center, root != null ? root.rotation : Quaternion.identity);
+
+        int hitCount = Physics.OverlapSphereNonAlloc(center, radius, _hitBuffer, ~0, QueryTriggerInteraction.Ignore);
         HashSet<PlayerHealth> processedPlayers = new();
 
         for (int i = 0; i < hitCount; i++)
@@ -62,15 +70,9 @@ public class EntityAreaAttack : EntityAttack
             PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
             if (ph != null && processedPlayers.Add(ph))
             {
-                Vector3 knockbackDir = ph.transform.position - _calculatedCenter;
-                ApplyDamageAndKnockback(hit, knockbackDir, _calculatedCenter);
+                Vector3 knockbackDir = ph.transform.position - center;
+                ApplyDamageAndKnockback(hit, knockbackDir, center);
             }
         }
-
-        if (_currentIndicator != null) Destroy(_currentIndicator);
-    }
-    public override void CancelAttack()
-    {
-        if (_currentIndicator != null) Destroy(_currentIndicator);
     }
 }

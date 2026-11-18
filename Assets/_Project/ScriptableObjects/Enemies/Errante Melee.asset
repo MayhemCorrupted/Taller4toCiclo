@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Errante Melee
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   rank: 0
-  preferredAttackDistance: 1
+  combatArchetype: 0
+  preferredCombatRange: 1
   healthBarMode: 1
   health: 60
   defense: 10
-  speed: 2.2
+  moveSpeed: 2.5
   isStunnable: 1
   defaultArmorState: 0
   defaultHyperarmorMultiplier: 0
@@ -38,20 +39,16 @@ MonoBehaviour:
   - vesaniaLevel: 4
     agonizeProbability: 0.9
     agonizeCooldown: 10
-  defaultAgonizeCooldown: 5
+  defaultAgonizeCooldown: 5.07
   defaultAgonizeProbability: 0
-  detectionRadius: 8
-  attackRadius: 3
-  lossRadius: 14
-  minAttackCooldown: 3
-  maxAttackCooldown: 3
   phases:
   - phaseName: 1
     healthThresholdPercentage: 1
     attackPool:
-      closeRangeMax: 2
-      mediumRangeMax: 0
       closeRangeAttacks:
       - {fileID: 11400000, guid: 547ccba26512c2948a2e63426dddf8a0, type: 2}
+      closeRotationCooldown: 1
       mediumRangeAttacks: []
+      mediumRotationCooldown: 2
       farRangeAttacks: []
+      farRotationCooldown: 3

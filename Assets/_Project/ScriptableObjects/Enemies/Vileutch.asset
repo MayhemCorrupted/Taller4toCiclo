@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb07f7ab27696cb408e0e295a3b983f2, type: 3}
-  m_Name: Profeta
+  m_Name: Vileutch
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  rank: 3
-  preferredAttackDistance: 0
+  rank: 4
+  combatArchetype: 2
+  preferredCombatRange: 0
   healthBarMode: 0
-  health: 800
+  health: 300
   defense: 50
-  speed: 5
+  moveSpeed: 2
   isStunnable: 0
   defaultArmorState: 1
   defaultHyperarmorMultiplier: 0.5
@@ -25,22 +26,32 @@ MonoBehaviour:
   vesaniaAgonizeSettings: []
   defaultAgonizeCooldown: 10
   defaultAgonizeProbability: 0.25
-  detectionRadius: 100
-  attackRadius: 15
-  lossRadius: 1000
-  minAttackCooldown: 4
-  maxAttackCooldown: 7
   phases:
   - phaseName: 1 phase
     healthThresholdPercentage: 1
     attackPool:
-      closeRangeMax: 3
-      mediumRangeMax: 5
       closeRangeAttacks:
       - {fileID: 11400000, guid: 75f0bcf60d9385a418c16d55481941e2, type: 2}
+      closeRotationCooldown: 4
       mediumRangeAttacks:
-      - {fileID: 11400000, guid: 412a294f3236d5246b8a00d8e7c207e1, type: 2}
+      - {fileID: 11400000, guid: 5c38d27188784614a9f58b74544c2449, type: 2}
       - {fileID: 11400000, guid: 57c19360982fefe43b2329eab1ea2a1e, type: 2}
+      mediumRotationCooldown: 4
       farRangeAttacks:
       - {fileID: 11400000, guid: b06610753d117754b804b7550b881d45, type: 2}
       - {fileID: 11400000, guid: 9ee3bfd7fe444f6448ab8e434998263b, type: 2}
+      farRotationCooldown: 3
+  - phaseName: 2 phase
+    healthThresholdPercentage: 0.75
+    attackPool:
+      closeRangeAttacks:
+      - {fileID: 11400000, guid: 75f0bcf60d9385a418c16d55481941e2, type: 2}
+      closeRotationCooldown: 2
+      mediumRangeAttacks:
+      - {fileID: 11400000, guid: 5c38d27188784614a9f58b74544c2449, type: 2}
+      - {fileID: 11400000, guid: 57c19360982fefe43b2329eab1ea2a1e, type: 2}
+      mediumRotationCooldown: 2
+      farRangeAttacks:
+      - {fileID: 11400000, guid: b06610753d117754b804b7550b881d45, type: 2}
+      - {fileID: 11400000, guid: 9ee3bfd7fe444f6448ab8e434998263b, type: 2}
+      farRotationCooldown: 3

@@ -10,19 +10,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79ec6f7cd15c6124a9c05f91b1f0abd8, type: 3}
-  m_Name: ProfetaArea
+  m_Name: VileutchAreaAttack
   m_EditorClassIdentifier: Assembly-CSharp::EntityAreaAttack
-  damage: 55
+  damage: 30
   knockback: 0
-  telegraphDuration: 2
-  attackDuration: 1
-  trackTargetUntil: 0.7
+  indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}
+  telegraphDuration: 5
+  trackTargetUntil: 0.5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  impactVfxPrefab: {fileID: 0}
+  vfxOffset: {x: 0, y: 0, z: 0}
+  vfxScale: {x: 1, y: 1, z: 1}
+  vfxLifetime: 2
+  alignVfxWithAttacker: 1
+  animationTrigger: 
+  damageImpactPercent: 0.229
+  fallbackAnimationDuration: 1
+  activeMotionDuration: 0.4
   overrideBaseArmor: 1
   armorState: 1
   hyperarmorDamageMultiplier: 0.5
-  animationTrigger: 
-  damageDelay: 0
   areaOrigin: 1
   radius: 5
   trackTarget: 1
-  indicatorPrefab: {fileID: 4365853189634161206, guid: cdff517039b5f734c80bec8b54445e94, type: 3}

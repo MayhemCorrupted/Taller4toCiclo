@@ -10,21 +10,32 @@ public class EntityCombat : MonoBehaviour
     public static event Action<EntityCombat> OnAnyEnemyTargetDetected;
     public static event Action<EntityCombat> OnAnyEnemyTargetLost;
 
-    private EntityBrain _brain;
-    private Health _health;
+    [Header("Capas y Detección")]
     [SerializeField] private Animator _animator;
     [SerializeField] private LayerMask _targetLayer;
     [SerializeField] private LayerMask _wallLayer;
-    [SerializeField] private float _checkInterval = 0.1f;
+    [Min(0.05f)][SerializeField] private float _checkInterval = 0.1f;
+    [Min(0.1f)][SerializeField] private float _eyeHeight = 1.2f;
 
+    private EntityBrain _brain;
+    private Health _health;
     private EntityData _entityData;
     private EnemyPhase _currentPhase;
     private int _currentPhaseIndex = -1;
 
     private Transform _target;
     private Health _targetHealth;
-    private float _atkCountdown = 0.0f;
-    private readonly Collider[] _hitBuffer = new Collider[5];
+    private float _lossTimer = 0f;
+
+    private float _closeCooldownTimer = 0f;
+    private float _mediumCooldownTimer = 0f;
+    private float _farCooldownTimer = 0f;
+
+    private int _closeAttackIndex = 0;
+    private int _mediumAttackIndex = 0;
+    private int _farAttackIndex = 0;
+
+    private readonly Collider[] _hitBuffer = new Collider[8];
     private WaitForSeconds _rangeEvalInterval;
     private Coroutine _detectionCoroutine;
     private Coroutine _attackCoroutine;
@@ -33,46 +44,42 @@ public class EntityCombat : MonoBehaviour
 
     private int _activeAttackAnimationCount = 0;
     private bool _attackAnimationStateEntered = false;
-
     private Vector3 _previousTargetPos;
+
     public Vector3 TargetVelocity { get; private set; }
     public EntityData Data => _entityData;
-    public EnemyRank Rank => _entityData != null ? _entityData.rank : EnemyRank.Minion;
-    public int PreferredAttackDistance => _entityData != null ? _entityData.preferredAttackDistance : 0;
+    public EnemyRank Rank => _entityData != null ? _entityData.rank : EnemyRank.Weak;
+    public EnemyCombatArchetype CombatArchetype => _entityData != null ? _entityData.combatArchetype : EnemyCombatArchetype.Melee;
+    public AttackRangeCategory PreferredCombatRange => _entityData != null ? _entityData.preferredCombatRange : AttackRangeCategory.None;
     public EnemyPhase CurrentPhase => _currentPhase;
     public bool IsPerformingAttack => _isPerformingAttack;
     public bool IsAttackAnimationPlaying => _activeAttackAnimationCount > 0;
     public Transform TargetTransform => IsTargetAlive() ? _target : null;
     public Vector3 TargetLocation => IsTargetAlive() ? _target.position : Vector3.positiveInfinity;
+    public bool HasTarget => IsTargetAlive();
     public bool CanSeeTarget => IsTargetAlive();
-    public bool IsInAttackRange
+    public bool IsLosingTarget => _lossTimer > 0f;
+    public float DistanceToTarget
     {
         get
         {
-            if (_brain != null && (_brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Death))
+            if (!IsTargetAlive()) return float.PositiveInfinity;
+            Vector3 diff = _target.position - transform.position;
+            diff.y = 0f;
+            return diff.magnitude;
+        }
+    }
+    public bool CanAttackFromCurrentPosition
+    {
+        get
+        {
+            if (_brain == null || _brain.CurrentState == EnemyState.Agonizing || _brain.CurrentState == EnemyState.Death)
                 return false;
 
-            if (!IsTargetAlive() || _entityData == null) return false;
+            if (!IsTargetAlive() || _entityData == null || _currentPhase == null)
+                return false;
 
-            if (EntityDirector.Instance != null && EntityDirector.Instance.GetHighestRankPresent() >= EnemyRank.MiniBoss && Rank == EnemyRank.Minion)
-            {
-                if (!EntityDirector.Instance.RequestAttackPermission(this)) return false;
-            }
-
-            float dist = Vector3.Distance(transform.position, _target.position);
-            _entityData.GetPreferredRangeBand(_currentPhase, out float minRange, out _, out float maxRange);
-
-            if (dist > maxRange) return false;
-
-            if (PreferredAttackDistance >= 2 && dist < minRange * 0.85f)
-            {
-                Vector3 awayFromTarget = (transform.position - _target.position).normalized;
-                awayFromTarget.y = 0f;
-                bool isCorneredAgainstWall = Physics.Raycast(transform.position + Vector3.up * 0.5f, awayFromTarget, 1.5f, _wallLayer);
-                if (!isCorneredAgainstWall) return false;
-            }
-
-            return true;
+            return TryResolveAttackBandForCurrentDistance(out _);
         }
     }
     public bool IsArmorActive
@@ -145,6 +152,24 @@ public class EntityCombat : MonoBehaviour
             _detectionCoroutine = StartCoroutine(DetectionRoutine());
         }
     }
+    public void ForceAlertNearestTarget()
+    {
+        if (IsTargetAlive() || _brain == null) return;
+
+        float alertRadius = Mathf.Max(_brain.LossDetectionRadius, _brain.LongRangeRadius * 1.5f);
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, alertRadius, _hitBuffer, _targetLayer);
+        for (int i = 0; i < hitCount; i++)
+        {
+            Transform candidate = _hitBuffer[i].transform;
+            Health candidateHealth = candidate.GetComponentInParent<Health>();
+
+            if (candidateHealth != null && candidateHealth.CurrentHealth <= 0f)
+                continue;
+
+            SetTarget(candidate, candidateHealth);
+            break;
+        }
+    }
     public void NotifyAttackAnimationStarted()
     {
         if (_brain != null && (_brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing))
@@ -156,6 +181,199 @@ public class EntityCombat : MonoBehaviour
     public void NotifyAttackAnimationEnded()
     {
         _activeAttackAnimationCount = Mathf.Max(0, _activeAttackAnimationCount - 1);
+    }
+    public float GetDesiredCombatHoldRadius()
+    {
+        if (_brain == null) return 2.5f;
+        if (_currentPhase == null) return _brain.GetOptimalRadiusForCategory(PreferredCombatRange);
+
+        DetectedRangeBand currentBand = _brain.EvaluateDistanceBand(DistanceToTarget);
+        AttackDistancePool pool = _currentPhase.attackPool;
+
+        if (PreferredCombatRange == AttackRangeCategory.None)
+        {
+            if (TryResolveAttackBandForCurrentDistance(out AttackRangeCategory activeBand))
+                return _brain.GetOptimalRadiusForCategory(activeBand);
+
+            if (HasValidAttacks(pool.closeRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Close);
+            if (HasValidAttacks(pool.mediumRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Medium);
+            if (HasValidAttacks(pool.farRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Far);
+
+            return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Close);
+        }
+
+        if (PreferredCombatRange == AttackRangeCategory.Medium)
+        {
+            if ((currentBand == DetectedRangeBand.Short || currentBand == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Close);
+
+            return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Medium);
+        }
+
+        if (PreferredCombatRange == AttackRangeCategory.Far)
+        {
+            if ((currentBand == DetectedRangeBand.Short || currentBand == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Close);
+
+            if (currentBand == DetectedRangeBand.Medium && HasValidAttacks(pool.mediumRangeAttacks))
+                return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Medium);
+
+            return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Far);
+        }
+
+        return _brain.GetOptimalRadiusForCategory(AttackRangeCategory.Close);
+    }
+    private bool TryResolveAttackBandForCurrentDistance(out AttackRangeCategory resolvedCategory)
+    {
+        resolvedCategory = AttackRangeCategory.Close;
+        if (_brain == null || _currentPhase == null) return false;
+
+        DetectedRangeBand band = _brain.EvaluateDistanceBand(DistanceToTarget);
+        AttackDistancePool pool = _currentPhase.attackPool;
+
+        switch (PreferredCombatRange)
+        {
+            case AttackRangeCategory.None:
+                if ((band == DetectedRangeBand.Short || band == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Close;
+                    return true;
+                }
+                if (band == DetectedRangeBand.Medium && HasValidAttacks(pool.mediumRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Medium;
+                    return true;
+                }
+                if (band == DetectedRangeBand.Long && HasValidAttacks(pool.farRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Far;
+                    return true;
+                }
+                return false;
+
+            case AttackRangeCategory.Close:
+                if ((band == DetectedRangeBand.Short || band == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Close;
+                    return true;
+                }
+                return false;
+
+            case AttackRangeCategory.Medium:
+                if (band == DetectedRangeBand.Medium && HasValidAttacks(pool.mediumRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Medium;
+                    return true;
+                }
+                if ((band == DetectedRangeBand.Short || band == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Close;
+                    return true;
+                }
+                return false;
+
+            case AttackRangeCategory.Far:
+                if (band == DetectedRangeBand.Long && HasValidAttacks(pool.farRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Far;
+                    return true;
+                }
+                if (band == DetectedRangeBand.Medium && HasValidAttacks(pool.mediumRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Medium;
+                    return true;
+                }
+                if ((band == DetectedRangeBand.Short || band == DetectedRangeBand.PersonalSpace) && HasValidAttacks(pool.closeRangeAttacks))
+                {
+                    resolvedCategory = AttackRangeCategory.Close;
+                    return true;
+                }
+                return false;
+        }
+
+        return false;
+    }
+    private bool HasValidAttacks(List<EntityAttack> list)
+    {
+        if (list == null || list.Count == 0) return false;
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] != null) return true;
+        }
+        return false;
+    }
+    private bool IsBandCooldownReady(AttackRangeCategory category)
+    {
+        return category switch
+        {
+            AttackRangeCategory.Close => _closeCooldownTimer <= 0f,
+            AttackRangeCategory.Medium => _mediumCooldownTimer <= 0f,
+            AttackRangeCategory.Far => _farCooldownTimer <= 0f,
+            _ => true
+        };
+    }
+    private void StartBandCooldown(AttackRangeCategory category)
+    {
+        if (_currentPhase == null) return;
+        AttackDistancePool pool = _currentPhase.attackPool;
+
+        switch (category)
+        {
+            case AttackRangeCategory.Close:
+                _closeCooldownTimer = pool.closeRotationCooldown;
+                break;
+            case AttackRangeCategory.Medium:
+                _mediumCooldownTimer = pool.mediumRotationCooldown;
+                break;
+            case AttackRangeCategory.Far:
+                _farCooldownTimer = pool.farRotationCooldown;
+                break;
+        }
+    }
+    private EntityAttack GetNextRotatedAttack(AttackRangeCategory category)
+    {
+        if (_currentPhase == null) return null;
+        AttackDistancePool pool = _currentPhase.attackPool;
+
+        List<EntityAttack> list;
+        int currentIndex;
+
+        switch (category)
+        {
+            case AttackRangeCategory.Close:
+                list = pool.closeRangeAttacks;
+                currentIndex = _closeAttackIndex;
+                break;
+            case AttackRangeCategory.Medium:
+                list = pool.mediumRangeAttacks;
+                currentIndex = _mediumAttackIndex;
+                break;
+            default:
+                list = pool.farRangeAttacks;
+                currentIndex = _farAttackIndex;
+                break;
+        }
+
+        if (!HasValidAttacks(list)) return null;
+
+        for (int attempt = 0; attempt < list.Count; attempt++)
+        {
+            int idx = (currentIndex + attempt) % list.Count;
+            if (list[idx] != null)
+            {
+                int nextIdx = (idx + 1) % list.Count;
+                if (category == AttackRangeCategory.Close) _closeAttackIndex = nextIdx;
+                else if (category == AttackRangeCategory.Medium) _mediumAttackIndex = nextIdx;
+                else _farAttackIndex = nextIdx;
+
+                return list[idx];
+            }
+        }
+
+        return null;
     }
     private bool IsTargetAlive()
     {
@@ -173,6 +391,7 @@ public class EntityCombat : MonoBehaviour
 
         _target = newTarget;
         _targetHealth = targetHealth;
+        _lossTimer = 0f;
         _previousTargetPos = _target.position;
         OnAnyEnemyTargetDetected?.Invoke(this);
     }
@@ -182,6 +401,7 @@ public class EntityCombat : MonoBehaviour
 
         _target = null;
         _targetHealth = null;
+        _lossTimer = 0f;
         TargetVelocity = Vector3.zero;
         OnAnyEnemyTargetLost?.Invoke(this);
     }
@@ -198,7 +418,7 @@ public class EntityCombat : MonoBehaviour
             if (_animator != null && !string.IsNullOrEmpty(_currentAttackLogic.animationTrigger))
                 _animator.ResetTrigger(_currentAttackLogic.animationTrigger);
 
-            _currentAttackLogic.CancelAttack();
+            _currentAttackLogic.CancelAttackFor(transform);
             _currentAttackLogic = null;
         }
 
@@ -225,6 +445,10 @@ public class EntityCombat : MonoBehaviour
     }
     private void Update()
     {
+        if (_closeCooldownTimer > 0f) _closeCooldownTimer = Mathf.Max(0f, _closeCooldownTimer - Time.deltaTime);
+        if (_mediumCooldownTimer > 0f) _mediumCooldownTimer = Mathf.Max(0f, _mediumCooldownTimer - Time.deltaTime);
+        if (_farCooldownTimer > 0f) _farCooldownTimer = Mathf.Max(0f, _farCooldownTimer - Time.deltaTime);
+
         if (_brain != null && (_brain.CurrentState == EnemyState.Death || _brain.CurrentState == EnemyState.Agonizing))
             return;
 
@@ -246,16 +470,12 @@ public class EntityCombat : MonoBehaviour
 
         if (_brain != null && _brain.CurrentState == EnemyState.Attacking && !_isPerformingAttack)
         {
-            if (_atkCountdown <= 0.0f)
+            if (TryResolveAttackBandForCurrentDistance(out AttackRangeCategory activeBand) && IsBandCooldownReady(activeBand))
             {
                 if (EntityDirector.Instance == null || EntityDirector.Instance.RequestAttackPermission(this))
                 {
-                    _attackCoroutine = StartCoroutine(PerformAttackRoutine());
+                    _attackCoroutine = StartCoroutine(PerformAttackRoutine(activeBand));
                 }
-            }
-            else
-            {
-                _atkCountdown = Mathf.Max(_atkCountdown - Time.deltaTime, 0.0f);
             }
         }
     }
@@ -277,43 +497,21 @@ public class EntityCombat : MonoBehaviour
         {
             _currentPhaseIndex = targetPhaseIndex;
             _currentPhase = _entityData.phases[_currentPhaseIndex];
+            _closeAttackIndex = 0;
+            _mediumAttackIndex = 0;
+            _farAttackIndex = 0;
         }
     }
-    private EntityAttack SelectAttackByDistance()
-    {
-        if (_currentPhase == null || !IsTargetAlive()) return null;
-        float dist = Vector3.Distance(transform.position, _target.position);
-        List<EntityAttack> candidatePool = null;
-
-        if (PreferredAttackDistance == 1 && _currentPhase.attackPool.closeRangeAttacks.Count > 0)
-            candidatePool = _currentPhase.attackPool.closeRangeAttacks;
-        else if (PreferredAttackDistance == 2 && _currentPhase.attackPool.mediumRangeAttacks.Count > 0)
-            candidatePool = _currentPhase.attackPool.mediumRangeAttacks;
-        else if (PreferredAttackDistance == 3 && _currentPhase.attackPool.farRangeAttacks.Count > 0)
-            candidatePool = _currentPhase.attackPool.farRangeAttacks;
-
-        if (candidatePool == null || candidatePool.Count == 0)
-        {
-            if (dist <= _currentPhase.attackPool.closeRangeMax) candidatePool = _currentPhase.attackPool.closeRangeAttacks;
-            else if (dist <= _currentPhase.attackPool.mediumRangeMax) candidatePool = _currentPhase.attackPool.mediumRangeAttacks;
-            else candidatePool = _currentPhase.attackPool.farRangeAttacks;
-        }
-
-        if (candidatePool == null || candidatePool.Count == 0) candidatePool = _currentPhase.attackPool.closeRangeAttacks;
-        if (candidatePool == null || candidatePool.Count == 0) return null;
-
-        return candidatePool[UnityEngine.Random.Range(0, candidatePool.Count)];
-    }
-    private IEnumerator PerformAttackRoutine()
+    private IEnumerator PerformAttackRoutine(AttackRangeCategory bandCategory)
     {
         _isPerformingAttack = true;
         _activeAttackAnimationCount = 0;
         _attackAnimationStateEntered = false;
-        _currentAttackLogic = SelectAttackByDistance();
+        _currentAttackLogic = GetNextRotatedAttack(bandCategory);
 
         if (_currentAttackLogic == null || !IsTargetAlive())
         {
-            _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
+            StartBandCooldown(bandCategory);
             _isPerformingAttack = false;
             _attackCoroutine = null;
             if (EntityDirector.Instance != null) EntityDirector.Instance.NotifyAttackFinished(this);
@@ -321,7 +519,6 @@ public class EntityCombat : MonoBehaviour
         }
 
         ApplyAttackArmorState(_currentAttackLogic);
-
         _currentAttackLogic.Prepare(transform, _target);
 
         float prepTimer = 0f;
@@ -362,8 +559,10 @@ public class EntityCombat : MonoBehaviour
 
         if (hasAnimationTrigger)
         {
-            if (!_attackAnimationStateEntered)
+            float waitEnterTimer = 0f;
+            while (!_attackAnimationStateEntered && waitEnterTimer < 0.35f)
             {
+                waitEnterTimer += Time.deltaTime;
                 yield return null;
             }
 
@@ -379,7 +578,7 @@ public class EntityCombat : MonoBehaviour
         }
 
         ApplyCurrentArmorState();
-        _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
+        StartBandCooldown(bandCategory);
         _isPerformingAttack = false;
         _attackAnimationStateEntered = false;
         _currentAttackLogic = null;
@@ -406,8 +605,6 @@ public class EntityCombat : MonoBehaviour
         if (newState == EnemyState.Death || newState == EnemyState.Agonizing)
         {
             AbortCurrentAttack();
-            if (_entityData != null && newState == EnemyState.Agonizing)
-                _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
             return;
         }
 
@@ -420,8 +617,6 @@ public class EntityCombat : MonoBehaviour
             if (_isPerformingAttack && currentArmor == ArmorType.None)
             {
                 AbortCurrentAttack();
-                if (_entityData != null)
-                    _atkCountdown = UnityEngine.Random.Range(_entityData.minAttackCooldown, _entityData.maxAttackCooldown);
             }
         }
     }
@@ -430,12 +625,13 @@ public class EntityCombat : MonoBehaviour
         while (true)
         {
             yield return _rangeEvalInterval;
-            if (_entityData == null) continue;
-            if (_brain != null && _brain.CurrentState == EnemyState.Death) yield break;
+            if (_entityData == null || _brain == null) continue;
+            if (_brain.CurrentState == EnemyState.Death) yield break;
 
             if (_target == null)
             {
-                int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _entityData.detectionRadius, _hitBuffer, _targetLayer);
+                float maxDetect = _brain.MaxDetectionRadius;
+                int hitCount = Physics.OverlapSphereNonAlloc(transform.position, maxDetect, _hitBuffer, _targetLayer);
                 for (int i = 0; i < hitCount; i++)
                 {
                     Transform candidate = _hitBuffer[i].transform;
@@ -444,7 +640,7 @@ public class EntityCombat : MonoBehaviour
                     if (candidateHealth != null && candidateHealth.CurrentHealth <= 0f)
                         continue;
 
-                    if (HasClearLineOfSight(candidate, _entityData.detectionRadius))
+                    if (HasClearLineOfSight(candidate))
                     {
                         SetTarget(candidate, candidateHealth);
                         break;
@@ -459,17 +655,32 @@ public class EntityCombat : MonoBehaviour
                     continue;
                 }
 
-                float distance = Vector3.Distance(transform.position, _target.position);
-                if (distance > _entityData.lossRadius || !HasClearLineOfSight(_target, distance))
+                float distance = DistanceToTarget;
+                bool isInRangeAndVisible = distance <= _brain.LossDetectionRadius && HasClearLineOfSight(_target);
+
+                if (isInRangeAndVisible)
                 {
-                    ClearTarget();
+                    _lossTimer = 0f;
+                }
+                else
+                {
+                    _lossTimer += _checkInterval;
+                    if (_lossTimer >= _brain.LossDetectionDuration)
+                    {
+                        ClearTarget();
+                    }
                 }
             }
         }
     }
-    private bool HasClearLineOfSight(Transform targetToCast, float maxDistance)
+    private bool HasClearLineOfSight(Transform targetToCast)
     {
-        Vector3 direction = (targetToCast.position - transform.position).normalized;
-        return !Physics.Raycast(transform.position, direction, maxDistance, _wallLayer);
+        Vector3 originEye = transform.position + Vector3.up * _eyeHeight;
+        Vector3 targetEye = targetToCast.position + Vector3.up * _eyeHeight;
+        Vector3 toTarget = targetEye - originEye;
+        float distance = toTarget.magnitude;
+
+        if (distance <= 0.05f) return true;
+        return !Physics.Raycast(originEye, toTarget / distance, distance, _wallLayer, QueryTriggerInteraction.Ignore);
     }
 }

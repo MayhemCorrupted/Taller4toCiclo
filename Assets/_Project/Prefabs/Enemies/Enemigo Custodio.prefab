@@ -88,6 +88,14 @@ MonoBehaviour:
   _health: {fileID: 4306573814955963703}
   _combat: {fileID: 5411413248189280062}
   _movement: {fileID: 5436640524068869313}
+  _aggroRadius: 10
+  _lossDetectionBuffer: 2
+  _lossDetectionDuration: 4
+  _personalSpaceRadius: 2
+  _shortRangeRadius: 2.5
+  _mediumRangeRadius: 4.5
+  _longRangeRadius: 6.5
+  _showRangeGizmos: 1
   _passiveAgonizeCheckInterval: 1
   OnDeathAnimationFinishedEvent:
     m_PersistentCalls:
@@ -124,6 +132,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _checkInterval: 0.1
+  _eyeHeight: 1.2
 --- !u!114 &5436640524068869313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,14 +147,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
   _brain: {fileID: 8523825861168803526}
   _combat: {fileID: 5411413248189280062}
-  _obstacleLayer:
+  _wallLayer:
     serializedVersion: 2
     m_Bits: 128
   _patrolWaitingTime: 1
   _patrolRadius: 5
+  _patrolTurnDelay: 0.25
+  _patrolRotationSpeed: 6
   _enableOrbitalMovement: 1
-  _orbitStrafeDistance: 2.5
+  _orbitAngularSpeed: 45
   _orbitDirectionChangeInterval: 3.5
+  _retreatSpeedMultiplier: 1.15
+  _combatRotationSpeed: 14
   _stunDuration: 0.5
   _knockbackForce: 9.5
   _knockbackFriction: 8
@@ -270,6 +283,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 667187839214590885, guid: b25f498e50f2b2c47a1d4745ecb09a41, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6d522539607d76c459b219ba4bbce9f6, type: 2}
     - target: {fileID: 919132149155446097, guid: b25f498e50f2b2c47a1d4745ecb09a41, type: 3}
       propertyPath: m_Name
       value: Custodio_TPose
@@ -314,6 +331,7 @@ MonoBehaviour:
   _navAgent: {fileID: 1513082390583895446}
   _speedDampTime: 0.1
   _directionalLerpSpeed: 10
+  _lockChildModelToRoot: 1
 --- !u!95 &5778664825395213109 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: b25f498e50f2b2c47a1d4745ecb09a41, type: 3}

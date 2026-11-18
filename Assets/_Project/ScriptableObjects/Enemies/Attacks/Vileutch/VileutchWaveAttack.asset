@@ -10,19 +10,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa5d89171a65814479fdf93bc72c9191, type: 3}
-  m_Name: EntityWaveAttack
+  m_Name: VileutchWaveAttack
   m_EditorClassIdentifier: Assembly-CSharp::EntityWaveAttack
   damage: 30
   knockback: 15
-  telegraphDuration: 2
-  attackDuration: 1
+  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}
+  telegraphDuration: 3
   trackTargetUntil: 0.8
-  overrideBaseArmor: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  impactVfxPrefab: {fileID: 0}
+  vfxOffset: {x: 0, y: 0, z: 0}
+  vfxScale: {x: 1, y: 1, z: 1}
+  vfxLifetime: 2
+  alignVfxWithAttacker: 1
+  animationTrigger: 
+  damageImpactPercent: 0.45
+  fallbackAnimationDuration: 1
+  activeMotionDuration: 0.4
+  overrideBaseArmor: 1
   armorState: 2
   hyperarmorDamageMultiplier: 0.5
-  animationTrigger: 
-  damageDelay: 0
   waveDistance: 10
   hitboxRadius: 1.5
   trackTarget: 1
-  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}

@@ -1,170 +1,128 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 [CreateAssetMenu(fileName = "EntityMultiChargeAttack", menuName = "Rotbound/Entity/Attack/EntityMultiChargeAttack")]
 public class EntityMultiChargeAttack : EntityAttack
 {
-    [Header("MULTI-CHARGE PROPERTIES")]
-    [Tooltip("Cantidad de embestidas consecutivas en línea recta hacia el jugador.")]
-    public int numberOfCharges = 3;
+    [Header("Propiedades Multi-Embestida")]
+    [Min(1)] public int numberOfCharges = 3;
     [Min(0.1f)] public float maxChargeDistance = 10f;
-    public float hitboxRadius = 1.5f;
-    [Tooltip("Si es verdadero, el enemigo rotará hacia el jugador antes de iniciar cada embestida.")]
+    [Min(0.1f)] public float hitboxRadius = 1.5f;
     public bool trackTarget = true;
     [Min(0f)] public float delayBetweenCharges = 0.2f;
 
-    [Header("OLEADAS DE CARGA (WAVES)")]
+    [Header("Oleadas")]
     [Min(1)] public int waveCount = 1;
     [Min(0f)] public float delayBetweenWaves = 0.5f;
 
-    public GameObject indicatorPrefab;
-
-    private readonly List<GameObject> _indicators = new();
     private readonly Collider[] _hitBuffer = new Collider[20];
     private readonly HashSet<PlayerHealth> _damagedPlayers = new();
-    private Collider _activeMainCollider;
     public override void Prepare(Transform origin, Transform target)
     {
-        ClearIndicators();
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        if (target != null && trackTarget) LookAtTarget(origin, target.position);
-        origin.TryGetComponent(out Health entityHealth);
+        ClearIndicatorsFor(root);
+        if (target != null && trackTarget) RotateRootTowards(root, target.position);
 
-        if (indicatorPrefab != null)
-        {
-            InstantiateIndicator(origin, origin.forward, entityHealth);
-        }
+        float agentRadius = root.TryGetComponent(out NavMeshAgent agent) ? agent.radius : 0.5f;
+        Vector3 dest = GetSafeChargeDestination(root, root.forward, maxChargeDistance, agentRadius);
+        float actualDist = Mathf.Max(0.2f, Vector3.Distance(root.position, dest));
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
+
+        SpawnIndicatorFor(root, groundOrigin + (root.forward * (actualDist * 0.5f)), Quaternion.LookRotation(root.forward), new Vector3(hitboxRadius * 2f, 0.1f, actualDist), telegraphDuration);
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && target != null && normalizedTime <= trackTargetUntil)
-        {
-            LookAtTarget(origin, target.position);
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-            if (_indicators.Count > 0 && _indicators[0] != null)
+        if (trackTarget && target != null && normalizedTime <= trackTargetUntil)
+        {
+            RotateRootTowards(root, target.position);
+            List<GameObject> inds = GetIndicatorsFor(root);
+            if (inds != null && inds.Count > 0 && inds[0] != null)
             {
-                Vector3 worldDir = origin.forward;
-                _indicators[0].transform.SetPositionAndRotation(
-                    origin.position + (worldDir * (maxChargeDistance / 2f)),
-                    Quaternion.LookRotation(worldDir)
-                );
+                float agentRadius = root.TryGetComponent(out NavMeshAgent agent) ? agent.radius : 0.5f;
+                Vector3 dest = GetSafeChargeDestination(root, root.forward, maxChargeDistance, agentRadius);
+                float actualDist = Mathf.Max(0.2f, Vector3.Distance(root.position, dest));
+                Vector3 groundOrigin = GetTelegraphOrigin(root);
+
+                inds[0].transform.SetPositionAndRotation(groundOrigin + (root.forward * (actualDist * 0.5f)), Quaternion.LookRotation(root.forward));
+                inds[0].transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, actualDist);
             }
         }
     }
-    private void InstantiateIndicator(Transform origin, Vector3 worldDir, Health entityHealth)
-    {
-        GameObject indicatorObj = Instantiate(indicatorPrefab, origin.position, Quaternion.LookRotation(worldDir));
-        indicatorObj.transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, maxChargeDistance);
-        indicatorObj.transform.position = origin.position + (worldDir * (maxChargeDistance / 2f));
-
-        if (indicatorObj.TryGetComponent(out EntityIndicator indicatorComp))
-        {
-            indicatorComp.Init(entityHealth);
-            indicatorComp.AnimateIndicator(telegraphDuration);
-        }
-        _indicators.Add(indicatorObj);
-    }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        yield return WaitDamageDelay();
+        yield return WaitForImpactTiming(origin);
 
-        if (origin == null) yield break;
-        if (origin.TryGetComponent(out _activeMainCollider))
-        {
-            _activeMainCollider.isTrigger = true;
-        }
+        Transform root = GetRootTransform(origin);
+        if (root == null) yield break;
 
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
             {
-                yield return TelegraphRoutine(origin, target);
+                yield return TelegraphRoutine(root, target);
             }
 
-            yield return ConsecutiveDashesRoutine(origin, target);
+            yield return ConsecutiveDashesRoutine(root, target);
 
             if (w < waveCount - 1 && delayBetweenWaves > 0) yield return new WaitForSeconds(delayBetweenWaves);
         }
-
-        if (_activeMainCollider != null)
-        {
-            _activeMainCollider.isTrigger = false;
-            _activeMainCollider = null;
-        }
     }
-    private IEnumerator ConsecutiveDashesRoutine(Transform origin, Transform target)
+    private IEnumerator ConsecutiveDashesRoutine(Transform root, Transform target)
     {
-        float dashDuration = attackDuration > 0 ? (attackDuration / numberOfCharges) : 0.1f;
+        float dashDuration = activeMotionDuration > 0 ? (activeMotionDuration / numberOfCharges) : 0.15f;
+        float agentRadius = root.TryGetComponent(out NavMeshAgent agent) ? agent.radius : 0.5f;
 
         for (int i = 0; i < numberOfCharges; i++)
         {
             if (i > 0)
             {
                 if (delayBetweenCharges > 0) yield return new WaitForSeconds(delayBetweenCharges);
-                yield return TelegraphRoutine(origin, target);
+                yield return TelegraphRoutine(root, target);
             }
 
-            ClearIndicators();
-            Vector3 chargeDir = origin.forward;
+            ClearIndicatorsFor(root);
+            Vector3 chargeDir = root.forward;
+            Vector3 startPos = root.position;
+            Vector3 targetPos = GetSafeChargeDestination(root, chargeDir, maxChargeDistance, agentRadius);
 
             _damagedPlayers.Clear();
-            Vector3 startPos = origin.position;
-            Vector3 targetPos = origin.position + (chargeDir * maxChargeDistance);
             float timer = 0f;
 
             while (timer < dashDuration)
             {
                 timer += Time.deltaTime;
                 float t = Mathf.Clamp01(timer / dashDuration);
+                root.position = Vector3.Lerp(startPos, targetPos, t);
 
-                origin.position = Vector3.Lerp(startPos, targetPos, t);
-
-                int hitCount = Physics.OverlapSphereNonAlloc(origin.position, hitboxRadius, _hitBuffer);
+                int hitCount = Physics.OverlapSphereNonAlloc(root.position, hitboxRadius, _hitBuffer, ~0, QueryTriggerInteraction.Ignore);
                 for (int h = 0; h < hitCount; h++)
                 {
                     Collider hit = _hitBuffer[h];
                     PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
                     if (ph != null && _damagedPlayers.Add(ph))
                     {
-                        ApplyDamageAndKnockback(hit, chargeDir, origin.position);
+                        ApplyDamageAndKnockback(hit, chargeDir, root.position);
                     }
                 }
                 yield return null;
             }
         }
     }
-    private IEnumerator TelegraphRoutine(Transform origin, Transform target)
+    private IEnumerator TelegraphRoutine(Transform root, Transform target)
     {
-        Prepare(origin, target);
-
+        Prepare(root, target);
         float prepTimer = 0f;
         while (prepTimer < telegraphDuration)
         {
             prepTimer += Time.deltaTime;
-            float normalizedPrep = prepTimer / Mathf.Max(telegraphDuration, 0.001f);
-
-            UpdatePreparation(origin, target, normalizedPrep);
+            UpdatePreparation(root, target, prepTimer / Mathf.Max(telegraphDuration, 0.001f));
             yield return null;
-        }
-    }
-    private void LookAtTarget(Transform origin, Vector3 targetPos)
-    {
-        Vector3 lookDir = (targetPos - origin.position).normalized;
-        lookDir.y = 0;
-        if (lookDir != Vector3.zero) origin.rotation = Quaternion.LookRotation(lookDir);
-    }
-    private void ClearIndicators()
-    {
-        foreach (var ind in _indicators) if (ind != null) Destroy(ind);
-        _indicators.Clear();
-    }
-    public override void CancelAttack()
-    {
-        ClearIndicators();
-        if (_activeMainCollider != null)
-        {
-            _activeMainCollider.isTrigger = false;
-            _activeMainCollider = null;
         }
     }
 }

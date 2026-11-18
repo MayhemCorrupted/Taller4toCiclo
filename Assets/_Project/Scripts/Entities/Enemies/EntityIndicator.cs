@@ -1,7 +1,6 @@
-using UnityEngine;
 using System;
 using System.Collections;
-
+using UnityEngine;
 public class EntityIndicator : MonoBehaviour
 {
     [SerializeField] private MeshRenderer _renderer;
@@ -12,6 +11,8 @@ public class EntityIndicator : MonoBehaviour
     private Action _onDeathCallback;
     private void Awake()
     {
+        if (_renderer == null) _renderer = GetComponentInChildren<MeshRenderer>();
+
         if (_renderer != null)
         {
             _material = new Material(_renderer.sharedMaterial);
@@ -34,6 +35,11 @@ public class EntityIndicator : MonoBehaviour
         {
             _targetHealth.OnDeath -= _onDeathCallback;
         }
+
+        if (_material != null)
+        {
+            Destroy(_material);
+        }
     }
     public void AnimateIndicator(float duration)
     {
@@ -43,10 +49,12 @@ public class EntityIndicator : MonoBehaviour
     private IEnumerator IndicatorRoutine(float duration)
     {
         float timer = 0f;
-        while (timer < duration)
+        float safeDuration = Mathf.Max(duration, 0.001f);
+
+        while (timer < safeDuration)
         {
             timer += Time.deltaTime;
-            float t = timer / duration;
+            float t = Mathf.Clamp01(timer / safeDuration);
             if (_material != null)
                 _material.color = Color.Lerp(_startColor, _endColor, t);
 

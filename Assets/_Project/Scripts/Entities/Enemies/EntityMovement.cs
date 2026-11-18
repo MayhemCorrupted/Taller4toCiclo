@@ -1,42 +1,46 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Health))]
 [RequireComponent(typeof(Rigidbody))]
 public class EntityMovement : MonoBehaviour
 {
-    private NavMeshAgent _NavAgent;
-    private Health _health;
-    private Rigidbody _rb;
-
+    [Header("Referencias")]
     [SerializeField] private EntityBrain _brain;
     [SerializeField] private EntityCombat _combat;
-    [SerializeField] private LayerMask _obstacleLayer;
+    [SerializeField] private LayerMask _wallLayer;
 
-    [Header("Patrol Settings")]
+    [Header("Patrulla y Delay de Giro")]
     [Min(0.0f)] public float _patrolWaitingTime = 1.0f;
     [Min(0.1f)] public float _patrolRadius = 5.0f;
+    [Min(0.0f)][SerializeField] private float _patrolTurnDelay = 0.25f;
+    [Min(1f)][SerializeField] private float _patrolRotationSpeed = 6f;
 
-    [Header("Orbital & Preferred Distance Settings")]
-    [Tooltip("Activa el desplazamiento orbital lateral alrededor del jugador cuando lo detecta.")]
+    [Header("Rodeo Táctico, Strafe y Espacio Personal")]
     [SerializeField] private bool _enableOrbitalMovement = true;
-    [Tooltip("Desplazamiento tangencial lateral para rodear al jugador mientras mantiene su rango preferido.")]
-    [SerializeField] private float _orbitStrafeDistance = 2.2f;
-    [Tooltip("Tiempo promedio en segundos antes de cambiar el sentido de órbita (izquierda/derecha).")]
-    [SerializeField] private float _orbitDirectionChangeInterval = 3.5f;
+    [Min(10f)][SerializeField] private float _orbitAngularSpeed = 45f;
+    [Min(0.5f)][SerializeField] private float _orbitDirectionChangeInterval = 3.5f;
+    [Min(0.5f)][SerializeField] private float _retreatSpeedMultiplier = 1.15f;
+    [Min(1f)][SerializeField] private float _combatRotationSpeed = 14f;
 
-    [Header("Hit Reaction & Death Settings")]
-    [Tooltip("Duración del retroceso físico (knockback) y duración de respaldo del stun si no hay animación Hurt.")]
+    [Header("Reacción al Daño y Muerte")]
     [SerializeField] private float _stunDuration = 0.45f;
     [SerializeField] private float _knockbackForce = 12f;
     [SerializeField] private float _knockbackFriction = 10f;
-    [Tooltip("Desactiva los colliders del enemigo al morir para no bloquear al jugador.")]
     [SerializeField] private bool _disableCollidersOnDeath = true;
 
+    private NavMeshAgent _navAgent;
+    private Health _health;
+    private Rigidbody _rb;
     private EntityData _entityData;
-    private float _speed = 0.0f;
+
+    private float _baseSpeed = 3.5f;
     private float _patrolWaitingTimer;
+    private float _patrolTurnDelayTimer;
+    private Vector3 _pendingPatrolDestination;
+    private bool _hasPendingPatrolDestination;
     private bool _isWaiting;
     private Coroutine _stunCoroutine;
 
@@ -45,14 +49,21 @@ public class EntityMovement : MonoBehaviour
     public bool IsKnockbackActive => _stunCoroutine != null;
     private void Awake()
     {
-        _NavAgent = GetComponent<NavMeshAgent>();
+        _navAgent = GetComponent<NavMeshAgent>();
         _health = GetComponent<Health>();
         _rb = GetComponent<Rigidbody>();
+
+        if (_brain == null) TryGetComponent(out _brain);
+        if (_combat == null) TryGetComponent(out _combat);
 
         _rb.isKinematic = true;
         _rb.useGravity = false;
         _rb.freezeRotation = true;
         _rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        _navAgent.autoBraking = true;
+        _navAgent.updateRotation = false;
+        _navAgent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
         _orbitDirection = Random.value > 0.5f ? 1 : -1;
         _orbitSwitchTimer = Random.Range(_orbitDirectionChangeInterval * 0.6f, _orbitDirectionChangeInterval * 1.4f);
@@ -66,7 +77,6 @@ public class EntityMovement : MonoBehaviour
             if (_brain.CurrentState == EnemyState.Patroling) SetRandomPatrolPoint();
         }
     }
-
     private void OnDestroy()
     {
         if (_brain != null)
@@ -79,39 +89,64 @@ public class EntityMovement : MonoBehaviour
     {
         _entityData = data;
     }
-    public void SetSpeed(float speed) => _speed = speed;
+    public void SetSpeed(float speed) => _baseSpeed = speed;
     private void Update()
     {
-        FlattenRotation();
+        if (!_navAgent.enabled || _brain == null) return;
 
-        if (!_NavAgent.enabled || _brain == null) return;
-        _NavAgent.speed = _speed;
+        if (_combat != null && _combat.IsPerformingAttack)
+        {
+            StopAgentCompletely();
+            return;
+        }
 
         switch (_brain.CurrentState)
         {
-            case EnemyState.Patroling: HandlePatroling(); break;
-            case EnemyState.Chasing: HandleChasing(); break;
-            case EnemyState.Attacking: HandleAttacking(); break;
-            case EnemyState.Hurt: HandleHurt(); break;
-            case EnemyState.Agonizing: HandleAgonizing(); break;
-            case EnemyState.Death: HandleDeath(); break;
+            case EnemyState.Patroling:
+                _navAgent.speed = _baseSpeed;
+                HandlePatroling();
+                break;
+            case EnemyState.Chasing:
+                HandleCombatPositioning();
+                break;
+            case EnemyState.Attacking:
+                HandleAttacking();
+                break;
+            case EnemyState.Hurt:
+            case EnemyState.Agonizing:
+            case EnemyState.Death:
+                StopAgentCompletely();
+                break;
         }
     }
+    private void StopAgentCompletely()
+    {
+        if (!_navAgent.enabled) return;
+        _navAgent.isStopped = true;
+        _navAgent.velocity = Vector3.zero;
+        if (_navAgent.hasPath) _navAgent.ResetPath();
+    }
+
     private void FlattenRotation()
     {
         Vector3 euler = transform.eulerAngles;
-        if (!Mathf.Approximately(euler.x, 0f) || !Mathf.Approximately(euler.z, 0f))
-        {
-            transform.rotation = Quaternion.Euler(0f, euler.y, 0f);
-        }
+        transform.rotation = Quaternion.Euler(0f, euler.y, 0f);
     }
     private void SetRandomPatrolPoint()
     {
-        Vector3 randomPoint = transform.position + Random.insideUnitSphere * _patrolRadius;
-        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, _patrolRadius, NavMesh.AllAreas))
+        for (int attempt = 0; attempt < 6; attempt++)
         {
-            _NavAgent.isStopped = false;
-            _NavAgent.SetDestination(hit.position);
+            Vector2 randomCircle = Random.insideUnitCircle * _patrolRadius;
+            Vector3 candidate = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
+
+            if (TryGetValidNavMeshPoint(candidate, 2.5f, out Vector3 validPoint))
+            {
+                _pendingPatrolDestination = validPoint;
+                _hasPendingPatrolDestination = true;
+                _patrolTurnDelayTimer = _patrolTurnDelay;
+                _navAgent.isStopped = true;
+                return;
+            }
         }
     }
     private void HandleStateChanged(EnemyState newState)
@@ -133,11 +168,10 @@ public class EntityMovement : MonoBehaviour
             _rb.useGravity = false;
             FlattenRotation();
 
-            if (_NavAgent.enabled)
+            if (_navAgent.enabled)
             {
-                _NavAgent.isStopped = true;
-                _NavAgent.velocity = Vector3.zero;
-                _NavAgent.enabled = false;
+                StopAgentCompletely();
+                _navAgent.enabled = false;
             }
 
             if (_disableCollidersOnDeath)
@@ -167,41 +201,65 @@ public class EntityMovement : MonoBehaviour
             _rb.useGravity = false;
             FlattenRotation();
 
-            if (!_NavAgent.enabled)
+            if (!_navAgent.enabled)
             {
                 if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
                     transform.position = hit.position;
-                _NavAgent.enabled = true;
+                _navAgent.enabled = true;
             }
 
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
+            StopAgentCompletely();
             return;
         }
 
-        if (!_NavAgent.enabled) return;
+        if (!_navAgent.enabled) return;
 
         if (newState == EnemyState.Hurt)
         {
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
+            StopAgentCompletely();
             return;
         }
 
         if (newState == EnemyState.Patroling)
         {
             _isWaiting = false;
+            _hasPendingPatrolDestination = false;
             SetRandomPatrolPoint();
         }
         else if (newState == EnemyState.Chasing)
         {
-            _NavAgent.isStopped = false;
+            _hasPendingPatrolDestination = false;
+            _navAgent.isStopped = false;
             _orbitDirection = Random.value > 0.5f ? 1 : -1;
             _orbitSwitchTimer = Random.Range(_orbitDirectionChangeInterval * 0.6f, _orbitDirectionChangeInterval * 1.4f);
         }
     }
     private void HandlePatroling()
     {
+        if (_hasPendingPatrolDestination)
+        {
+            Vector3 dirToDest = _pendingPatrolDestination - transform.position;
+            RotateSmoothly(dirToDest, _patrolRotationSpeed);
+
+            _patrolTurnDelayTimer -= Time.deltaTime;
+            if (_patrolTurnDelayTimer <= 0f)
+            {
+                _hasPendingPatrolDestination = false;
+                _navAgent.isStopped = false;
+                _navAgent.SetDestination(_pendingPatrolDestination);
+            }
+            return;
+        }
+
+        Vector3 moveDir = _navAgent.desiredVelocity.sqrMagnitude > 0.01f
+            ? _navAgent.desiredVelocity
+            : _navAgent.velocity;
+
+        if (moveDir.sqrMagnitude > 0.02f)
+        {
+            RotateSmoothly(moveDir, _patrolRotationSpeed);
+        }
+
         if (_isWaiting)
         {
             _patrolWaitingTimer -= Time.deltaTime;
@@ -212,121 +270,138 @@ public class EntityMovement : MonoBehaviour
             }
             return;
         }
-        if (!_NavAgent.pathPending && _NavAgent.remainingDistance <= _NavAgent.stoppingDistance)
+
+        if (!_navAgent.pathPending && _navAgent.remainingDistance <= _navAgent.stoppingDistance)
         {
-            if (!_NavAgent.hasPath || _NavAgent.velocity.sqrMagnitude == 0.0f)
+            if (!_navAgent.hasPath || _navAgent.velocity.sqrMagnitude < 0.01f)
             {
                 _isWaiting = true;
                 _patrolWaitingTimer = _patrolWaitingTime;
             }
         }
     }
-    private void HandleChasing()
-    {
-        MaintainPreferredCombatDistance(allowOrbitalStrafe: true);
-    }
     private void HandleAttacking()
     {
         if (_combat != null && _combat.IsPerformingAttack)
         {
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
+            StopAgentCompletely();
             return;
         }
 
-        MaintainPreferredCombatDistance(allowOrbitalStrafe: true);
-    }
-    private void MaintainPreferredCombatDistance(bool allowOrbitalStrafe)
-    {
-        if (_combat == null || _combat.TargetTransform == null) return;
+        if (_combat != null && _combat.PreferredCombatRange == AttackRangeCategory.None && _combat.CanAttackFromCurrentPosition)
+        {
+            if (_combat.DistanceToTarget >= _brain.PersonalSpaceRadius)
+            {
+                StopAgentCompletely();
+                RotateSmoothly(_combat.TargetLocation - transform.position, _combatRotationSpeed);
+                return;
+            }
+        }
 
-        _NavAgent.isStopped = false;
+        HandleCombatPositioning();
+    }
+    private void HandleCombatPositioning()
+    {
+        if (_combat == null || _combat.TargetTransform == null || _brain == null) return;
 
         Vector3 targetPos = _combat.TargetLocation;
-        Vector3 ambushCenter = targetPos;
+        Vector3 toSelf = transform.position - targetPos;
+        toSelf.y = 0f;
+        float currentDist = toSelf.magnitude;
+        Vector3 radialDir = currentDist > 0.01f ? toSelf / currentDist : -transform.forward;
 
-        if (EntityDirector.Instance != null)
+        float personalSpace = _brain.PersonalSpaceRadius;
+        float desiredHoldRadius = _combat.GetDesiredCombatHoldRadius();
+
+        if (currentDist < personalSpace)
         {
-            Vector3 flatVel = new(_combat.TargetVelocity.x, 0f, _combat.TargetVelocity.z);
-            if (flatVel.sqrMagnitude > 0.5f)
-                ambushCenter += flatVel * EntityDirector.Instance.ambushPredictionTime;
-        }
+            _navAgent.speed = _baseSpeed * _retreatSpeedMultiplier;
+            float retreatDistance = Mathf.Max(personalSpace + 0.6f, desiredHoldRadius);
+            Vector3 retreatGoal = targetPos + radialDir * retreatDistance;
 
-        float minRange = 1.2f;
-        float optimalRange = 2.5f;
-
-        if (_entityData != null)
-            _entityData.GetPreferredRangeBand(_combat.CurrentPhase, out minRange, out optimalRange, out _);
-
-        Vector3 radialFromTarget = transform.position - targetPos;
-        radialFromTarget.y = 0f;
-        float currentDist = radialFromTarget.magnitude;
-        Vector3 radialDir = currentDist > 0.01f ? radialFromTarget / currentDist : -transform.forward;
-
-        Vector3 anchorCenter = (currentDist < minRange && _combat.PreferredAttackDistance > 0) ? targetPos : ambushCenter;
-        float desiredRadius = optimalRange;
-
-        Vector3 destination = anchorCenter + (radialDir * desiredRadius);
-
-        if (_enableOrbitalMovement && allowOrbitalStrafe)
-        {
-            _orbitSwitchTimer -= Time.deltaTime;
-            if (_orbitSwitchTimer <= 0f)
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, radialDir, 1.5f, _wallLayer, QueryTriggerInteraction.Ignore))
             {
-                _orbitDirection *= -1;
-                _orbitSwitchTimer = Random.Range(_orbitDirectionChangeInterval * 0.6f, _orbitDirectionChangeInterval * 1.4f);
+                Vector3 sideEscape = Vector3.Cross(Vector3.up, radialDir) * _orbitDirection;
+                retreatGoal = transform.position + sideEscape * 2.5f;
             }
 
-            Vector3 tangentDir = Vector3.Cross(Vector3.up, radialDir) * _orbitDirection;
-            Vector3 orbitedOffset = (radialDir * desiredRadius) + (tangentDir * _orbitStrafeDistance);
-            orbitedOffset = orbitedOffset.normalized * desiredRadius;
-            destination = anchorCenter + orbitedOffset;
+            if (TryGetValidNavMeshPoint(retreatGoal, 2.5f, out Vector3 safeRetreat))
+            {
+                _navAgent.isStopped = false;
+                _navAgent.SetDestination(safeRetreat);
+            }
+        }
+        else
+        {
+            _navAgent.speed = _baseSpeed;
+            Vector3 tacticalGoal = EntityDirector.Instance != null
+                ? EntityDirector.Instance.GetTacticalPosition(_combat, _combat.TargetTransform, _combat.TargetVelocity)
+                : targetPos + radialDir * desiredHoldRadius;
+
+            if (_enableOrbitalMovement && _combat.CombatArchetype != EnemyCombatArchetype.Ranged)
+            {
+                _orbitSwitchTimer -= Time.deltaTime;
+                if (_orbitSwitchTimer <= 0f)
+                {
+                    _orbitDirection *= -1;
+                    _orbitSwitchTimer = Random.Range(_orbitDirectionChangeInterval * 0.6f, _orbitDirectionChangeInterval * 1.4f);
+                }
+
+                Vector3 offsetFromTarget = tacticalGoal - targetPos;
+                offsetFromTarget.y = 0f;
+                if (offsetFromTarget.sqrMagnitude > 0.1f)
+                {
+                    float angleDelta = _orbitDirection * _orbitAngularSpeed * Time.deltaTime;
+                    tacticalGoal = targetPos + (Quaternion.Euler(0f, angleDelta, 0f) * offsetFromTarget);
+                }
+            }
+
+            if (EntityDirector.Instance != null)
+                tacticalGoal += EntityDirector.Instance.GetSeparationVector(_combat);
+
+            if (TryGetValidNavMeshPoint(tacticalGoal, 2.5f, out Vector3 validDest))
+            {
+                _navAgent.isStopped = false;
+                _navAgent.SetDestination(validDest);
+            }
+            else if (TryGetValidNavMeshPoint(targetPos + radialDir * desiredHoldRadius, 2.5f, out Vector3 fallbackDest))
+            {
+                _navAgent.isStopped = false;
+                _navAgent.SetDestination(fallbackDest);
+            }
         }
 
-        if (EntityDirector.Instance != null)
+        RotateSmoothly(targetPos - transform.position, _combatRotationSpeed);
+    }
+    private void RotateSmoothly(Vector3 flatDirection, float speed)
+    {
+        flatDirection.y = 0f;
+        if (flatDirection.sqrMagnitude > 0.001f)
         {
-            destination += EntityDirector.Instance.GetSeparationVector(_combat);
+            Quaternion targetRot = Quaternion.LookRotation(flatDirection.normalized, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * speed);
         }
+    }
+    private bool TryGetValidNavMeshPoint(Vector3 desiredPoint, float searchRadius, out Vector3 resultPoint)
+    {
+        resultPoint = transform.position;
 
-        if (NavMesh.SamplePosition(destination, out NavMeshHit navHit, 3.5f, NavMesh.AllAreas))
-        {
-            _NavAgent.SetDestination(navHit.position);
-        }
-        else if (NavMesh.SamplePosition(targetPos + radialDir * minRange, out NavMeshHit fallbackHit, 3.5f, NavMesh.AllAreas))
-        {
-            _NavAgent.SetDestination(fallbackHit.position);
-        }
+        if (!NavMesh.SamplePosition(desiredPoint, out NavMeshHit hit, searchRadius, NavMesh.AllAreas))
+            return false;
 
-        Vector3 dirToTarget = (targetPos - transform.position).normalized;
-        dirToTarget.y = 0f;
-        if (dirToTarget.sqrMagnitude > 0.01f)
-        {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dirToTarget), Time.deltaTime * 10f);
-        }
-    }
-    private void HandleHurt()
-    {
-        if (_NavAgent.enabled)
-        {
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
-        }
-    }
-    private void HandleAgonizing()
-    {
-        if (_NavAgent.enabled)
-        {
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
-        }
-    }
-    private void HandleDeath()
-    {
-        if (_NavAgent.enabled)
-        {
-            _NavAgent.isStopped = true;
-            _NavAgent.velocity = Vector3.zero;
-        }
+        if (NavMesh.Raycast(transform.position, hit.position, out _, NavMesh.AllAreas))
+            return false;
+
+        Vector3 eyeOrigin = transform.position + Vector3.up * 0.6f;
+        Vector3 eyeTarget = hit.position + Vector3.up * 0.6f;
+        Vector3 dir = eyeTarget - eyeOrigin;
+        float dist = dir.magnitude;
+
+        if (dist > 0.1f && Physics.SphereCast(eyeOrigin, _navAgent.radius * 0.8f, dir / dist, out _, dist, _wallLayer, QueryTriggerInteraction.Ignore))
+            return false;
+
+        resultPoint = hit.position;
+        return true;
     }
     private void HandleHurtTriggered()
     {
@@ -338,7 +413,7 @@ public class EntityMovement : MonoBehaviour
     }
     private IEnumerator StunAndKnockbackRoutine()
     {
-        _NavAgent.enabled = false;
+        _navAgent.enabled = false;
         _rb.constraints = RigidbodyConstraints.FreezeRotation;
         _rb.isKinematic = false;
         _rb.useGravity = true;
@@ -391,9 +466,8 @@ public class EntityMovement : MonoBehaviour
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             transform.position = hit.position;
 
-        _NavAgent.enabled = true;
-        _NavAgent.isStopped = true;
-        _NavAgent.velocity = Vector3.zero;
+        _navAgent.enabled = true;
+        StopAgentCompletely();
         _stunCoroutine = null;
 
         if (_brain != null && _brain.CurrentState == EnemyState.Hurt && !_brain.IsHurtAnimationActive)

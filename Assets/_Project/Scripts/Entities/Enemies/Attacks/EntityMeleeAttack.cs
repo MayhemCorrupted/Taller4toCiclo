@@ -1,85 +1,87 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
 [CreateAssetMenu(fileName = "EntityMeleeAttack", menuName = "Rotbound/Entity/Attack/EntityMeleeAttack")]
 public class EntityMeleeAttack : EntityAttack
 {
-    [Header("MELEE PROPERTIES")]
-    public bool isRadial;
-    public float radius = 2f;
-    public Vector3 hitboxMeasurements = Vector3.one;
-    public float verticalOffset = 0.0f;
-    public GameObject indicatorPrefab;
-    private GameObject _currentIndicator;
-    private readonly Collider[] _hitBuffer = new Collider[10];
+    [Header("Propiedades Melee")]
+    public bool isRadial = false;
+    [Min(0.1f)] public float radius = 2f;
+    public Vector3 hitboxMeasurements = new(2f, 1.5f, 2.5f);
+    public float hitboxVerticalOffset = 0.8f;
+    private readonly Collider[] _hitBuffer = new Collider[12];
     public override void Prepare(Transform origin, Transform target)
     {
-        if (indicatorPrefab == null || origin == null) return;
+        ClearIndicatorsFor(origin);
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        origin.TryGetComponent(out Health entityHealth);
-        Vector3 spawnPos = origin.position + (Vector3.up * verticalOffset);
+        if (target != null) RotateRootTowards(root, target.position);
 
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
         if (isRadial)
         {
-            _currentIndicator = Instantiate(indicatorPrefab, spawnPos, Quaternion.identity);
-            _currentIndicator.transform.localScale = new Vector3(radius * 2f, 0.1f, radius * 2f);
+            SpawnIndicatorFor(root, groundOrigin, Quaternion.identity, new Vector3(radius * 2f, 0.1f, radius * 2f), telegraphDuration);
         }
         else
         {
-            Vector3 boxCenter = spawnPos + (origin.forward * (hitboxMeasurements.z * 0.5f));
-            _currentIndicator = Instantiate(indicatorPrefab, boxCenter, Quaternion.LookRotation(origin.forward));
-            _currentIndicator.transform.localScale = hitboxMeasurements;
-        }
-
-        if (_currentIndicator.TryGetComponent(out EntityIndicator indicatorComp))
-        {
-            indicatorComp.Init(entityHealth);
-            indicatorComp.AnimateIndicator(telegraphDuration);
+            Vector3 boxCenter = groundOrigin + (root.forward * (hitboxMeasurements.z * 0.5f));
+            SpawnIndicatorFor(root, boxCenter, Quaternion.LookRotation(root.forward), new Vector3(hitboxMeasurements.x, 0.1f, hitboxMeasurements.z), telegraphDuration);
         }
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (_currentIndicator != null && origin != null && !isRadial)
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
+
+        if (target != null && normalizedTime <= trackTargetUntil)
         {
-            Vector3 spawnPos = origin.position + (Vector3.up * verticalOffset);
-            Vector3 boxCenter = spawnPos + (origin.forward * (hitboxMeasurements.z * 0.5f));
-            _currentIndicator.transform.SetPositionAndRotation(boxCenter, Quaternion.LookRotation(origin.forward));
+            RotateRootTowards(root, target.position);
+        }
+
+        List<GameObject> inds = GetIndicatorsFor(root);
+        if (inds != null && inds.Count > 0 && inds[0] != null && !isRadial)
+        {
+            Vector3 groundOrigin = GetTelegraphOrigin(root);
+            Vector3 boxCenter = groundOrigin + (root.forward * (hitboxMeasurements.z * 0.5f));
+            inds[0].transform.SetPositionAndRotation(boxCenter, Quaternion.LookRotation(root.forward));
         }
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        if (_currentIndicator != null) Destroy(_currentIndicator);
+        yield return WaitForImpactTiming(origin);
 
-        Vector3 originPos = origin.position + (Vector3.up * verticalOffset);
+        Transform root = GetRootTransform(origin);
+        ClearIndicatorsFor(root);
+        if (root == null) yield break;
+
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
+        Vector3 hitboxOrigin = root.position + (Vector3.up * hitboxVerticalOffset);
         int hitCount;
 
         if (isRadial)
         {
-            hitCount = Physics.OverlapSphereNonAlloc(originPos, radius, _hitBuffer);
+            SpawnImpactVfx(groundOrigin, root.rotation);
+            hitCount = Physics.OverlapSphereNonAlloc(hitboxOrigin, radius, _hitBuffer, ~0, QueryTriggerInteraction.Ignore);
         }
         else
         {
-            Vector3 boxCenter = originPos + (origin.forward * (hitboxMeasurements.z * 0.5f));
-            hitCount = Physics.OverlapBoxNonAlloc(boxCenter, hitboxMeasurements * 0.5f, _hitBuffer, origin.rotation);
+            Vector3 vfxCenter = groundOrigin + (root.forward * (hitboxMeasurements.z * 0.5f));
+            SpawnImpactVfx(vfxCenter, root.rotation);
+            Vector3 boxCenter = hitboxOrigin + (root.forward * (hitboxMeasurements.z * 0.5f));
+            hitCount = Physics.OverlapBoxNonAlloc(boxCenter, hitboxMeasurements * 0.5f, _hitBuffer, root.rotation, ~0, QueryTriggerInteraction.Ignore);
         }
 
+        HashSet<PlayerHealth> processedPlayers = new();
         for (int i = 0; i < hitCount; i++)
         {
             Collider hit = _hitBuffer[i];
-            if (hit.TryGetComponent(out PlayerHealth playerHealth))
+            PlayerHealth playerHealth = hit.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null && processedPlayers.Add(playerHealth))
             {
-                playerHealth.TakeDamage(damage);
-                if (hit.TryGetComponent(out PlayerMovement playerMov))
-                {
-                    Vector3 knockbackDir = (hit.transform.position - origin.position).normalized;
-                    playerMov.ApplyKnockback(knockbackDir, knockback);
-                }
+                Vector3 knockbackDir = playerHealth.transform.position - root.position;
+                ApplyDamageAndKnockback(hit, knockbackDir, root.position);
             }
         }
-        yield return null;
-    }
-    public override void CancelAttack()
-    {
-        if (_currentIndicator != null) Destroy(_currentIndicator);
     }
 }

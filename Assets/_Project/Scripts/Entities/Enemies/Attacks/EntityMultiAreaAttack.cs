@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [CreateAssetMenu(fileName = "EntityMultiAreaAttack", menuName = "Rotbound/Entity/Attack/EntityMultiAreaAttack")]
 public class EntityMultiAreaAttack : EntityAttack
 {
@@ -8,82 +9,97 @@ public class EntityMultiAreaAttack : EntityAttack
     public enum AreaOrigin { Attacker, Target }
     public enum PatternType { Random, Linear, CircularRing, CrossShape, StarShape }
 
-    [Header("MULTI-AREA PROPERTIES")]
+    [Header("Propiedades Multi-Área")]
     public MultiAreaStyle executionStyle = MultiAreaStyle.Simultaneous;
     public AreaOrigin areaOrigin = AreaOrigin.Attacker;
     public PatternType patternType = PatternType.Random;
-    public int numberOfAreas = 4;
+    [Min(1)] public int numberOfAreas = 4;
     [Min(0.1f)] public float areaRadius = 2f;
-    public float scatterRadius = 8f;
+    [Min(0f)] public float scatterRadius = 8f;
     [Min(0f)] public float delayBetweenAreas = 0.2f;
-    [Tooltip("Si es verdadero, las áreas seguirán la posición/orientación del objetivo durante el telegrafiado.")]
     public bool trackTarget = true;
 
-    [Header("OLEADAS DE ATAQUE (WAVES)")]
+    [Header("Oleadas")]
     [Min(1)] public int waveCount = 1;
     [Min(0f)] public float delayBetweenWaves = 0.5f;
-
-    public GameObject indicatorPrefab;
-    private readonly List<Vector3> _calculatedCenters = new();
-    private readonly List<GameObject> _indicators = new();
+    private readonly Dictionary<int, List<Vector3>> _centersByInstance = new();
     private readonly Collider[] _hitBuffer = new Collider[20];
     public override void Prepare(Transform origin, Transform target)
     {
-        _calculatedCenters.Clear();
-        ClearIndicators();
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        Vector3 basePosition = (areaOrigin == AreaOrigin.Attacker || target == null) ? origin.position : target.position;
-        basePosition.y = origin.position.y;
-        origin.TryGetComponent(out Health entityHealth);
+        ClearIndicatorsFor(root);
+        int key = root.GetInstanceID();
+        if (!_centersByInstance.TryGetValue(key, out List<Vector3> centers))
+        {
+            centers = new List<Vector3>();
+            _centersByInstance[key] = centers;
+        }
+        centers.Clear();
 
-        GeneratePatternCenters(basePosition, origin.forward);
+        if (target != null && areaOrigin == AreaOrigin.Attacker)
+            RotateRootTowards(root, target.position);
+
+        Vector3 basePosition = (areaOrigin == AreaOrigin.Attacker || target == null)
+            ? GetTelegraphOrigin(root)
+            : GetGroundPosition(target.position, root);
+
+        GeneratePatternCenters(centers, basePosition, root.forward, root);
 
         if (executionStyle == MultiAreaStyle.Simultaneous && indicatorPrefab != null)
         {
-            foreach (var center in _calculatedCenters)
+            for (int i = 0; i < centers.Count; i++)
             {
-                InstantiateIndicator(center, telegraphDuration, entityHealth);
+                SpawnIndicatorFor(root, centers[i], Quaternion.identity, new Vector3(areaRadius * 2f, 0.1f, areaRadius * 2f), telegraphDuration);
             }
         }
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && normalizedTime <= trackTargetUntil)
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
+
+        if (trackTarget && normalizedTime <= trackTargetUntil)
         {
             if (target != null && areaOrigin == AreaOrigin.Attacker)
+                RotateRootTowards(root, target.position);
+
+            Vector3 basePosition = (areaOrigin == AreaOrigin.Attacker || target == null)
+                ? GetTelegraphOrigin(root)
+                : GetGroundPosition(target.position, root);
+
+            int key = root.GetInstanceID();
+            if (!_centersByInstance.TryGetValue(key, out List<Vector3> centers))
             {
-                Vector3 lookDir = (target.position - origin.position).normalized;
-                lookDir.y = 0;
-                if (lookDir != Vector3.zero) origin.rotation = Quaternion.LookRotation(lookDir);
+                centers = new List<Vector3>();
+                _centersByInstance[key] = centers;
             }
-
-            Vector3 basePosition = (areaOrigin == AreaOrigin.Attacker || target == null) ? origin.position : target.position;
-            basePosition.y = origin.position.y;
-
-            _calculatedCenters.Clear();
-            GeneratePatternCenters(basePosition, origin.forward);
+            centers.Clear();
+            GeneratePatternCenters(centers, basePosition, root.forward, root);
 
             if (executionStyle == MultiAreaStyle.Simultaneous)
             {
-                for (int i = 0; i < _indicators.Count && i < _calculatedCenters.Count; i++)
+                List<GameObject> inds = GetIndicatorsFor(root);
+                if (inds != null)
                 {
-                    if (_indicators[i] != null)
+                    for (int i = 0; i < inds.Count && i < centers.Count; i++)
                     {
-                        _indicators[i].transform.position = _calculatedCenters[i];
+                        if (inds[i] != null) inds[i].transform.position = centers[i];
                     }
                 }
             }
         }
     }
-    private void GeneratePatternCenters(Vector3 center, Vector3 forwardDir)
+    private void GeneratePatternCenters(List<Vector3> outCenters, Vector3 center, Vector3 forwardDir, Transform root)
     {
         switch (patternType)
         {
             case PatternType.Linear:
                 for (int i = 0; i < numberOfAreas; i++)
                 {
-                    float dist = (i - (numberOfAreas - 1) / 2f) * (scatterRadius / numberOfAreas);
-                    _calculatedCenters.Add(center + (forwardDir * dist));
+                    float dist = (i - (numberOfAreas - 1) / 2f) * (scatterRadius / Mathf.Max(1, numberOfAreas));
+                    outCenters.Add(GetGroundPosition(center + (forwardDir * dist), root));
                 }
                 break;
 
@@ -92,7 +108,7 @@ public class EntityMultiAreaAttack : EntityAttack
                 for (int i = 0; i < numberOfAreas; i++)
                 {
                     Vector3 dir = Quaternion.Euler(0, i * angleStep, 0) * forwardDir;
-                    _calculatedCenters.Add(center + (dir * scatterRadius));
+                    outCenters.Add(GetGroundPosition(center + (dir * scatterRadius), root));
                 }
                 break;
 
@@ -102,7 +118,7 @@ public class EntityMultiAreaAttack : EntityAttack
                 {
                     Vector3 dir = crossDirs[i % 4];
                     float step = ((i / 4) + 1) * (scatterRadius / 2f);
-                    _calculatedCenters.Add(center + (dir * step));
+                    outCenters.Add(GetGroundPosition(center + (dir * step), root));
                 }
                 break;
 
@@ -112,62 +128,54 @@ public class EntityMultiAreaAttack : EntityAttack
                 for (int i = 0; i < points; i++)
                 {
                     Vector3 dir = Quaternion.Euler(0, i * starAngle, 0) * forwardDir;
-                    _calculatedCenters.Add(center + (dir * scatterRadius));
+                    outCenters.Add(GetGroundPosition(center + (dir * scatterRadius), root));
                 }
                 break;
 
             default:
                 for (int i = 0; i < numberOfAreas; i++)
                 {
-                    Vector3 offset = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized * Random.Range(0, scatterRadius);
-                    _calculatedCenters.Add(i == 0 ? center : center + offset);
+                    Vector2 rnd = Random.insideUnitCircle * scatterRadius;
+                    Vector3 rawPoint = i == 0 ? center : center + new Vector3(rnd.x, 0f, rnd.y);
+                    outCenters.Add(GetGroundPosition(rawPoint, root));
                 }
                 break;
         }
     }
-    private void InstantiateIndicator(Vector3 center, float duration, Health entityHealth)
-    {
-        GameObject indicatorObj = Instantiate(indicatorPrefab, center, Quaternion.identity);
-        indicatorObj.transform.localScale = new Vector3(areaRadius * 2f, 0.1f, areaRadius * 2f);
-
-        if (indicatorObj.TryGetComponent(out EntityIndicator indicatorComp))
-        {
-            indicatorComp.Init(entityHealth);
-            indicatorComp.AnimateIndicator(duration);
-        }
-        _indicators.Add(indicatorObj);
-    }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        yield return WaitDamageDelay();
+        yield return WaitForImpactTiming(origin);
 
-        if (origin == null) yield break;
-        origin.TryGetComponent(out Health entityHealth);
+        Transform root = GetRootTransform(origin);
+        if (root == null) yield break;
 
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
             {
-                Prepare(origin, target);
+                Prepare(root, target);
                 yield return new WaitForSeconds(telegraphDuration);
             }
 
+            _centersByInstance.TryGetValue(root.GetInstanceID(), out List<Vector3> centers);
+            if (centers == null) yield break;
+
             if (executionStyle == MultiAreaStyle.Simultaneous)
             {
-                foreach (var center in _calculatedCenters) ApplyAreaDamage(center);
-                ClearIndicators();
+                for (int i = 0; i < centers.Count; i++) ApplyAreaDamage(centers[i]);
+                ClearIndicatorsFor(root);
             }
             else
             {
                 float individualTelegraph = telegraphDuration / Mathf.Max(numberOfAreas, 1);
-                for (int i = 0; i < _calculatedCenters.Count; i++)
+                for (int i = 0; i < centers.Count; i++)
                 {
-                    Vector3 center = _calculatedCenters[i];
-                    if (indicatorPrefab != null) InstantiateIndicator(center, individualTelegraph, entityHealth);
+                    Vector3 center = centers[i];
+                    SpawnIndicatorFor(root, center, Quaternion.identity, new Vector3(areaRadius * 2f, 0.1f, areaRadius * 2f), individualTelegraph);
                     yield return new WaitForSeconds(individualTelegraph);
                     ApplyAreaDamage(center);
-                    ClearIndicators();
-                    if (i < _calculatedCenters.Count - 1 && delayBetweenAreas > 0) yield return new WaitForSeconds(delayBetweenAreas);
+                    ClearIndicatorsFor(root);
+                    if (i < centers.Count - 1 && delayBetweenAreas > 0) yield return new WaitForSeconds(delayBetweenAreas);
                 }
             }
 
@@ -176,7 +184,9 @@ public class EntityMultiAreaAttack : EntityAttack
     }
     private void ApplyAreaDamage(Vector3 center)
     {
-        int hitCount = Physics.OverlapSphereNonAlloc(center, areaRadius, _hitBuffer);
+        SpawnImpactVfx(center, Quaternion.identity);
+
+        int hitCount = Physics.OverlapSphereNonAlloc(center, areaRadius, _hitBuffer, ~0, QueryTriggerInteraction.Ignore);
         HashSet<PlayerHealth> processedPlayers = new();
 
         for (int i = 0; i < hitCount; i++)
@@ -190,10 +200,4 @@ public class EntityMultiAreaAttack : EntityAttack
             }
         }
     }
-    private void ClearIndicators()
-    {
-        foreach (var ind in _indicators) if (ind != null) Destroy(ind);
-        _indicators.Clear();
-    }
-    public override void CancelAttack() => ClearIndicators();
 }

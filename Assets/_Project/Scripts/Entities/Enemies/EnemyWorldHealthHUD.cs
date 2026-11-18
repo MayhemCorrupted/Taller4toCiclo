@@ -5,15 +5,19 @@ public class EnemyWorldHealthHUD : MonoBehaviour
 {
     [Header("Referencias del Enemigo")]
     [SerializeField] private EntityBrain _brain;
+    [SerializeField] private EntityCombat _combat;
     [SerializeField] private Health _health;
 
     [Header("Elementos UI World-Space")]
-    [Tooltip("Contenedor raíz del World-Space Canvas sobre la cabeza del enemigo.")]
+    [SerializeField] private Canvas _worldCanvas;
     [SerializeField] private GameObject _worldHudContainer;
-    [Tooltip("Imagen de relleno (Image Type = Filled).")]
     [SerializeField] private Image _healthFillImage;
-    [Tooltip("Texto con el porcentaje de vida (ej: 100%).")]
     [SerializeField] private TextMeshProUGUI _healthPercentageText;
+
+    [Header("Posicionamiento y Visibilidad")]
+    [SerializeField] private Transform _anchorTarget;
+    [SerializeField] private Vector3 _verticalOffset = new(0f, 2.2f, 0f);
+    [SerializeField] private bool _onlyShowWhenDamagedOrAlerted = false;
 
     [Header("Ajustes Visuales")]
     [SerializeField] private float _lerpSpeed = 12f;
@@ -25,23 +29,37 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     private void Awake()
     {
         if (_brain == null) _brain = GetComponentInParent<EntityBrain>();
+        if (_combat == null) _combat = GetComponentInParent<EntityCombat>();
         if (_health == null) _health = GetComponentInParent<Health>();
+        if (_worldCanvas == null) _worldCanvas = GetComponentInChildren<Canvas>(true);
+
         _mainCamera = Camera.main;
+
+        if (_worldCanvas != null)
+        {
+            _worldCanvas.renderMode = RenderMode.WorldSpace;
+            if (_mainCamera != null) _worldCanvas.worldCamera = _mainCamera;
+        }
     }
     private void Start()
     {
         EntityData data = _brain != null ? _brain.Data : null;
         _isEnabledForThisEnemy = (data != null && data.healthBarMode == EnemyHealthBarMode.WorldSpace);
 
-        if (_worldHudContainer != null)
-            _worldHudContainer.SetActive(_isEnabledForThisEnemy);
+        if (!_isEnabledForThisEnemy)
+        {
+            if (_worldHudContainer != null) _worldHudContainer.SetActive(false);
+            return;
+        }
 
-        if (_isEnabledForThisEnemy && _health != null)
+        if (_health != null)
         {
             _health.OnHealthChanged += HandleHealthChanged;
             _health.OnDeath += HandleDeath;
             UpdateVisuals(instant: true);
         }
+
+        RefreshVisibility();
     }
     private void OnDestroy()
     {
@@ -53,12 +71,30 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if (!_isEnabledForThisEnemy || _worldHudContainer == null || !_worldHudContainer.activeSelf)
+        if (!_isEnabledForThisEnemy || _worldHudContainer == null)
             return;
 
-        if (_faceCamera && _mainCamera != null)
+        if (_health != null && _health.CurrentHealth <= 0f)
         {
-            transform.rotation = _mainCamera.transform.rotation;
+            if (_worldHudContainer.activeSelf) _worldHudContainer.SetActive(false);
+            return;
+        }
+
+        RefreshVisibility();
+
+        if (!_worldHudContainer.activeSelf)
+            return;
+
+        if (_anchorTarget != null)
+        {
+            transform.position = _anchorTarget.position + _verticalOffset;
+        }
+
+        if (_faceCamera)
+        {
+            if (_mainCamera == null) _mainCamera = Camera.main;
+            if (_mainCamera != null)
+                transform.rotation = _mainCamera.transform.rotation;
         }
 
         if (_healthFillImage != null)
@@ -66,9 +102,27 @@ public class EnemyWorldHealthHUD : MonoBehaviour
             _healthFillImage.fillAmount = Mathf.Lerp(_healthFillImage.fillAmount, _targetFillAmount, Time.deltaTime * _lerpSpeed);
         }
     }
+    private void RefreshVisibility()
+    {
+        if (_worldHudContainer == null) return;
+
+        if (!_onlyShowWhenDamagedOrAlerted)
+        {
+            if (!_worldHudContainer.activeSelf) _worldHudContainer.SetActive(true);
+            return;
+        }
+
+        bool isDamaged = _health != null && _health.CurrentHealth < _health.MaxHealth;
+        bool isAlerted = _combat != null && _combat.CanSeeTarget;
+        bool shouldShow = isDamaged || isAlerted;
+
+        if (_worldHudContainer.activeSelf != shouldShow)
+            _worldHudContainer.SetActive(shouldShow);
+    }
     private void HandleHealthChanged()
     {
         UpdateVisuals(instant: false);
+        RefreshVisibility();
     }
     private void HandleDeath()
     {

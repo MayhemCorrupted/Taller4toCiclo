@@ -14,16 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAtk
   damage: 10
   knockback: 7
+  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}
   telegraphDuration: 1
-  attackDuration: 2
   trackTargetUntil: 0.9
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 1919
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  impactVfxPrefab: {fileID: 0}
+  vfxOffset: {x: 0, y: 0, z: 0}
+  vfxScale: {x: 1, y: 1, z: 1}
+  vfxLifetime: 2
+  alignVfxWithAttacker: 1
+  animationTrigger: Melee
+  damageImpactPercent: 0.1
+  fallbackAnimationDuration: 1
+  activeMotionDuration: 0.5
   overrideBaseArmor: 1
   armorState: 1
   hyperarmorDamageMultiplier: 0
-  animationTrigger: Melee
-  damageDelay: 2
   isRadial: 0
   radius: 2
   hitboxMeasurements: {x: 1, y: 1.5, z: 1.5}
-  verticalOffset: 1
-  indicatorPrefab: {fileID: 6503214459216356991, guid: a6ce3e4c25cea134a804eb8301915356, type: 3}
+  hitboxVerticalOffset: 0

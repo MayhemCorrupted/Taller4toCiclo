@@ -7,83 +7,84 @@ public class EntityMultiWaveAttack : EntityAttack
     public enum MultiWaveStyle { SimultaneousWave, ConsecutiveWaves }
     public enum WavePattern { RadialWave, FanAbanico, CrossStar, ConsecutiveLineal, Random }
 
-    [Header("MULTI-WAVE PROPERTIES")]
+    [Header("Propiedades Multi-Onda")]
     public MultiWaveStyle waveStyle = MultiWaveStyle.ConsecutiveWaves;
     public WavePattern pattern = WavePattern.RadialWave;
-    public int numberOfWaves = 3;
+    [Min(1)] public int numberOfWaves = 3;
     [Min(0.1f)] public float waveDistance = 10f;
-    public float hitboxRadius = 1.5f;
+    [Min(0.1f)] public float hitboxRadius = 1.5f;
     public bool trackTarget = true;
     [Min(0f)] public float delayBetweenWaves = 0.2f;
 
-    [Header("OLEADAS DE RÁFAGA (WAVE REPEATS)")]
+    [Header("Oleadas")]
     [Min(1)] public int waveCount = 1;
     [Min(0f)] public float delayBetweenWaveRepeats = 0.5f;
 
-    public GameObject indicatorPrefab;
-
-    private readonly List<Vector3> _localDirections = new();
-    private readonly List<GameObject> _indicators = new();
+    private readonly Dictionary<int, List<Vector3>> _directionsByInstance = new();
     private readonly Collider[] _hitBuffer = new Collider[20];
     public override void Prepare(Transform origin, Transform target)
     {
-        _localDirections.Clear();
-        ClearIndicators();
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        if (target != null && trackTarget) LookAtTarget(origin, target.position);
-        origin.TryGetComponent(out Health entityHealth);
+        ClearIndicatorsFor(root);
+        if (target != null && trackTarget) RotateRootTowards(root, target.position);
 
-        GenerateDirections();
-
-        if (waveStyle == MultiWaveStyle.SimultaneousWave && indicatorPrefab != null)
+        int key = root.GetInstanceID();
+        if (!_directionsByInstance.TryGetValue(key, out List<Vector3> dirs))
         {
-            foreach (var localDir in _localDirections)
+            dirs = new List<Vector3>();
+            _directionsByInstance[key] = dirs;
+        }
+        dirs.Clear();
+        GenerateDirections(dirs);
+
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
+        if (waveStyle == MultiWaveStyle.SimultaneousWave)
+        {
+            for (int i = 0; i < dirs.Count; i++)
             {
-                Vector3 worldDir = origin.rotation * localDir;
-                InstantiateIndicator(origin, worldDir, entityHealth);
+                Vector3 worldDir = root.rotation * dirs[i];
+                SpawnIndicatorFor(root, groundOrigin + (worldDir * (waveDistance * 0.5f)), Quaternion.LookRotation(worldDir), new Vector3(hitboxRadius * 2f, 0.1f, waveDistance), telegraphDuration);
             }
         }
-        else if (waveStyle == MultiWaveStyle.ConsecutiveWaves && indicatorPrefab != null && _localDirections.Count > 0)
+        else if (dirs.Count > 0)
         {
-            InstantiateIndicator(origin, origin.rotation * _localDirections[0], entityHealth);
+            Vector3 worldDir = root.rotation * dirs[0];
+            SpawnIndicatorFor(root, groundOrigin + (worldDir * (waveDistance * 0.5f)), Quaternion.LookRotation(worldDir), new Vector3(hitboxRadius * 2f, 0.1f, waveDistance), telegraphDuration);
         }
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && target != null && normalizedTime <= trackTargetUntil)
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
+
+        if (trackTarget && target != null && normalizedTime <= trackTargetUntil)
         {
-            LookAtTarget(origin, target.position);
+            RotateRootTowards(root, target.position);
+            Vector3 groundOrigin = GetTelegraphOrigin(root);
+            List<GameObject> inds = GetIndicatorsFor(root);
+            if (!_directionsByInstance.TryGetValue(root.GetInstanceID(), out List<Vector3> dirs) || inds == null) return;
 
             if (waveStyle == MultiWaveStyle.SimultaneousWave)
             {
-                for (int i = 0; i < _indicators.Count && i < _localDirections.Count; i++)
+                for (int i = 0; i < inds.Count && i < dirs.Count; i++)
                 {
-                    if (_indicators[i] != null)
+                    if (inds[i] != null)
                     {
-                        Vector3 worldDir = origin.rotation * _localDirections[i];
-                        _indicators[i].transform.SetPositionAndRotation(
-                            origin.position + (worldDir * (waveDistance / 2f)),
-                            Quaternion.LookRotation(worldDir)
-                        );
-                        _indicators[i].transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
+                        Vector3 worldDir = root.rotation * dirs[i];
+                        inds[i].transform.SetPositionAndRotation(groundOrigin + (worldDir * (waveDistance * 0.5f)), Quaternion.LookRotation(worldDir));
                     }
                 }
             }
-            else if (waveStyle == MultiWaveStyle.ConsecutiveWaves)
+            else if (inds.Count > 0 && inds[0] != null && dirs.Count > 0)
             {
-                if (_indicators.Count > 0 && _indicators[0] != null && _localDirections.Count > 0)
-                {
-                    Vector3 worldDir = origin.rotation * _localDirections[0];
-                    _indicators[0].transform.SetPositionAndRotation(
-                        origin.position + (worldDir * (waveDistance / 2f)),
-                        Quaternion.LookRotation(worldDir)
-                    );
-                    _indicators[0].transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
-                }
+                Vector3 worldDir = root.rotation * dirs[0];
+                inds[0].transform.SetPositionAndRotation(groundOrigin + (worldDir * (waveDistance * 0.5f)), Quaternion.LookRotation(worldDir));
             }
         }
     }
-    private void GenerateDirections()
+    private void GenerateDirections(List<Vector3> outDirs)
     {
         switch (pattern)
         {
@@ -92,137 +93,96 @@ public class EntityMultiWaveAttack : EntityAttack
                 float startAngle = -totalAngle / 2f;
                 float step = totalAngle / Mathf.Max(numberOfWaves - 1, 1);
                 for (int i = 0; i < numberOfWaves; i++)
-                {
-                    _localDirections.Add(Quaternion.Euler(0, startAngle + (i * step), 0) * Vector3.forward);
-                }
+                    outDirs.Add(Quaternion.Euler(0, startAngle + (i * step), 0) * Vector3.forward);
                 break;
 
             case WavePattern.CrossStar:
                 int count = Mathf.Max(numberOfWaves, 4);
                 float angleCross = 360f / count;
                 for (int i = 0; i < count; i++)
-                {
-                    _localDirections.Add(Quaternion.Euler(0, i * angleCross, 0) * Vector3.forward);
-                }
+                    outDirs.Add(Quaternion.Euler(0, i * angleCross, 0) * Vector3.forward);
                 break;
 
             case WavePattern.Random:
                 for (int i = 0; i < numberOfWaves; i++)
-                {
-                    _localDirections.Add(Quaternion.Euler(0, Random.Range(0f, 360f), 0) * Vector3.forward);
-                }
+                    outDirs.Add(Quaternion.Euler(0, Random.Range(0f, 360f), 0) * Vector3.forward);
                 break;
 
             default:
                 float angleRadial = 360f / numberOfWaves;
                 for (int i = 0; i < numberOfWaves; i++)
-                {
-                    _localDirections.Add(Quaternion.Euler(0, i * angleRadial, 0) * Vector3.forward);
-                }
+                    outDirs.Add(Quaternion.Euler(0, i * angleRadial, 0) * Vector3.forward);
                 break;
         }
     }
-    private void InstantiateIndicator(Transform origin, Vector3 worldDir, Health entityHealth)
-    {
-        GameObject indicatorObj = Instantiate(indicatorPrefab, origin.position, Quaternion.LookRotation(worldDir));
-        indicatorObj.transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
-        indicatorObj.transform.position = origin.position + (worldDir * (waveDistance / 2f));
-
-        if (indicatorObj.TryGetComponent(out EntityIndicator indicatorComp))
-        {
-            indicatorComp.Init(entityHealth);
-            indicatorComp.AnimateIndicator(telegraphDuration);
-        }
-        _indicators.Add(indicatorObj);
-    }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        yield return WaitDamageDelay();
+        yield return WaitForImpactTiming(origin);
 
-        if (origin == null) yield break;
+        Transform root = GetRootTransform(origin);
+        if (root == null) yield break;
 
         for (int w = 0; w < waveCount; w++)
         {
             if (w > 0)
             {
-                Prepare(origin, target);
+                Prepare(root, target);
                 yield return new WaitForSeconds(telegraphDuration);
             }
 
+            if (!_directionsByInstance.TryGetValue(root.GetInstanceID(), out List<Vector3> dirs)) yield break;
+
             if (waveStyle == MultiWaveStyle.SimultaneousWave)
             {
-                ExecuteSimultaneousWave(origin);
+                HashSet<PlayerHealth> processedPlayers = new();
+                Vector3 groundOrigin = GetTelegraphOrigin(root);
+                for (int i = 0; i < dirs.Count; i++)
+                {
+                    Vector3 worldDir = root.rotation * dirs[i];
+                    SpawnImpactVfx(groundOrigin, Quaternion.LookRotation(worldDir));
+
+                    Vector3 boxCenter = root.position + (worldDir * (waveDistance * 0.5f));
+                    Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance * 0.5f);
+
+                    int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(worldDir), ~0, QueryTriggerInteraction.Ignore);
+                    for (int j = 0; j < hitCount; j++)
+                    {
+                        Collider hit = _hitBuffer[j];
+                        PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                        if (ph != null && processedPlayers.Add(ph))
+                            ApplyDamageAndKnockback(hit, worldDir, root.position);
+                    }
+                }
+                ClearIndicatorsFor(root);
             }
             else
             {
-                yield return ConsecutiveWavesRoutine(origin, target);
-            }
+                ClearIndicatorsFor(root);
+                for (int i = 0; i < dirs.Count; i++)
+                {
+                    if (i > 0 && delayBetweenWaves > 0) yield return new WaitForSeconds(delayBetweenWaves);
+                    if (trackTarget && target != null) RotateRootTowards(root, target.position);
 
+                    Vector3 waveDir = root.rotation * dirs[i];
+                    SpawnImpactVfx(GetTelegraphOrigin(root), Quaternion.LookRotation(waveDir));
+
+                    Vector3 boxCenter = root.position + (waveDir * (waveDistance * 0.5f));
+                    Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance * 0.5f);
+
+                    int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(waveDir), ~0, QueryTriggerInteraction.Ignore);
+                    HashSet<PlayerHealth> processedPlayers = new();
+
+                    for (int j = 0; j < hitCount; j++)
+                    {
+                        Collider hit = _hitBuffer[j];
+                        PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
+                        if (ph != null && processedPlayers.Add(ph))
+                            ApplyDamageAndKnockback(hit, waveDir, root.position);
+                    }
+                    yield return null;
+                }
+            }
             if (w < waveCount - 1 && delayBetweenWaveRepeats > 0) yield return new WaitForSeconds(delayBetweenWaveRepeats);
         }
     }
-    private void ExecuteSimultaneousWave(Transform origin)
-    {
-        HashSet<PlayerHealth> processedPlayers = new();
-
-        foreach (var localDir in _localDirections)
-        {
-            Vector3 worldDir = origin.rotation * localDir;
-            Vector3 boxCenter = origin.position + (worldDir * (waveDistance / 2f));
-            Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance / 2f);
-
-            int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(worldDir));
-            for (int j = 0; j < hitCount; j++)
-            {
-                Collider hit = _hitBuffer[j];
-                PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
-                if (ph != null && processedPlayers.Add(ph))
-                {
-                    ApplyDamageAndKnockback(hit, worldDir, origin.position);
-                }
-            }
-        }
-        ClearIndicators();
-    }
-    private IEnumerator ConsecutiveWavesRoutine(Transform origin, Transform target)
-    {
-        ClearIndicators();
-
-        for (int i = 0; i < _localDirections.Count; i++)
-        {
-            if (i > 0 && delayBetweenWaves > 0) yield return new WaitForSeconds(delayBetweenWaves);
-            if (trackTarget && target != null) LookAtTarget(origin, target.position);
-
-            Vector3 waveDir = origin.rotation * _localDirections[i];
-            Vector3 boxCenter = origin.position + (waveDir * (waveDistance / 2f));
-            Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance / 2f);
-
-            int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(waveDir));
-            HashSet<PlayerHealth> processedPlayers = new();
-
-            for (int j = 0; j < hitCount; j++)
-            {
-                Collider hit = _hitBuffer[j];
-                PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
-                if (ph != null && processedPlayers.Add(ph))
-                {
-                    ApplyDamageAndKnockback(hit, waveDir, origin.position);
-                }
-            }
-
-            yield return null;
-        }
-    }
-    private void LookAtTarget(Transform origin, Vector3 targetPos)
-    {
-        Vector3 lookDir = (targetPos - origin.position).normalized;
-        lookDir.y = 0;
-        if (lookDir != Vector3.zero) origin.rotation = Quaternion.LookRotation(lookDir);
-    }
-    private void ClearIndicators()
-    {
-        foreach (var ind in _indicators) if (ind != null) Destroy(ind);
-        _indicators.Clear();
-    }
-    public override void CancelAttack() => ClearIndicators();
 }

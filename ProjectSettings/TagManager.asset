@@ -9,6 +9,7 @@ TagManager:
   - Errante
   - Pillar
   - Boss
+  - ErrantesBosque
   layers:
   - Default
   - TransparentFX

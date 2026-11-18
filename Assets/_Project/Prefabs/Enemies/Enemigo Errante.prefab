@@ -88,6 +88,14 @@ MonoBehaviour:
   _health: {fileID: 8717549765142134006}
   _combat: {fileID: 2981225711452780749}
   _movement: {fileID: 6756939468450792380}
+  _aggroRadius: 5
+  _lossDetectionBuffer: 2
+  _lossDetectionDuration: 3
+  _personalSpaceRadius: 0.75
+  _shortRangeRadius: 1.5
+  _mediumRangeRadius: 2
+  _longRangeRadius: 3
+  _showRangeGizmos: 1
   _passiveAgonizeCheckInterval: 1
   OnDeathAnimationFinishedEvent:
     m_PersistentCalls:
@@ -124,6 +132,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _checkInterval: 0.1
+  _eyeHeight: 1.2
 --- !u!114 &6756939468450792380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,15 +147,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
   _brain: {fileID: 1202830902662934329}
   _combat: {fileID: 2981225711452780749}
-  _obstacleLayer:
+  _wallLayer:
     serializedVersion: 2
     m_Bits: 128
   _patrolWaitingTime: 1
   _patrolRadius: 5
+  _patrolTurnDelay: 0.25
+  _patrolRotationSpeed: 6
   _enableOrbitalMovement: 1
-  _orbitStrafeDistance: 2.5
+  _orbitAngularSpeed: 45
   _orbitDirectionChangeInterval: 2
-  _stunDuration: 0.5
+  _retreatSpeedMultiplier: 1.15
+  _combatRotationSpeed: 14
+  _stunDuration: 1
   _knockbackForce: 9.5
   _knockbackFriction: 8
   _disableCollidersOnDeath: 1
@@ -312,8 +325,9 @@ MonoBehaviour:
   _brain: {fileID: 1202830902662934329}
   _combat: {fileID: 2981225711452780749}
   _navAgent: {fileID: 1409534704617941714}
-  _speedDampTime: 0.1
+  _speedDampTime: 0.2
   _directionalLerpSpeed: 10
+  _lockChildModelToRoot: 1
 --- !u!4 &8946916746046889187 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b25f498e50f2b2c47a1d4745ecb09a41, type: 3}

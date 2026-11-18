@@ -4,66 +4,58 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EntityWaveAttack", menuName = "Rotbound/Entity/Attack/EntityWaveAttack")]
 public class EntityWaveAttack : EntityAttack
 {
-    [Header("WAVE PROPERTIES")]
+    [Header("Propiedades de Onda")]
     [Min(0.1f)] public float waveDistance = 10f;
-    public float hitboxRadius = 1.5f;
+    [Min(0.1f)] public float hitboxRadius = 1.5f;
     public bool trackTarget = true;
-    public GameObject indicatorPrefab;
 
-    private GameObject _currentIndicator;
-    private EntityIndicator _indicatorComp;
-    private readonly Collider[] _hitBuffer = new Collider[10];
+    private readonly Collider[] _hitBuffer = new Collider[12];
     public override void Prepare(Transform origin, Transform target)
     {
-        if (origin == null) return;
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-        if (trackTarget && target != null)
-        {
-            LookAtTarget(origin, target.position);
-        }
+        ClearIndicatorsFor(root);
+        if (trackTarget && target != null) RotateRootTowards(root, target.position);
 
-        origin.TryGetComponent(out Health entityHealth);
-
-        if (indicatorPrefab != null)
-        {
-            Vector3 dir = origin.forward;
-            _currentIndicator = Instantiate(indicatorPrefab, origin.position, Quaternion.LookRotation(dir));
-            _currentIndicator.transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
-            _currentIndicator.transform.position = origin.position + (dir * (waveDistance / 2f));
-
-            if (_currentIndicator.TryGetComponent(out _indicatorComp))
-            {
-                _indicatorComp.Init(entityHealth);
-                _indicatorComp.AnimateIndicator(telegraphDuration);
-            }
-        }
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
+        Vector3 dir = root.forward;
+        SpawnIndicatorFor(root, groundOrigin + (dir * (waveDistance * 0.5f)), Quaternion.LookRotation(dir), new Vector3(hitboxRadius * 2f, 0.1f, waveDistance), telegraphDuration);
     }
     public override void UpdatePreparation(Transform origin, Transform target, float normalizedTime)
     {
-        if (trackTarget && origin != null && target != null && normalizedTime <= trackTargetUntil)
-        {
-            LookAtTarget(origin, target.position);
+        Transform root = GetRootTransform(origin);
+        if (root == null) return;
 
-            if (_currentIndicator != null)
+        if (trackTarget && target != null && normalizedTime <= trackTargetUntil)
+        {
+            RotateRootTowards(root, target.position);
+            List<GameObject> inds = GetIndicatorsFor(root);
+            if (inds != null && inds.Count > 0 && inds[0] != null)
             {
-                Vector3 dir = origin.forward;
-                _currentIndicator.transform.SetPositionAndRotation(origin.position + (dir * (waveDistance / 2f)), Quaternion.LookRotation(dir));
-                _currentIndicator.transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
+                Vector3 groundOrigin = GetTelegraphOrigin(root);
+                Vector3 dir = root.forward;
+                inds[0].transform.SetPositionAndRotation(groundOrigin + (dir * (waveDistance * 0.5f)), Quaternion.LookRotation(dir));
+                inds[0].transform.localScale = new Vector3(hitboxRadius * 2f, 0.1f, waveDistance);
             }
         }
     }
     public override IEnumerator Execute(Transform origin, Transform target, MonoBehaviour runner)
     {
-        yield return WaitDamageDelay();
+        yield return WaitForImpactTiming(origin);
 
-        if (_currentIndicator != null) Destroy(_currentIndicator);
-        if (origin == null) yield break;
+        Transform root = GetRootTransform(origin);
+        ClearIndicatorsFor(root);
+        if (root == null) yield break;
 
-        Vector3 dir = origin.forward;
-        Vector3 boxCenter = origin.position + (dir * (waveDistance / 2f));
-        Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance / 2f);
+        Vector3 dir = root.forward;
+        Vector3 groundOrigin = GetTelegraphOrigin(root);
+        SpawnImpactVfx(groundOrigin, Quaternion.LookRotation(dir));
 
-        int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(dir));
+        Vector3 boxCenter = root.position + (dir * (waveDistance * 0.5f));
+        Vector3 boxHalfExtents = new(hitboxRadius, 2f, waveDistance * 0.5f);
+
+        int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxHalfExtents, _hitBuffer, Quaternion.LookRotation(dir), ~0, QueryTriggerInteraction.Ignore);
         HashSet<PlayerHealth> processedPlayers = new();
 
         for (int i = 0; i < hitCount; i++)
@@ -72,18 +64,8 @@ public class EntityWaveAttack : EntityAttack
             PlayerHealth ph = hit.GetComponentInParent<PlayerHealth>();
             if (ph != null && processedPlayers.Add(ph))
             {
-                ApplyDamageAndKnockback(hit, dir, origin.position);
+                ApplyDamageAndKnockback(hit, dir, root.position);
             }
         }
-    }
-    private void LookAtTarget(Transform origin, Vector3 targetPos)
-    {
-        Vector3 lookDir = (targetPos - origin.position).normalized;
-        lookDir.y = 0;
-        if (lookDir != Vector3.zero) origin.rotation = Quaternion.LookRotation(lookDir);
-    }
-    public override void CancelAttack()
-    {
-        if (_currentIndicator != null) Destroy(_currentIndicator);
     }
 }
