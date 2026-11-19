@@ -14,13 +14,11 @@ public class VolumetricFogArea : MonoBehaviour
         RenderSettings.fog = true;
         RenderSettings.fogDensity = defaultDensity;
     }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
             FogTransition(targetDensity);
     }
-
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))

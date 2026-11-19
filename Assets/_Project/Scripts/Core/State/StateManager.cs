@@ -2,61 +2,52 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-[Serializable]
-public class StateObjectiveRule
+[Serializable] public class MissionGoal
 {
-    [Tooltip("Nombre descriptivo para identificar la regla en el Inspector (Ej: 'Destruir Pilares en Estado 1').")]
-    public string ruleName = "Objetivo de Estado";
+    [Tooltip("Nombre para identificar este objetivo en el Inspector.")]
+    public string title = "Nuevo Objetivo";
 
-    [Tooltip("Estado (int) en el que debe estar el juego para que cuenten estas bajas/destrucciones.")]
-    public int activeInState = 1;
+    [Tooltip("Estado requerido para contar. Usa -1 si puede cumplirse en cualquier estado.")]
+    public int requiredState = 1;
 
-    [Tooltip("Tag del objeto o enemigo a destruir/matar (Ej: 'Pillar', 'Errante', 'Custodio').")]
+    [Tooltip("Tag del enemigo u objeto a destruir (Ej: 'Enemy', 'Pillar').")]
     public string targetTag = "Enemy";
 
-    [Tooltip("Cantidad necesaria dentro de ese estado para cumplir la regla.")]
-    [Min(1)] public int requiredCount = 3;
+    [Tooltip("Cantidad necesaria para completar el objetivo.")]
+    [Min(1)] public int amount = 1;
 
-    [Header("Resultado al Cumplirse")]
-    [Tooltip("Si es >= 0, cambia automáticamente al estado indicado. Dejar en -1 para mantener el estado actual.")]
-    public int targetStateOnComplete = -1;
+    [Header("Recompensa / Resultado")]
+    [Tooltip("Palabra clave que se activa al completarlo (Ej: 'EnemigosLimpios').")]
+    public string giveFlag;
 
-    [Tooltip("Opcional: Bandera de ramificación que se activa (Ej: 'MatoEnemigosSinPilares').")]
-    public string flagToUnlock;
+    [Tooltip("Estado al que avanza automáticamente (-1 = mantener estado actual).")]
+    public int nextState = -1;
 
-    [Tooltip("Evento único que se dispara al cumplir esta condición.")]
-    public UnityEvent onObjectiveMet;
+    public UnityEvent onCompleted;
 
-    [HideInInspector] public bool hasBeenMet = false;
+    [HideInInspector] public bool isCompleted;
 }
-[Serializable]
-public struct StateEventEntry
+[Serializable] public struct StateAction
 {
-    [Tooltip("Valor exacto de CurrentState (int) que dispara este evento.")]
-    public int stateValue;
-    public UnityEvent onStateEntered;
+    [Tooltip("Número de estado que dispara este evento.")]
+    public int state;
+    public UnityEvent onEnter;
 }
 public class StateManager : MonoBehaviour
 {
     public static StateManager Instance { get; private set; }
-
-    [Header("Estado Actual (Int)")]
+    [Header("Progreso Actual")]
     [SerializeField] private int _currentState = 0;
-
-    [Header("Reglas de Entidades/Objetos por Estado")]
-    [Tooltip("Define qué ocurre al matar entidades o destruir objetos en un estado específico.")]
-    [SerializeField] private StateObjectiveRule[] _objectiveRules;
-
-    [Header("Eventos al Entrar en un Estado")]
-    [SerializeField] private StateEventEntry[] _stateEvents;
-
+    [Header("Objetivos (Matar / Destruir)")]
+    [SerializeField] private MissionGoal[] _goals;
+    [Header("Eventos al Entrar a un Estado")]
+    [SerializeField] private StateAction[] _onStateEnter;
     public event Action<int> OnStateChanged;
     public int CurrentState => _currentState;
-
     private readonly Dictionary<(int state, string tag), int> _killsByStateAndTag = new();
-    private readonly HashSet<string> _unlockedFlags = new();
-    private readonly HashSet<string> _triggeredEventIDs = new();
-    private readonly Dictionary<int, UnityEvent> _stateEventsLookup = new();
+    private readonly HashSet<string> _activeFlags = new();
+    private readonly HashSet<string> _triggeredEvents = new();
+    private readonly Dictionary<int, UnityEvent> _stateLookup = new();
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -64,16 +55,15 @@ public class StateManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        Instance = this;
-        InitializeStateLookup();
-    }
 
+        Instance = this;
+        BuildStateLookup();
+    }
     private void Start()
     {
         SyncFromSaveManager();
-        EvaluateCurrentState();
+        NotifyStateEntered();
     }
-
     private void SyncFromSaveManager()
     {
         if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession) return;
@@ -81,32 +71,147 @@ public class StateManager : MonoBehaviour
 
         ImportStateData(SaveManager.Instance.CurrentRun.world);
     }
-    private void InitializeStateLookup()
+    private void BuildStateLookup()
     {
-        _stateEventsLookup.Clear();
-        if (_stateEvents == null) return;
+        _stateLookup.Clear();
+        if (_onStateEnter == null) return;
 
-        foreach (var entry in _stateEvents)
+        foreach (var entry in _onStateEnter)
         {
-            if (!_stateEventsLookup.TryAdd(entry.stateValue, entry.onStateEntered))
+            if (!_stateLookup.TryAdd(entry.state, entry.onEnter))
             {
-                GameLogger.LogWarning($"[StateManager] Estado duplicado ({entry.stateValue}) en _stateEvents.");
+                GameLogger.LogWarning($"[StateManager] Estado duplicado ({entry.state}) en _onStateEnter.");
             }
+        }
+    }
+    public void SetState(int newState)
+    {
+        if (_currentState == newState) return;
+
+        _currentState = newState;
+        NotifyStateEntered();
+        EvaluateGoals();
+        AutoSaveIfActive();
+    }
+    /// <summary>
+    /// Alias de compatibilidad para llamadas existentes en el Inspector.
+    /// </summary>
+    public void SetExactState(int newState) => SetState(newState);
+    public void AddState(int amount)
+    {
+        if (amount == 0) return;
+
+        _currentState += amount;
+        NotifyStateEntered();
+        EvaluateGoals();
+        AutoSaveIfActive();
+    }
+    public void NextState() => AddState(1);
+    public void AddStatePoint() => AddState(1);
+
+    public void RegisterEntityKilled(string entityTag = "Untagged")
+    {
+        var key = (_currentState, entityTag);
+        if (!_killsByStateAndTag.ContainsKey(key))
+            _killsByStateAndTag[key] = 0;
+
+        _killsByStateAndTag[key]++;
+        EvaluateGoals();
+    }
+    public int GetKillsInState(int state, string entityTag)
+    {
+        return _killsByStateAndTag.TryGetValue((state, entityTag), out int count) ? count : 0;
+    }
+    public int GetTotalKills(string entityTag)
+    {
+        int total = 0;
+        foreach (var kvp in _killsByStateAndTag)
+        {
+            if (kvp.Key.tag == entityTag)
+                total += kvp.Value;
+        }
+        return total;
+    }
+    private void EvaluateGoals()
+    {
+        if (_goals == null) return;
+
+        for (int i = 0; i < _goals.Length; i++)
+        {
+            MissionGoal goal = _goals[i];
+            if (goal.isCompleted) continue;
+
+            // Si requiredState >= 0, se queda en ese estado exacto; si es -1, cuenta en cualquier estado
+            if (goal.requiredState >= 0 && goal.requiredState != _currentState) continue;
+
+            int currentCount = goal.requiredState < 0
+                ? GetTotalKills(goal.targetTag)
+                : GetKillsInState(_currentState, goal.targetTag);
+
+            if (currentCount >= goal.amount)
+            {
+                goal.isCompleted = true;
+
+                if (!string.IsNullOrWhiteSpace(goal.giveFlag))
+                    _activeFlags.Add(goal.giveFlag.Trim());
+
+                goal.onCompleted?.Invoke();
+
+                if (goal.nextState >= 0)
+                    SetState(goal.nextState);
+            }
+        }
+    }
+    public bool CheckFlag(string flag)
+    {
+        return !string.IsNullOrWhiteSpace(flag) && _activeFlags.Contains(flag.Trim());
+    }
+    public void SetFlag(string flag, bool active)
+    {
+        if (string.IsNullOrWhiteSpace(flag)) return;
+
+        if (active) _activeFlags.Add(flag.Trim());
+        else _activeFlags.Remove(flag.Trim());
+    }
+    public void ActivateFlag(string flag) => SetFlag(flag, true);
+    public void DeactivateFlag(string flag) => SetFlag(flag, false);
+    public bool HasEventTriggered(string eventID)
+    {
+        return !string.IsNullOrWhiteSpace(eventID) && _triggeredEvents.Contains(eventID);
+    }
+    public void MarkEventAsTriggered(string eventID)
+    {
+        if (!string.IsNullOrWhiteSpace(eventID))
+            _triggeredEvents.Add(eventID);
+    }
+
+    private void NotifyStateEntered()
+    {
+        OnStateChanged?.Invoke(_currentState);
+
+        if (_stateLookup.TryGetValue(_currentState, out UnityEvent stateEvent))
+        {
+            stateEvent?.Invoke();
+        }
+    }
+    private static void AutoSaveIfActive()
+    {
+        if (SaveManager.Instance != null && SaveManager.Instance.HasActiveSession)
+        {
+            _ = SaveManager.Instance.AutoSaveRunAsync();
         }
     }
     public void ResetAllProgress()
     {
         _currentState = 0;
         _killsByStateAndTag.Clear();
-        _unlockedFlags.Clear();
-        _triggeredEventIDs.Clear();
+        _activeFlags.Clear();
+        _triggeredEvents.Clear();
 
-        if (_objectiveRules != null)
+        if (_goals != null)
         {
-            for (int i = 0; i < _objectiveRules.Length; i++)
-            {
-                _objectiveRules[i].hasBeenMet = false;
-            }
+            for (int i = 0; i < _goals.Length; i++)
+                _goals[i].isCompleted = false;
         }
     }
     public void ExportStateData(WorldSaveData targetData)
@@ -116,16 +221,12 @@ public class StateManager : MonoBehaviour
         targetData.currentState = _currentState;
 
         targetData.unlockedFlags.Clear();
-        foreach (string flag in _unlockedFlags)
-        {
+        foreach (string flag in _activeFlags)
             targetData.unlockedFlags.Add(flag);
-        }
 
         targetData.triggeredEventIDs.Clear();
-        foreach (string evtId in _triggeredEventIDs)
-        {
+        foreach (string evtId in _triggeredEvents)
             targetData.triggeredEventIDs.Add(evtId);
-        }
 
         targetData.stateKillRecords.Clear();
         foreach (var kvp in _killsByStateAndTag)
@@ -144,18 +245,18 @@ public class StateManager : MonoBehaviour
 
         _currentState = sourceData.currentState;
 
-        _unlockedFlags.Clear();
+        _activeFlags.Clear();
         if (sourceData.unlockedFlags != null)
         {
             for (int i = 0; i < sourceData.unlockedFlags.Count; i++)
-                _unlockedFlags.Add(sourceData.unlockedFlags[i]);
+                _activeFlags.Add(sourceData.unlockedFlags[i]);
         }
 
-        _triggeredEventIDs.Clear();
+        _triggeredEvents.Clear();
         if (sourceData.triggeredEventIDs != null)
         {
             for (int i = 0; i < sourceData.triggeredEventIDs.Count; i++)
-                _triggeredEventIDs.Add(sourceData.triggeredEventIDs[i]);
+                _triggeredEvents.Add(sourceData.triggeredEventIDs[i]);
         }
 
         _killsByStateAndTag.Clear();
@@ -168,133 +269,20 @@ public class StateManager : MonoBehaviour
             }
         }
 
-        if (_objectiveRules != null)
+        if (_goals != null)
         {
-            for (int i = 0; i < _objectiveRules.Length; i++)
+            for (int i = 0; i < _goals.Length; i++)
             {
-                StateObjectiveRule rule = _objectiveRules[i];
-                int kills = GetKillsInState(rule.activeInState, rule.targetTag);
-                bool flagAlreadyUnlocked = !string.IsNullOrWhiteSpace(rule.flagToUnlock) && _unlockedFlags.Contains(rule.flagToUnlock);
+                MissionGoal goal = _goals[i];
+                int kills = goal.requiredState < 0
+                    ? GetTotalKills(goal.targetTag)
+                    : GetKillsInState(goal.requiredState, goal.targetTag);
 
-                rule.hasBeenMet = (rule.activeInState < _currentState) || (kills >= rule.requiredCount) || flagAlreadyUnlocked;
+                bool flagActive = !string.IsNullOrWhiteSpace(goal.giveFlag) && _activeFlags.Contains(goal.giveFlag.Trim());
+                bool pastState = goal.requiredState >= 0 && goal.requiredState < _currentState;
+
+                goal.isCompleted = pastState || kills >= goal.amount || flagActive;
             }
-        }
-    }
-    /// <summary>
-    /// Establece directamente el estado exacto deseado.
-    /// </summary>
-    public void SetState(int exactTargetState)
-    {
-        if (_currentState == exactTargetState) return;
-
-        _currentState = exactTargetState;
-        EvaluateCurrentState();
-
-        if (SaveManager.Instance != null && SaveManager.Instance.HasActiveSession)
-        {
-            _ = SaveManager.Instance.AutoSaveRunAsync();
-        }
-    }
-    /// <summary>
-    /// Alias de compatibilidad para llamadas previas desde UnityEvents.
-    /// </summary>
-    public void SetExactState(int exactTargetState) => SetState(exactTargetState);
-    /// <summary>
-    /// Suma una cantidad específica al estado actual (Ej: +1, +2).
-    /// </summary>
-    public void AddState(int amount)
-    {
-        if (amount == 0) return;
-
-        _currentState += amount;
-        EvaluateCurrentState();
-
-        if (SaveManager.Instance != null && SaveManager.Instance.HasActiveSession)
-        {
-            _ = SaveManager.Instance.AutoSaveRunAsync();
-        }
-    }
-    /// <summary>
-    /// Avanza el estado actual en +1.
-    /// </summary>
-    public void AddStatePoint() => AddState(1);
-
-    /// <summary>
-    /// Registra la muerte de una entidad o destrucción de un objeto en el estado actual.
-    /// </summary>
-    public void RegisterEntityKilled(string entityTag = "Untagged")
-    {
-        var key = (_currentState, entityTag);
-        if (!_killsByStateAndTag.ContainsKey(key))
-            _killsByStateAndTag[key] = 0;
-
-        _killsByStateAndTag[key]++;
-        EvaluateObjectiveRules();
-    }
-
-    /// <summary>
-    /// Consulta cuántas entidades con cierto Tag fueron eliminadas en un estado específico.
-    /// </summary>
-    public int GetKillsInState(int state, string entityTag)
-    {
-        return _killsByStateAndTag.TryGetValue((state, entityTag), out int count) ? count : 0;
-    }
-    private void EvaluateObjectiveRules()
-    {
-        if (_objectiveRules == null) return;
-
-        int stateAtEvaluation = _currentState;
-
-        for (int i = 0; i < _objectiveRules.Length; i++)
-        {
-            StateObjectiveRule rule = _objectiveRules[i];
-            if (rule.hasBeenMet) continue;
-            if (rule.activeInState != stateAtEvaluation) continue;
-
-            int currentKills = GetKillsInState(stateAtEvaluation, rule.targetTag);
-            if (currentKills >= rule.requiredCount)
-            {
-                rule.hasBeenMet = true;
-
-                if (!string.IsNullOrWhiteSpace(rule.flagToUnlock))
-                    _unlockedFlags.Add(rule.flagToUnlock);
-
-                rule.onObjectiveMet?.Invoke();
-
-                if (rule.targetStateOnComplete >= 0)
-                {
-                    SetState(rule.targetStateOnComplete);
-                }
-            }
-        }
-    }
-    public bool CheckFlag(string flag)
-    {
-        return !string.IsNullOrWhiteSpace(flag) && _unlockedFlags.Contains(flag);
-    }
-    public void SetFlag(string flag, bool active)
-    {
-        if (string.IsNullOrWhiteSpace(flag)) return;
-
-        if (active) _unlockedFlags.Add(flag);
-        else _unlockedFlags.Remove(flag);
-    }
-    public bool HasEventTriggered(string eventID)
-    {
-        return !string.IsNullOrWhiteSpace(eventID) && _triggeredEventIDs.Contains(eventID);
-    }
-    public void MarkEventAsTriggered(string eventID)
-    {
-        if (!string.IsNullOrWhiteSpace(eventID))
-            _triggeredEventIDs.Add(eventID);
-    }
-    private void EvaluateCurrentState()
-    {
-        OnStateChanged?.Invoke(_currentState);
-
-        if (_stateEventsLookup.TryGetValue(_currentState, out UnityEvent stateEvent))
-        {
-            stateEvent?.Invoke();
         }
     }
 }

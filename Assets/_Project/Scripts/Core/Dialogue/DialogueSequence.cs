@@ -6,7 +6,7 @@ using UnityEngine.Localization;
     public LocalizedString SpeakerName;
     public LocalizedString DialogueText;
     public Sprite SpeakerSprite;
-    [Range(0, 0.1f)] public float CustomTextSpeed;
+    [Range(0.01f, 0.5f)] public float CustomTextSpeed;
     [Header("Eventos de Línea")]
     public string LineEndEventID;
 }
@@ -19,8 +19,8 @@ using UnityEngine.Localization;
 public class DialogueSequence : ScriptableObject
 {
     [Header("Estilo de UI (Opcional)")]
-    [Tooltip("Dejar vacío para la UI por defecto, o escribir el uiID de DialogueUI (ej: 'Pensamiento', 'Cartel').")]
-    public string CustomUIID;
+    [Tooltip("Dejar vacío para la UI por defecto, o escribir el ID de DialogueUI (ej: 'Pensamiento', 'Cartel').")]
+    public string id;
     [Header("Contenido")]
     public DialogueLine[] Lines;
     public DialogueOption[] Options;

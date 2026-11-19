@@ -51,10 +51,6 @@ MonoBehaviour:
     m_Key: VILEUTCH_INITIAL6
     m_Metadata:
       m_Items: []
-  - m_Id: 13006011530625024
-    m_Key: VILEUTCH_INITIAL7
-    m_Metadata:
-      m_Items: []
   - m_Id: 12889340392390662
     m_Key: LITHOSELLE_INITIAL
     m_Metadata:
@@ -103,12 +99,12 @@ MonoBehaviour:
     m_Key: LITHOSELLE_PILLAR3
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128522
-    m_Key: LITHOSELLE_PILLAR4
+  - m_Id: 13087623656128521
+    m_Key: LITHOSELLE_PILLAR3
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128523
-    m_Key: LITHOSELLE_PILLAR5
+  - m_Id: 13087623656128522
+    m_Key: LITHOSELLE_PILLAR4
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128524
@@ -157,6 +153,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 13166524747104258
     m_Key: LITHOSELLE_HEAL_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14141076897677312
+    m_Key: LITHOSELLE_NOTHING_ANSWER
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14141077191278592
+    m_Key: LITHOSELLE_WAKE1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14141077191278593
+    m_Key: LITHOSELLE_WAKE2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14141077191278594
+    m_Key: LITHOSELLE_WAKE3
     m_Metadata:
       m_Items: []
   m_Metadata:

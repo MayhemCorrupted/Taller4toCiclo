@@ -438,7 +438,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7824747}
   m_Layer: 0
-  m_Name: Managers
+  m_Name: In-Game Managers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6845,8 +6845,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Option B
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
+  m_sharedMaterial: {fileID: 4685778547123066004, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6876,19 +6876,19 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
-  m_characterHorizontalScale: 1
+  m_characterHorizontalScale: 0.9
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
+  m_wordWrappingRatios: 0.373
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
@@ -19536,6 +19536,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 297125704}
   m_CullTransparentMesh: 1
+--- !u!1001 &308470455
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5924538106955276852, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_Name
+      value: Graphics Manager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8444230467632183207, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c7cc557bd79876c4db1cd61feea64c86, type: 3}
 --- !u!1 &310198765
 GameObject:
   m_ObjectHideFlags: 0
@@ -33873,50 +33930,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 77071562cda7a1c4c869d14e994b9d9f, type: 3}
---- !u!1 &645243784
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 645243785}
-  - component: {fileID: 645243786}
-  m_Layer: 0
-  m_Name: Language
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &645243785
+--- !u!4 &645243785 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+  m_PrefabInstance: {fileID: 1145476256224936130}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 645243784}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7824747}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &645243786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 645243784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9630b191466f594e9f0a17d5e655719, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageManager
 --- !u!43 &645498805
 Mesh:
   m_ObjectHideFlags: 0
@@ -48410,7 +48428,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSceneEventHandler
   _eventBindings:
-  - eventID: StartFade
+  - eventID: StartGameplay
     onEventTriggered:
       m_PersistentCalls:
         m_Calls:
@@ -48814,7 +48832,7 @@ MeshCollider:
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
-  m_CookingOptions: 30
+  m_CookingOptions: 2
   m_Mesh: {fileID: -3403604149546326829, guid: dbd99352639aa74458e6549060033eaa, type: 3}
 --- !u!64 &855331491
 MeshCollider:
@@ -48868,7 +48886,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: c93ee1ab852c9ec4e9ea77a61021fcb5, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 72a457c1f5bf4fb44af0c0beefc1d8b6, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &856514314
 GameObject:
@@ -71130,6 +71148,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4333302466454926694, guid: 5453e1372a8e7c1498d95d4714e55ad1, type: 3}
   m_PrefabInstance: {fileID: 1333276624}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1337709983
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5128346359639625752, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6566591786242846589, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
+      propertyPath: m_Name
+      value: Audio Manager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0598798e5261b9541a97fcb22317f61b, type: 3}
 --- !u!43 &1341428360
 Mesh:
   m_ObjectHideFlags: 0
@@ -71325,7 +71400,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1341516862
 RectTransform:
   m_ObjectHideFlags: 0
@@ -82405,22 +82480,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
-  _objectiveRules: []
-  _stateEvents:
-  - stateValue: 0
-    onStateEntered:
+  _goals:
+  - title: 
+    requiredState: 0
+    targetTag: 
+    amount: 0
+    giveFlag: 
+    nextState: 0
+    onCompleted:
+      m_PersistentCalls:
+        m_Calls: []
+    isCompleted: 0
+  _onStateEnter:
+  - state: 0
+    onEnter:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1768172764}
-          m_TargetAssemblyTypeName: 
-          m_MethodName: 
-          m_Mode: 0
+        - m_Target: {fileID: 851241653}
+          m_TargetAssemblyTypeName: DialogueManager, Assembly-CSharp
+          m_MethodName: StartCustomDialogue
+          m_Mode: 2
           m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: 
+            m_ObjectArgument: {fileID: 11400000, guid: 61f134e704c374b49bb180a5d82079f6, type: 2}
+            m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
             m_IntArgument: 0
             m_FloatArgument: 0
-            m_StringArgument: 
+            m_StringArgument: VileutchMonologue
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!43 &1501869636
@@ -85299,23 +85384,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueUI
   _playerHUD: {fileID: 7795036303825140426}
   _defaultUI:
-    uiID: Default
-    dialoguePanel: {fileID: 1863666169}
+    id: default
+    panel: {fileID: 1863666169}
     canvasGroup: {fileID: 1863666173}
-    speakerNameTMP: {fileID: 1704020201}
-    dialogueTextTMP: {fileID: 1419789774}
-    speakerPortrait: {fileID: 1453253771}
-    optionsContainer: {fileID: 1341516861}
+    nameText: {fileID: 1704020201}
+    bodyText: {fileID: 1419789774}
+    portrait: {fileID: 1453253771}
+    optionsPanel: {fileID: 1341516861}
     optionButtons:
     - {fileID: 634121183}
     - {fileID: 1613708219}
     - {fileID: 1328767739}
-    optionTMP:
+    optionTexts:
     - {fileID: 1908108219}
     - {fileID: 191637264}
     - {fileID: 1750018382}
-    interactionPromptTMP: {fileID: 638315035}
-    skipTypingLocalizedString:
+    promptText: {fileID: 638315035}
+    skipText:
       m_TableReference:
         m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
       m_TableEntryReference:
@@ -85324,7 +85409,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextLineLocalizedString:
+    nextText:
       m_TableReference:
         m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
       m_TableEntryReference:
@@ -85333,24 +85418,24 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    defaultTextSpeed: 0.03
-    skipPromptDelay: 7
-    nextPromptDelay: 2
-    commaPauseDelay: 0.25
-    periodPauseDelay: 1
-    specialSignPauseDelay: 1
+    textSpeed: 0.03
+    skipDelay: 7
+    nextDelay: 1.5
+    commaPause: 0.15
+    periodPause: 0.3
+    signPause: 0.25
   _customUIs:
-  - uiID: VileutchMonologue
-    dialoguePanel: {fileID: 1487788976}
+  - id: VileutchMonologue
+    panel: {fileID: 1487788976}
     canvasGroup: {fileID: 1403522796}
-    speakerNameTMP: {fileID: 0}
-    dialogueTextTMP: {fileID: 1403522794}
-    speakerPortrait: {fileID: 0}
-    optionsContainer: {fileID: 0}
+    nameText: {fileID: 0}
+    bodyText: {fileID: 1403522794}
+    portrait: {fileID: 0}
+    optionsPanel: {fileID: 0}
     optionButtons: []
-    optionTMP: []
-    interactionPromptTMP: {fileID: 49345094}
-    skipTypingLocalizedString:
+    optionTexts: []
+    promptText: {fileID: 49345094}
+    skipText:
       m_TableReference:
         m_TableCollectionName: 
       m_TableEntryReference:
@@ -85359,7 +85444,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextLineLocalizedString:
+    nextText:
       m_TableReference:
         m_TableCollectionName: 
       m_TableEntryReference:
@@ -85368,13 +85453,13 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    defaultTextSpeed: 0.04
-    skipPromptDelay: 10
-    nextPromptDelay: 2
-    commaPauseDelay: 0.25
-    periodPauseDelay: 1
-    specialSignPauseDelay: 1
-  _fadePanelDuration: 0.2
+    textSpeed: 0.04
+    skipDelay: 10
+    nextDelay: 2
+    commaPause: 0.15
+    periodPause: 0.3
+    signPause: 0.25
+  _fadeDuration: 0.5
   references:
     version: 2
     RefIds: []
@@ -96892,8 +96977,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Option C
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
+  m_sharedMaterial: {fileID: 4685778547123066004, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -96923,19 +97008,19 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
-  m_characterHorizontalScale: 1
+  m_characterHorizontalScale: 0.9
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
+  m_wordWrappingRatios: 0.373
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
@@ -101977,8 +102062,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Opcion A
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
+  m_sharedMaterial: {fileID: 4685778547123066004, guid: 1b5a6fa980512034fa1630fc93827e65, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -102008,19 +102093,19 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
-  m_characterHorizontalScale: 1
+  m_characterHorizontalScale: 0.9
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
+  m_wordWrappingRatios: 0.373
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
@@ -113682,11 +113767,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ded70407f7c0a82419b76bf6e4af5410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
-  defaultSequence: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
-  stateDialogues: []
-  _overrideUIID: 
-  loopDialogue: 0
-  OnInteractEveryTime:
+  _defaultDialogue: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
+  _branches: []
+  _defaultUIID: 
+  _canRepeat: 1
+  OnInteract:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &2146065897
@@ -114255,6 +114340,63 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1001 &1145476256224936130
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7824747}
+    m_Modifications:
+    - target: {fileID: 4733344894606279303, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_Name
+      value: Language
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5893014401393509131, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dd9b34a8d95316e4bae1c7e693cc2d05, type: 3}
 --- !u!224 &1241176140286691020
 RectTransform:
   m_ObjectHideFlags: 0
@@ -119586,8 +119728,10 @@ NavMeshObstacle:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 431508279}
+  - {fileID: 1337709983}
+  - {fileID: 308470455}
   - {fileID: 7824747}
+  - {fileID: 431508279}
   - {fileID: 1709965398}
   - {fileID: 1399852358}
   - {fileID: 2134032552}

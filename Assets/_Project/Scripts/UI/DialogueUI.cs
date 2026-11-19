@@ -7,95 +7,92 @@ using UnityEngine.Localization;
 using UnityEngine.UI;
 [Serializable] public struct DialogueUIPreset
 {
-    [Tooltip("Identificador único para invocar esta UI (ej: 'Pensamiento', 'Cartel', 'Cinematica').")]
-    public string uiID;
+    [Tooltip("ID único para invocar esta UI (ej: 'Pensamiento', 'Cartel', 'Cinematica').")]
+    public string id;
 
     [Header("Panel Principal")]
-    public GameObject dialoguePanel;
+    public GameObject panel;
     public CanvasGroup canvasGroup;
 
     [Header("Textos y Retrato")]
-    public TextMeshProUGUI speakerNameTMP;
-    public TextMeshProUGUI dialogueTextTMP;
-    public Image speakerPortrait;
+    public TextMeshProUGUI nameText;
+    public TextMeshProUGUI bodyText;
+    public Image portrait;
 
     [Header("Opciones de Respuesta")]
-    public GameObject optionsContainer;
+    public GameObject optionsPanel;
     public Button[] optionButtons;
-    public TextMeshProUGUI[] optionTMP;
+    public TextMeshProUGUI[] optionTexts;
 
-    [Header("Prompt de Interacción")]
-    public TextMeshProUGUI interactionPromptTMP;
-    [Tooltip("Opcional: Si se deja vacío, usará el LocalizedString de la UI por defecto.")]
-    public LocalizedString skipTypingLocalizedString;
-    [Tooltip("Opcional: Si se deja vacío, usará el LocalizedString de la UI por defecto.")]
-    public LocalizedString nextLineLocalizedString;
+    [Header("Aviso de Interacción")]
+    public TextMeshProUGUI promptText;
+    [Tooltip("Si se deja vacío, usa el texto de la UI por defecto.")]
+    public LocalizedString skipText;
+    [Tooltip("Si se deja vacío, usa el texto de la UI por defecto.")]
+    public LocalizedString nextText;
 
-    [Header("Tiempos y Velocidad de Texto")]
-    [Tooltip("Velocidad base por carácter en esta UI (recomendado: 0.03).")]
-    [Range(0.01f, 0.1f)] public float defaultTextSpeed;
-    [Tooltip("Segundos antes de mostrar el aviso para saltar el tipeo (recomendado: 1.5).")]
-    [Min(0f)] public float skipPromptDelay;
-    [Tooltip("Segundos antes de mostrar el aviso para pasar a la siguiente línea (recomendado: 0.2).")]
-    [Min(0f)] public float nextPromptDelay;
+    [Header("Velocidad y Tiempos (Segundos)")]
+    [Tooltip("Segundos por carácter. 0.03 = normal | 0.15 = lento | 0.5 = muy lento.")]
+    [Range(0.01f, 0.5f)] public float textSpeed;
+    [Tooltip("Espera antes de mostrar el aviso para saltar texto (recomendado: 1.5).")]
+    [Min(0f)] public float skipDelay;
+    [Tooltip("Espera antes de mostrar el aviso para continuar (recomendado: 0.2).")]
+    [Min(0f)] public float nextDelay;
 
     [Header("Pausas por Puntuación (Segundos Extra)")]
-    [Tooltip("Pausa adicional al detectar comas o punto y coma (, ; :) (recomendado: 0.15).")]
-    [Min(0f)] public float commaPauseDelay;
-    [Tooltip("Pausa adicional al detectar puntos (.) (recomendado: 0.3).")]
-    [Min(0f)] public float periodPauseDelay;
-    [Tooltip("Pausa adicional al detectar signos de exclamación o interrogación (! ?) (recomendado: 0.25).")]
-    [Min(0f)] public float specialSignPauseDelay;
+    [Tooltip("Pausa en coma, punto y coma o dos puntos (, ; :) (recomendado: 0.15).")]
+    [Min(0f)] public float commaPause;
+    [Tooltip("Pausa en punto o puntos suspensivos (. …) (recomendado: 0.3).")]
+    [Min(0f)] public float periodPause;
+    [Tooltip("Pausa en exclamación o interrogación (! ?) (recomendado: 0.25).")]
+    [Min(0f)] public float signPause;
 }
 public class DialogueUI : MonoBehaviour
 {
     [Header("HUD del Jugador")]
     [SerializeField] private GameObject _playerHUD;
 
-    [Header("Configuración de UI por Defecto")]
+    [Header("UI por Defecto")]
     [SerializeField] private DialogueUIPreset _defaultUI;
 
-    [Header("Configuraciones de UI Personalizadas")]
+    [Header("UIs Personalizadas")]
     [SerializeField] private DialogueUIPreset[] _customUIs;
 
     [Header("Animación de Panel")]
-    [SerializeField] private float _fadePanelDuration = 0.3f;
+    [SerializeField] private float _fadeDuration = 0.3f;
 
     public bool IsTyping { get; private set; }
-    public string ActiveUIID => _activeUI.uiID;
+    public string ActiveUIID => _activeUI.id;
 
     private DialogueUIPreset _activeUI;
-    private DialogueLine? _currentLine = null;
     private Coroutine _typingCoroutine;
     private Coroutine _promptCoroutine;
     private float _currentTextSpeed;
-    private string _currentInteractKeyName = "E";
-    private float _typingPercentage = 0f;
+    private string _interactKeyName = "E";
     private void Reset()
     {
         _defaultUI = new DialogueUIPreset
         {
-            uiID = "Default",
-            defaultTextSpeed = 0.03f,
-            skipPromptDelay = 1.5f,
-            nextPromptDelay = 0.2f,
-            commaPauseDelay = 0.15f,
-            periodPauseDelay = 0.3f,
-            specialSignPauseDelay = 0.25f
+            id = "Default",
+            textSpeed = 0.03f,
+            skipDelay = 1.5f,
+            nextDelay = 0.2f,
+            commaPause = 0.15f,
+            periodPause = 0.3f,
+            signPause = 0.25f
         };
     }
     private void OnValidate()
     {
-        if (_defaultUI.defaultTextSpeed <= 0f)
-            _defaultUI.defaultTextSpeed = 0.03f;
+        if (_defaultUI.textSpeed <= 0f)
+            _defaultUI.textSpeed = 0.03f;
 
-        if (_customUIs != null)
+        if (_customUIs == null) return;
+
+        for (int i = 0; i < _customUIs.Length; i++)
         {
-            for (int i = 0; i < _customUIs.Length; i++)
-            {
-                if (_customUIs[i].defaultTextSpeed <= 0f)
-                    _customUIs[i].defaultTextSpeed = 0.03f;
-            }
+            if (_customUIs[i].textSpeed <= 0f)
+                _customUIs[i].textSpeed = 0.03f;
         }
     }
     private void Awake()
@@ -114,19 +111,19 @@ public class DialogueUI : MonoBehaviour
     }
     private void InitializePreset(ref DialogueUIPreset preset)
     {
-        if (preset.defaultTextSpeed <= 0f)
-            preset.defaultTextSpeed = 0.03f;
+        if (preset.textSpeed <= 0f)
+            preset.textSpeed = 0.03f;
 
-        if (preset.canvasGroup == null && preset.dialoguePanel != null)
-            preset.canvasGroup = preset.dialoguePanel.GetComponent<CanvasGroup>();
+        if (preset.canvasGroup == null && preset.panel != null)
+            preset.canvasGroup = preset.panel.GetComponent<CanvasGroup>();
 
-        if (preset.dialoguePanel != null)
-            preset.dialoguePanel.SetActive(false);
+        if (preset.panel != null)
+            preset.panel.SetActive(false);
 
         HidePresetOptions(preset);
 
-        if (preset.interactionPromptTMP != null)
-            preset.interactionPromptTMP.gameObject.SetActive(false);
+        if (preset.promptText != null)
+            preset.promptText.gameObject.SetActive(false);
     }
     private void OnDisable()
     {
@@ -154,14 +151,14 @@ public class DialogueUI : MonoBehaviour
         string trimmedID = uiID.Trim();
         for (int i = 0; i < _customUIs.Length; i++)
         {
-            if (string.Equals(_customUIs[i].uiID?.Trim(), trimmedID, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_customUIs[i].id?.Trim(), trimmedID, StringComparison.OrdinalIgnoreCase))
             {
                 _activeUI = _customUIs[i];
                 return;
             }
         }
 
-        Debug.LogWarning($"[DialogueUI] No se encontró una UI con el ID '{uiID}'. Se usará la UI por defecto.");
+        GameLogger.LogWarning($"[DialogueUI] No se encontró una UI con el ID '{uiID}'. Se usará la UI por defecto.");
         _activeUI = _defaultUI;
     }
     public void UseCustomUI(int customIndex)
@@ -176,33 +173,31 @@ public class DialogueUI : MonoBehaviour
     }
     public void UseCustomUI(DialogueUIPreset customPreset)
     {
-        if (customPreset.defaultTextSpeed <= 0f)
-            customPreset.defaultTextSpeed = 0.03f;
+        if (customPreset.textSpeed <= 0f)
+            customPreset.textSpeed = 0.03f;
 
         _activeUI = customPreset;
     }
     public void SwitchActiveUI(string uiID)
     {
-        GameObject previousPanel = _activeUI.dialoguePanel;
+        GameObject previousPanel = _activeUI.panel;
         UnsubscribeCurrentLine();
         HideAllOptions();
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-        if (_activeUI.interactionPromptTMP != null) _activeUI.interactionPromptTMP.gameObject.SetActive(false);
+        if (_activeUI.promptText != null) _activeUI.promptText.gameObject.SetActive(false);
 
         if (string.IsNullOrWhiteSpace(uiID))
             UseDefaultUI();
         else
             UseCustomUI(uiID);
 
-        if (previousPanel != null && previousPanel != _activeUI.dialoguePanel)
-        {
+        if (previousPanel != null && previousPanel != _activeUI.panel)
             previousPanel.SetActive(false);
-        }
 
-        if (_activeUI.dialoguePanel != null && !_activeUI.dialoguePanel.activeSelf)
+        if (_activeUI.panel != null && !_activeUI.panel.activeSelf)
         {
-            _activeUI.dialoguePanel.SetActive(true);
+            _activeUI.panel.SetActive(true);
             if (_activeUI.canvasGroup != null) _activeUI.canvasGroup.alpha = 1f;
         }
     }
@@ -210,16 +205,16 @@ public class DialogueUI : MonoBehaviour
     {
         if (_playerHUD != null) _playerHUD.SetActive(false);
 
-        DeactivateAllPanelsExcept(_activeUI.dialoguePanel);
+        DeactivateAllPanelsExcept(_activeUI.panel);
 
-        if (_activeUI.dialoguePanel != null) _activeUI.dialoguePanel.SetActive(true);
+        if (_activeUI.panel != null) _activeUI.panel.SetActive(true);
         HideAllOptions();
 
         if (_activeUI.canvasGroup != null)
         {
             LeanTween.cancel(_activeUI.canvasGroup.gameObject);
             _activeUI.canvasGroup.alpha = 0f;
-            LeanTween.alphaCanvas(_activeUI.canvasGroup, 1f, _fadePanelDuration)
+            LeanTween.alphaCanvas(_activeUI.canvasGroup, 1f, _fadeDuration)
                      .setEaseOutCubic()
                      .setOnComplete(() => onComplete?.Invoke());
         }
@@ -234,12 +229,12 @@ public class DialogueUI : MonoBehaviour
         HideAllOptions();
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-        if (_activeUI.interactionPromptTMP != null) _activeUI.interactionPromptTMP.gameObject.SetActive(false);
+        if (_activeUI.promptText != null) _activeUI.promptText.gameObject.SetActive(false);
 
         if (_activeUI.canvasGroup != null)
         {
             LeanTween.cancel(_activeUI.canvasGroup.gameObject);
-            LeanTween.alphaCanvas(_activeUI.canvasGroup, 0f, _fadePanelDuration)
+            LeanTween.alphaCanvas(_activeUI.canvasGroup, 0f, _fadeDuration)
                      .setEaseInCubic()
                      .setOnComplete(() => FinalizeClose(onComplete));
         }
@@ -250,103 +245,94 @@ public class DialogueUI : MonoBehaviour
     }
     private void FinalizeClose(Action onComplete)
     {
-        if (_activeUI.dialoguePanel != null) _activeUI.dialoguePanel.SetActive(false);
+        if (_activeUI.panel != null) _activeUI.panel.SetActive(false);
         if (_playerHUD != null) _playerHUD.SetActive(true);
-        if (_activeUI.dialogueTextTMP != null) _activeUI.dialogueTextTMP.text = string.Empty;
+        if (_activeUI.bodyText != null) _activeUI.bodyText.text = string.Empty;
 
         _activeUI = _defaultUI;
-
         onComplete?.Invoke();
     }
     private void DeactivateAllPanelsExcept(GameObject activePanel)
     {
-        if (_defaultUI.dialoguePanel != null && _defaultUI.dialoguePanel != activePanel)
-            _defaultUI.dialoguePanel.SetActive(false);
+        if (_defaultUI.panel != null && _defaultUI.panel != activePanel)
+            _defaultUI.panel.SetActive(false);
 
         if (_customUIs == null) return;
         for (int i = 0; i < _customUIs.Length; i++)
         {
-            if (_customUIs[i].dialoguePanel != null && _customUIs[i].dialoguePanel != activePanel)
-                _customUIs[i].dialoguePanel.SetActive(false);
+            if (_customUIs[i].panel != null && _customUIs[i].panel != activePanel)
+                _customUIs[i].panel.SetActive(false);
         }
     }
     public void UpdateInteractKeyName(string keyName)
     {
-        _currentInteractKeyName = keyName;
+        _interactKeyName = keyName;
     }
     private void UnsubscribeCurrentLine()
     {
-        if (LanguageManager.Instance != null)
-        {
-            if (_activeUI.speakerNameTMP != null)
-                LanguageManager.Instance.UnbindText(_activeUI.speakerNameTMP);
+        if (LanguageManager.Instance == null) return;
 
-            if (_activeUI.dialogueTextTMP != null)
-                LanguageManager.Instance.UnbindText(_activeUI.dialogueTextTMP);
-        }
-        _currentLine = null;
+        if (_activeUI.nameText != null)
+            LanguageManager.Instance.UnbindText(_activeUI.nameText);
+
+        if (_activeUI.bodyText != null)
+            LanguageManager.Instance.UnbindText(_activeUI.bodyText);
     }
     public void ShowLine(DialogueLine line)
     {
         UnsubscribeCurrentLine();
-        _currentLine = line;
-        _typingPercentage = 0f;
         IsTyping = false;
 
-        if (_activeUI.dialogueTextTMP != null)
+        if (_activeUI.bodyText != null)
         {
-            _activeUI.dialogueTextTMP.text = string.Empty;
-            _activeUI.dialogueTextTMP.maxVisibleCharacters = 0;
+            _activeUI.bodyText.text = string.Empty;
+            _activeUI.bodyText.maxVisibleCharacters = 0;
         }
 
-        if (_activeUI.speakerPortrait != null)
+        if (_activeUI.portrait != null)
         {
-            _activeUI.speakerPortrait.sprite = line.SpeakerSprite;
-            _activeUI.speakerPortrait.gameObject.SetActive(line.SpeakerSprite != null);
+            _activeUI.portrait.sprite = line.SpeakerSprite;
+            _activeUI.portrait.gameObject.SetActive(line.SpeakerSprite != null);
         }
 
-        float presetTextSpeed = _activeUI.defaultTextSpeed > 0f ? _activeUI.defaultTextSpeed : 0.03f;
-        _currentTextSpeed = line.CustomTextSpeed > 0f ? line.CustomTextSpeed : presetTextSpeed;
+        float presetSpeed = _activeUI.textSpeed > 0f ? _activeUI.textSpeed : 0.03f;
+        _currentTextSpeed = line.CustomTextSpeed > 0f ? line.CustomTextSpeed : presetSpeed;
 
-        if (_activeUI.speakerNameTMP != null && LanguageManager.Instance != null)
+        if (_activeUI.nameText != null && LanguageManager.Instance != null)
         {
-            LanguageManager.Instance.BindText(_activeUI.speakerNameTMP, line.SpeakerName);
+            LanguageManager.Instance.BindText(_activeUI.nameText, line.SpeakerName);
         }
 
-        if (_activeUI.dialogueTextTMP != null && LanguageManager.Instance != null)
+        if (_activeUI.bodyText != null && LanguageManager.Instance != null)
         {
-            LanguageManager.Instance.BindText(_activeUI.dialogueTextTMP, line.DialogueText, (text) =>
+            LanguageManager.Instance.BindText(_activeUI.bodyText, line.DialogueText, (text) =>
             {
-                if (_activeUI.dialogueTextTMP.text == text && IsTyping) return;
+                if (_activeUI.bodyText.text == text && IsTyping) return;
 
                 if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
 
-                _activeUI.dialogueTextTMP.text = text;
-                _activeUI.dialogueTextTMP.maxVisibleCharacters = 0;
-
-                _typingPercentage = 0f;
+                _activeUI.bodyText.text = text;
+                _activeUI.bodyText.maxVisibleCharacters = 0;
                 _typingCoroutine = StartCoroutine(TypewriterRoutine());
             });
         }
     }
     private IEnumerator TypewriterRoutine()
     {
-        if (this == null || _activeUI.dialogueTextTMP == null) yield break;
+        if (this == null || _activeUI.bodyText == null) yield break;
 
         IsTyping = true;
         UpdateInteractionPrompt();
 
-        _activeUI.dialogueTextTMP.ForceMeshUpdate();
-        TMP_TextInfo textInfo = _activeUI.dialogueTextTMP.textInfo;
+        _activeUI.bodyText.ForceMeshUpdate();
+        TMP_TextInfo textInfo = _activeUI.bodyText.textInfo;
         int totalChars = textInfo.characterCount;
         int visibleCount = 0;
 
         while (visibleCount < totalChars)
         {
             visibleCount++;
-            _activeUI.dialogueTextTMP.maxVisibleCharacters = visibleCount;
-
-            _typingPercentage = (float)visibleCount / Mathf.Max(1, totalChars);
+            _activeUI.bodyText.maxVisibleCharacters = visibleCount;
 
             float waitDuration = _currentTextSpeed;
 
@@ -360,9 +346,9 @@ public class DialogueUI : MonoBehaviour
             yield return new WaitForSeconds(waitDuration);
         }
 
-        _typingPercentage = 1f;
         IsTyping = false;
-        SkipTypingEffect();
+        _typingCoroutine = null;
+        UpdateInteractionPrompt();
     }
     private float GetPunctuationDelay(char currentChar, char nextChar)
     {
@@ -371,9 +357,9 @@ public class DialogueUI : MonoBehaviour
 
         return currentChar switch
         {
-            ',' or ';' or ':' => _activeUI.commaPauseDelay,
-            '.' or '…' => _activeUI.periodPauseDelay,
-            '!' or '?' => _activeUI.specialSignPauseDelay,
+            ',' or ';' or ':' => _activeUI.commaPause,
+            '.' or '…' => _activeUI.periodPause,
+            '!' or '?' => _activeUI.signPause,
             _ => 0f,
         };
     }
@@ -385,12 +371,15 @@ public class DialogueUI : MonoBehaviour
     }
     public void SkipTypingEffect()
     {
-        if (this == null || _activeUI.dialogueTextTMP == null) return;
-        if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+        if (this == null || _activeUI.bodyText == null) return;
 
-        _typingPercentage = 1f;
-        _activeUI.dialogueTextTMP.maxVisibleCharacters = 99999;
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+        }
 
+        _activeUI.bodyText.maxVisibleCharacters = 99999;
         IsTyping = false;
         UpdateInteractionPrompt();
     }
@@ -399,8 +388,8 @@ public class DialogueUI : MonoBehaviour
         HidePresetOptions(_activeUI);
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-        if (_activeUI.interactionPromptTMP != null) _activeUI.interactionPromptTMP.gameObject.SetActive(false);
-        if (_activeUI.optionsContainer != null) _activeUI.optionsContainer.SetActive(true);
+        if (_activeUI.promptText != null) _activeUI.promptText.gameObject.SetActive(false);
+        if (_activeUI.optionsPanel != null) _activeUI.optionsPanel.SetActive(true);
 
         if (_activeUI.optionButtons == null) return;
 
@@ -410,9 +399,9 @@ public class DialogueUI : MonoBehaviour
             int index = i;
             _activeUI.optionButtons[index].gameObject.SetActive(true);
 
-            if (LanguageManager.Instance != null && _activeUI.optionTMP != null && index < _activeUI.optionTMP.Length && _activeUI.optionTMP[index] != null)
+            if (LanguageManager.Instance != null && _activeUI.optionTexts != null && index < _activeUI.optionTexts.Length && _activeUI.optionTexts[index] != null)
             {
-                LanguageManager.Instance.BindText(_activeUI.optionTMP[index], options[index].OptionText);
+                LanguageManager.Instance.BindText(_activeUI.optionTexts[index], options[index].OptionText);
             }
 
             _activeUI.optionButtons[index].onClick.RemoveAllListeners();
@@ -444,14 +433,14 @@ public class DialogueUI : MonoBehaviour
     }
     private void HidePresetOptions(DialogueUIPreset preset)
     {
-        if (preset.optionsContainer != null) preset.optionsContainer.SetActive(false);
+        if (preset.optionsPanel != null) preset.optionsPanel.SetActive(false);
         if (preset.optionButtons == null) return;
 
         for (int i = 0; i < preset.optionButtons.Length; i++)
         {
-            if (LanguageManager.Instance != null && preset.optionTMP != null && i < preset.optionTMP.Length && preset.optionTMP[i] != null)
+            if (LanguageManager.Instance != null && preset.optionTexts != null && i < preset.optionTexts.Length && preset.optionTexts[i] != null)
             {
-                LanguageManager.Instance.UnbindText(preset.optionTMP[i]);
+                LanguageManager.Instance.UnbindText(preset.optionTexts[i]);
             }
 
             if (preset.optionButtons[i] != null)
@@ -463,30 +452,30 @@ public class DialogueUI : MonoBehaviour
     }
     private void UpdateInteractionPrompt()
     {
-        if (this == null || _activeUI.interactionPromptTMP == null) return;
+        if (this == null || _activeUI.promptText == null) return;
 
         if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-        _activeUI.interactionPromptTMP.gameObject.SetActive(false);
+        _activeUI.promptText.gameObject.SetActive(false);
 
-        float delay = IsTyping ? _activeUI.skipPromptDelay : _activeUI.nextPromptDelay;
+        float delay = IsTyping ? _activeUI.skipDelay : _activeUI.nextDelay;
         _promptCoroutine = StartCoroutine(ShowPromptRoutine(delay));
     }
     private IEnumerator ShowPromptRoutine(float delay)
     {
         yield return new WaitForSeconds(delay);
 
-        if (_activeUI.interactionPromptTMP == null || LanguageManager.Instance == null) yield break;
+        if (_activeUI.promptText == null || LanguageManager.Instance == null) yield break;
 
         LocalizedString targetString = IsTyping
-            ? (!_activeUI.skipTypingLocalizedString.IsEmpty ? _activeUI.skipTypingLocalizedString : _defaultUI.skipTypingLocalizedString)
-            : (!_activeUI.nextLineLocalizedString.IsEmpty ? _activeUI.nextLineLocalizedString : _defaultUI.nextLineLocalizedString);
+            ? (!_activeUI.skipText.IsEmpty ? _activeUI.skipText : _defaultUI.skipText)
+            : (!_activeUI.nextText.IsEmpty ? _activeUI.nextText : _defaultUI.nextText);
 
-        LanguageManager.Instance.BindText(_activeUI.interactionPromptTMP, targetString, (text) =>
+        LanguageManager.Instance.BindText(_activeUI.promptText, targetString, (text) =>
         {
-            if (_activeUI.interactionPromptTMP != null)
+            if (_activeUI.promptText != null)
             {
-                _activeUI.interactionPromptTMP.text = text.Replace("{key}", _currentInteractKeyName);
-                _activeUI.interactionPromptTMP.gameObject.SetActive(true);
+                _activeUI.promptText.text = text.Replace("{key}", _interactKeyName);
+                _activeUI.promptText.gameObject.SetActive(true);
             }
         });
     }

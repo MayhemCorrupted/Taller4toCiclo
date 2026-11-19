@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
   m_Name: Vileutch Initial Monologue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  CustomUIID: VileutchMonologue
+  id: VileutchMonologue
   Lines:
   - SpeakerName:
       m_TableReference:
@@ -138,31 +138,10 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 8864743980417024
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
-        m_KeyId: 13006011530625024
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    SpeakerSprite: {fileID: 0}
-    CustomTextSpeed: 0.1
+    CustomTextSpeed: 0.0664
     LineEndEventID: 
   Options: []
-  SequenceEndEventID: StartFade
+  SequenceEndEventID: StartGameplay
   references:
     version: 2
     RefIds: []

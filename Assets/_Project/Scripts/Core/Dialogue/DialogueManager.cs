@@ -36,7 +36,7 @@ public class DialogueManager : MonoBehaviour
 
         string targetUI = !string.IsNullOrWhiteSpace(_pendingUIID)
             ? _pendingUIID
-            : sequence.CustomUIID;
+            : sequence.id;
 
         _pendingUIID = null;
 
@@ -57,8 +57,8 @@ public class DialogueManager : MonoBehaviour
 
         _pendingUIID = null;
 
-        if (!string.IsNullOrWhiteSpace(sequence.CustomUIID))
-            _dialogueUI.UseCustomUI(sequence.CustomUIID);
+        if (!string.IsNullOrWhiteSpace(sequence.id))
+            _dialogueUI.UseCustomUI(sequence.id);
         else
             _dialogueUI.UseCustomUI(0);
 
@@ -190,9 +190,9 @@ public class DialogueManager : MonoBehaviour
             }
 
             if (_currentSequence != null &&
-                !string.Equals(_currentSequence.CustomUIID?.Trim(), nextSequence.CustomUIID?.Trim(), StringComparison.OrdinalIgnoreCase))
+                !string.Equals(_currentSequence.id?.Trim(), nextSequence.id?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
-                _dialogueUI.SwitchActiveUI(nextSequence.CustomUIID);
+                _dialogueUI.SwitchActiveUI(nextSequence.id);
             }
 
             LoadSequence(nextSequence);
