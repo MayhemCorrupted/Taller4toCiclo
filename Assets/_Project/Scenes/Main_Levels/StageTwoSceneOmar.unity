@@ -648,6 +648,79 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51799260}
   m_CullTransparentMesh: 1
+--- !u!1001 &83641176
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 168.60294
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.9846303
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -133.83052
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5573558960044214447, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cc26cd8fd5f00f45ae3e33244b387e8, type: 2}
+    - target: {fileID: 919132149155446097, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: m_Name
+      value: Linterna
+      objectReference: {fileID: 0}
+    - target: {fileID: 2248506821417124045, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cc26cd8fd5f00f45ae3e33244b387e8, type: 2}
+    - target: {fileID: 2413087446710457377, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cc26cd8fd5f00f45ae3e33244b387e8, type: 2}
+    - target: {fileID: 7796480716395351343, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cc26cd8fd5f00f45ae3e33244b387e8, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ec7a0ec657018c248b4f63102b54bafb, type: 3}
 --- !u!1 &95059214 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8068073526183931155, guid: 8a78a335155fdc54394ce33099d557a3, type: 3}
@@ -6813,6 +6886,13 @@ MonoBehaviour:
   _hinge: {fileID: 430152121}
   _openAngle: 70
   _doorSpeed: 2
+  _isLocked: 0
+  OnInteractWhileLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorUnlocked:
+    m_PersistentCalls:
+      m_Calls: []
   _revertDirection: 0
   _forcedDirection: 0
 --- !u!1 &438135530 stripped
@@ -7012,6 +7092,9 @@ MonoBehaviour:
   OnVesaniaChangedEvent:
     m_PersistentCalls:
       m_Calls: []
+  OnCheckpointActivatedEvent:
+    m_PersistentCalls:
+      m_Calls: []
   OnLifeLostEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -7022,9 +7105,13 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _player: {fileID: 0}
+  _startingLives: 3
+  _vesania4HealthThreshold: 0.2
+  _resetVesaniaOnPurify: 1
   _vesaniaSpawnGroups:
   - requiredVesaniaLevel: 0
     objectsToActivate: []
+    objectsToDeactivate: []
   _statueCheckpointTransform: {fileID: 0}
 --- !u!1 &508624672
 GameObject:
@@ -23655,103 +23742,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
-  _tagRequirements: []
-  _stateSequence:
-  - requiredStateValue: 0
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - requiredStateValue: 1
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-  _currentProgression:
-    EntitiesKilled: 0
-    TotalEntities: 0
-    InteractionsCompleted: 0
-    TotalInteractions: 0
-  _progressionMilestones: []
-  onCombatCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onInteractionsCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onTotalProgressionCompleted:
-    m_PersistentCalls:
-      m_Calls: []
+  _objectiveRules: []
+  _stateEvents: []
 --- !u!4 &1508526092 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3014035706127421481, guid: b75c9aa0f13f9d64a8f78ec5fe05de77, type: 3}
@@ -27784,9 +27776,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   _pauseMenuUI: {fileID: 225891066}
   _inventoryPanelUI: {fileID: 110998165}
+  _gameOverUI: {fileID: 0}
   _panelToggleCooldown: 0.1
   _gameplayCursorTexture: {fileID: 0}
   _gameplayCursorHotspot: {x: 16, y: 16}
+  _interactCursorTexture: {fileID: 0}
+  _interactCursorHotspot: {x: 16, y: 16}
   _uiCursorTexture: {fileID: 0}
   _uiCursorHotspot: {x: 0, y: 0}
 --- !u!1 &1773690193
@@ -34172,6 +34167,13 @@ MonoBehaviour:
   _hinge: {fileID: 2118185935}
   _openAngle: 70
   _doorSpeed: 2
+  _isLocked: 0
+  OnInteractWhileLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorUnlocked:
+    m_PersistentCalls:
+      m_Calls: []
   _revertDirection: 0
   _forcedDirection: 0
 --- !u!65 &2118185937
@@ -34235,24 +34237,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
   defaultSequence: {fileID: 0}
+  stateDialogues: []
   _overrideUIID: 
-  conditionalOverrides: []
   loopDialogue: 0
-  OnInteractDialogue:
+  OnInteractEveryTime:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 851241653}
-        m_TargetAssemblyTypeName: DialogueManager, Assembly-CSharp
-        m_MethodName: StartDialogue
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 11400000, guid: ed8caee3ec396034d8a95d52a62bcdb3, type: 2}
-          m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!4 &403222912700237643
 Transform:
   m_ObjectHideFlags: 0
@@ -34817,3 +34807,4 @@ SceneRoots:
   - {fileID: 348194960}
   - {fileID: 1278759284}
   - {fileID: 1563741659}
+  - {fileID: 83641176}
