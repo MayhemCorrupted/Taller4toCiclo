@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 6204997315890622434}
   - component: {fileID: 1409534704617941714}
   m_Layer: 3
-  m_Name: Enemigo Errante
+  m_Name: Errante Catedral
   m_TagString: Errante
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0

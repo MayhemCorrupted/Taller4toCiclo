@@ -17,7 +17,7 @@ using UnityEngine.Events;
     [Min(1)] public int amount = 1;
 
     [Header("Recompensa / Resultado")]
-    [Tooltip("Palabra clave que se activa al completarlo (Ej: 'EnemigosLimpios').")]
+    [Tooltip("Bandera que se activa al completarlo (Ej: 'EnemigosLimpios').")]
     public string giveFlag;
 
     [Tooltip("Estado al que avanza automáticamente (-1 = mantener estado actual).")]
@@ -33,21 +33,35 @@ using UnityEngine.Events;
     public int state;
     public UnityEvent onEnter;
 }
+[Serializable] public struct DialogueEventAction
+{
+    [Tooltip("Debe coincidir con el SequenceEndEventID o LineEndEventID del diálogo.")]
+    public string eventID;
+    public UnityEvent onTriggered;
+}
 public class StateManager : MonoBehaviour
 {
     public static StateManager Instance { get; private set; }
+
     [Header("Progreso Actual")]
     [SerializeField] private int _currentState = 0;
+
     [Header("Objetivos (Matar / Destruir)")]
     [SerializeField] private MissionGoal[] _goals;
+
     [Header("Eventos al Entrar a un Estado")]
     [SerializeField] private StateAction[] _onStateEnter;
+
+    [Header("Eventos Disparados desde Diálogos")]
+    [SerializeField] private DialogueEventAction[] _dialogueEvents;
+
     public event Action<int> OnStateChanged;
     public int CurrentState => _currentState;
     private readonly Dictionary<(int state, string tag), int> _killsByStateAndTag = new();
     private readonly HashSet<string> _activeFlags = new();
     private readonly HashSet<string> _triggeredEvents = new();
     private readonly Dictionary<int, UnityEvent> _stateLookup = new();
+    private DialogueManager _dialogueManager;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -61,8 +75,17 @@ public class StateManager : MonoBehaviour
     }
     private void Start()
     {
+        _dialogueManager = FindAnyObjectByType<DialogueManager>();
+        if (_dialogueManager != null)
+            _dialogueManager.OnDialogueEventTriggered += HandleDialogueEvent;
+
         SyncFromSaveManager();
         NotifyStateEntered();
+    }
+    private void OnDestroy()
+    {
+        if (_dialogueManager != null)
+            _dialogueManager.OnDialogueEventTriggered -= HandleDialogueEvent;
     }
     private void SyncFromSaveManager()
     {
@@ -84,6 +107,19 @@ public class StateManager : MonoBehaviour
             }
         }
     }
+    private void HandleDialogueEvent(string eventID)
+    {
+        if (string.IsNullOrWhiteSpace(eventID) || _dialogueEvents == null) return;
+
+        string trimmedID = eventID.Trim();
+        for (int i = 0; i < _dialogueEvents.Length; i++)
+        {
+            if (string.Equals(_dialogueEvents[i].eventID?.Trim(), trimmedID, StringComparison.OrdinalIgnoreCase))
+            {
+                _dialogueEvents[i].onTriggered?.Invoke();
+            }
+        }
+    }
     public void SetState(int newState)
     {
         if (_currentState == newState) return;
@@ -93,9 +129,6 @@ public class StateManager : MonoBehaviour
         EvaluateGoals();
         AutoSaveIfActive();
     }
-    /// <summary>
-    /// Alias de compatibilidad para llamadas existentes en el Inspector.
-    /// </summary>
     public void SetExactState(int newState) => SetState(newState);
     public void AddState(int amount)
     {
@@ -108,7 +141,6 @@ public class StateManager : MonoBehaviour
     }
     public void NextState() => AddState(1);
     public void AddStatePoint() => AddState(1);
-
     public void RegisterEntityKilled(string entityTag = "Untagged")
     {
         var key = (_currentState, entityTag);
@@ -141,7 +173,6 @@ public class StateManager : MonoBehaviour
             MissionGoal goal = _goals[i];
             if (goal.isCompleted) continue;
 
-            // Si requiredState >= 0, se queda en ese estado exacto; si es -1, cuenta en cualquier estado
             if (goal.requiredState >= 0 && goal.requiredState != _currentState) continue;
 
             int currentCount = goal.requiredState < 0
@@ -184,7 +215,6 @@ public class StateManager : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(eventID))
             _triggeredEvents.Add(eventID);
     }
-
     private void NotifyStateEntered()
     {
         OnStateChanged?.Invoke(_currentState);
@@ -268,7 +298,6 @@ public class StateManager : MonoBehaviour
                 _killsByStateAndTag[(rec.state, rec.tag)] = rec.count;
             }
         }
-
         if (_goals != null)
         {
             for (int i = 0; i < _goals.Length; i++)

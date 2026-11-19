@@ -5322,17 +5322,6 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
---- !u!114 &136742267 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8717549765142134006, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-  m_PrefabInstance: {fileID: 493754141}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Health
 --- !u!1001 &142585913
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28131,67 +28120,6 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
   _statueCheckpointTransform: {fileID: 1559732516}
---- !u!1001 &493754141
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 95.4352
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.63
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -120.65044
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 530528606437522973, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_Name
-      value: Enemigo Errante Bosque 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 530528606437522973, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_TagString
-      value: ErrantesBosque
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
 --- !u!43 &494384403
 Mesh:
   m_ObjectHideFlags: 0
@@ -31663,67 +31591,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 584256399}
   m_Mesh: {fileID: 8095900138718097042, guid: b09a58e813c05324ebf1d9d29cac021b, type: 3}
---- !u!1001 &584436299
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 89.335205
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.63
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -120.45043
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 81512171728384102, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 530528606437522973, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_Name
-      value: Enemigo Errante Bosque 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 530528606437522973, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-      propertyPath: m_TagString
-      value: ErrantesBosque
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
 --- !u!43 &584553477
 Mesh:
   m_ObjectHideFlags: 0
@@ -48460,18 +48327,6 @@ MonoBehaviour:
             m_StringArgument: StartGameFade
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 1
-            m_FloatArgument: 0
-            m_StringArgument: StartGameFade
-            m_BoolArgument: 0
-          m_CallState: 2
   - eventID: StartMoveTutorial
     onEventTriggered:
       m_PersistentCalls:
@@ -48523,7 +48378,7 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 2
+            m_IntArgument: 1
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 1
@@ -48563,7 +48418,7 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 3
+            m_IntArgument: 2
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -48603,7 +48458,7 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 3
+            m_IntArgument: 2
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -48643,7 +48498,7 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 3
+            m_IntArgument: 2
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -55049,7 +54904,7 @@ Transform:
   m_GameObject: {fileID: 996403041}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 93.4, y: -1.2, z: -100.40001}
+  m_LocalPosition: {x: 93.4, y: -1.2, z: -104.71}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -60517,7 +60372,7 @@ Transform:
   m_GameObject: {fileID: 1059120823}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 93.4, y: -1.2, z: -81.10001}
+  m_LocalPosition: {x: 93.4, y: -1.2, z: -81.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -82481,12 +82336,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
   _goals:
-  - title: 
-    requiredState: 0
-    targetTag: 
-    amount: 0
-    giveFlag: 
-    nextState: 0
+  - title: Derrotar errantes
+    requiredState: 1
+    targetTag: Errante
+    amount: 2
+    giveFlag: ErrantesDerrotados
+    nextState: -1
+    onCompleted:
+      m_PersistentCalls:
+        m_Calls: []
+    isCompleted: 0
+  - title: Destruir pilares
+    requiredState: -1
+    targetTag: Pillar
+    amount: 3
+    giveFlag: PilaresRotos
+    nextState: -1
     onCompleted:
       m_PersistentCalls:
         m_Calls: []
@@ -82506,6 +82371,55 @@ MonoBehaviour:
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: VileutchMonologue
+            m_BoolArgument: 0
+          m_CallState: 2
+  _dialogueEvents:
+  - eventID: IniciarCombate
+    onTriggered:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1489273650}
+          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
+          m_MethodName: SetState
+          m_Mode: 3
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 1
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: IrEstadoPilares
+    onTriggered:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1489273650}
+          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
+          m_MethodName: SetState
+          m_Mode: 3
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 2
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: FinalizarMision
+    onTriggered:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1489273650}
+          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
+          m_MethodName: SetState
+          m_Mode: 3
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 3
+            m_FloatArgument: 0
+            m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!43 &1501869636
@@ -83952,6 +83866,67 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1001 &1525435789
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 82.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.63
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -120.45043
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3722455436666024862, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_Name
+      value: Errante Bosque
+      objectReference: {fileID: 0}
+    - target: {fileID: 6549579314429324720, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: _aggroRadius
+      value: 7
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
 --- !u!1 &1528926807
 GameObject:
   m_ObjectHideFlags: 0
@@ -85696,8 +85671,8 @@ MonoBehaviour:
   - {fileID: 1689846489}
   - {fileID: 352302252}
   _tutorialEnemies:
-  - {fileID: 1749783485}
-  - {fileID: 136742267}
+  - {fileID: 8717549764583093949}
+  - {fileID: 8717549765467319275}
   _requireBothSpecials: 0
   _lightAttackPrompt:
     LocalizedText:
@@ -96907,17 +96882,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e5a1c9282fe90ab47a850857ba6104a9, type: 3}
---- !u!114 &1749783485 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8717549765142134006, guid: 6cfb7310b3ba2c9439cbe1fcbb49dd2e, type: 3}
-  m_PrefabInstance: {fileID: 584436299}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Health
 --- !u!1 &1750018380
 GameObject:
   m_ObjectHideFlags: 0
@@ -113767,8 +113731,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ded70407f7c0a82419b76bf6e4af5410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
-  _defaultDialogue: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
-  _branches: []
+  _defaultDialogue: {fileID: 0}
+  _branches:
+  - title: Primera charla (Entrega Anathema)
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 11400000, guid: a6ccccf58b16a28489028a7985dcb755, type: 2}
+    runOnce: 1
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: "A\xFAn quedan enemigos"
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 0}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Enemigos limpios (Faltan pilares)
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 0}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Enemigos Y pilares ya destruidos
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 0}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Recordatorio pilares (Estado 2)
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 0}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: 
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 0}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
   _defaultUIID: 
   _canRepeat: 1
   OnInteract:
@@ -115991,6 +116009,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2183836342704105782}
   m_CullTransparentMesh: 1
+--- !u!1001 &6836598594022752811
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 95.4352
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.63
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -120.65044
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684321082760321475, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3722455436666024862, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+      propertyPath: m_Name
+      value: Errante Bosque 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
 --- !u!1 &6860784135979115767 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6860784136129761544, guid: dba15fe9136f720408fc3356383d579b, type: 3}
@@ -119205,6 +119280,28 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 13.668, y: 7.6670003, z: 0.127}
   m_TimeToStationary: 0.5
+--- !u!114 &8717549764583093949 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2627649867585659250, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+  m_PrefabInstance: {fileID: 1525435789}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+--- !u!114 &8717549765467319275 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2627649867585659250, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
+  m_PrefabInstance: {fileID: 6836598594022752811}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 085fb390267b17949835f0ccee2f9d5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
 --- !u!208 &8725386832506006291
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -119752,8 +119849,8 @@ SceneRoots:
   - {fileID: 1700749931}
   - {fileID: 1152502109}
   - {fileID: 1795583113}
-  - {fileID: 584436299}
-  - {fileID: 493754141}
+  - {fileID: 1525435789}
+  - {fileID: 6836598594022752811}
   - {fileID: 855331487}
   - {fileID: 212720843}
   - {fileID: 1167044749}
