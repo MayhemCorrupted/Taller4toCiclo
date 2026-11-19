@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Default Local Group
   m_GUID: 7b05dd9ffdabaf64cb36f5b3ae182b7b
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 7cc26cd8fd5f00f45ae3e33244b387e8
+    m_Address: Assets/_Project/Art/Textures/Materials/Linterna/Linterna Material.mat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: f3a1d042dbfc34543a45c3119cc71ccf, type: 2}
   m_SchemaSet:
