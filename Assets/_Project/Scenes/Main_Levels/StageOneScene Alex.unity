@@ -48311,22 +48311,6 @@ MonoBehaviour:
             m_StringArgument: StartGameFade
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: DisableSafeZone
-    onEventTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1004569377}
-          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_MethodName: SetActive
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 1
-            m_FloatArgument: 0
-            m_StringArgument: StartGameFade
-            m_BoolArgument: 0
-          m_CallState: 2
   - eventID: StartMoveTutorial
     onEventTriggered:
       m_PersistentCalls:
@@ -48343,7 +48327,23 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: StartCombatTutorial
+  - eventID: DisableSafeZone
+    onEventTriggered:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1004569377}
+          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_MethodName: SetActive
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 1
+            m_FloatArgument: 0
+            m_StringArgument: StartGameFade
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: DarAnathema
     onEventTriggered:
       m_PersistentCalls:
         m_Calls:
@@ -48371,17 +48371,33 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 1
           m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
+  - eventID: FinalizarMision
+    onEventTriggered:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2118185936}
+          m_TargetAssemblyTypeName: DoorController, Assembly-CSharp
+          m_MethodName: UnlockAndOpenDoor
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 1
+            m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
-            m_BoolArgument: 1
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 430152123}
+          m_TargetAssemblyTypeName: DoorController, Assembly-CSharp
+          m_MethodName: UnlockAndOpenDoor
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
           m_CallState: 2
   - eventID: GiftRedoma
     onEventTriggered:
@@ -48407,18 +48423,6 @@ MonoBehaviour:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 2
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -48451,18 +48455,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 2
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
   - eventID: GiftMemory
     onEventTriggered:
       m_PersistentCalls:
@@ -48491,46 +48483,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 1489273650}
-          m_TargetAssemblyTypeName: StateManager, Assembly-CSharp
-          m_MethodName: SetExactState
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 2
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - eventID: ResetInteraction
-    onEventTriggered:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: ResetInteraction
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: SetDefaultSequence
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 6e2e7fa1494e2484dbabe25a19aa761d, type: 2}
-            m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
   - eventID: OpenStat
     onEventTriggered:
       m_PersistentCalls:
@@ -48542,30 +48494,6 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: ResetInteraction
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 2145360389}
-          m_TargetAssemblyTypeName: DialogueInteraction, Assembly-CSharp
-          m_MethodName: SetDefaultSequence
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 6e2e7fa1494e2484dbabe25a19aa761d, type: 2}
-            m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
@@ -82338,7 +82266,7 @@ MonoBehaviour:
   _goals:
   - title: Derrotar errantes
     requiredState: 1
-    targetTag: Errante
+    targetTag: ErranteBosque
     amount: 2
     giveFlag: ErrantesDerrotados
     nextState: -1
@@ -82374,7 +82302,7 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   _dialogueEvents:
-  - eventID: IniciarCombate
+  - eventID: DarAnathema
     onTriggered:
       m_PersistentCalls:
         m_Calls:
@@ -82390,7 +82318,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: IrEstadoPilares
+  - eventID: IniciarPilares
     onTriggered:
       m_PersistentCalls:
         m_Calls:
@@ -83917,10 +83845,6 @@ PrefabInstance:
     - target: {fileID: 3722455436666024862, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
       propertyPath: m_Name
       value: Errante Bosque
-      objectReference: {fileID: 0}
-    - target: {fileID: 6549579314429324720, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
-      propertyPath: _aggroRadius
-      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -98383,7 +98307,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
       propertyPath: m_Name
-      value: WomanRockLow
+      value: Lithoselle
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
       propertyPath: m_Layer
@@ -113733,55 +113657,81 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
   _defaultDialogue: {fileID: 0}
   _branches:
-  - title: Primera charla (Entrega Anathema)
+  - title: Intro y entrega de Anathema
     state: 0
     requiredFlags: []
-    dialogue: {fileID: 11400000, guid: a6ccccf58b16a28489028a7985dcb755, type: 2}
+    dialogue: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
     runOnce: 1
     onStart:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 493622542}
+          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+          m_MethodName: ActivateCheckpoint
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
     customUIID: 
-  - title: "A\xFAn quedan enemigos"
-    state: 0
+  - title: Recordatorio enemigos
+    state: 1
     requiredFlags: []
-    dialogue: {fileID: 0}
+    dialogue: {fileID: 11400000, guid: 513b5b1e8c726fd48902f72e479b0e3c, type: 2}
     runOnce: 0
     onStart:
       m_PersistentCalls:
         m_Calls: []
     customUIID: 
-  - title: Enemigos limpios (Faltan pilares)
-    state: 0
-    requiredFlags: []
-    dialogue: {fileID: 0}
+  - title: Confirmar solo enemigos
+    state: 1
+    requiredFlags:
+    - ErrantesDerrotados
+    dialogue: {fileID: 11400000, guid: e9b7c06745c331b419636e4dbcb5c9b1, type: 2}
     runOnce: 0
     onStart:
       m_PersistentCalls:
         m_Calls: []
     customUIID: 
-  - title: Enemigos Y pilares ya destruidos
-    state: 0
-    requiredFlags: []
-    dialogue: {fileID: 0}
+  - title: Confirmar enemigos + pilares
+    state: 1
+    requiredFlags:
+    - ErrantesDerrotados
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: 2f841c8ea20c07a44a8fd6ead3e557d2, type: 2}
     runOnce: 0
     onStart:
       m_PersistentCalls:
         m_Calls: []
     customUIID: 
-  - title: Recordatorio pilares (Estado 2)
-    state: 0
+  - title: Recordatorio pilares
+    state: 2
     requiredFlags: []
-    dialogue: {fileID: 0}
+    dialogue: {fileID: 11400000, guid: fa0d70b9fee9daf49b16048b241dcf2b, type: 2}
     runOnce: 0
     onStart:
       m_PersistentCalls:
         m_Calls: []
     customUIID: 
-  - title: 
-    state: 0
-    requiredFlags: []
-    dialogue: {fileID: 0}
+  - title: Confirmar pilares
+    state: 2
+    requiredFlags:
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: d4d995f30a8a0394a837569099cdb585, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: "Post-misi\xF3n (Catedral abierta)"
+    state: 3
+    requiredFlags:
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: 95895c36adae20349ad5878568f77207, type: 2}
     runOnce: 0
     onStart:
       m_PersistentCalls:

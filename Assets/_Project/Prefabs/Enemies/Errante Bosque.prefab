@@ -562,7 +562,7 @@ GameObject:
   - component: {fileID: 7971053874470664046}
   m_Layer: 3
   m_Name: Errante Bosque
-  m_TagString: ErrantesBosque
+  m_TagString: ErranteBosque
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

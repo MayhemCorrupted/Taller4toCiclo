@@ -1,5 +1,4 @@
 using UnityEngine;
-
 [RequireComponent(typeof(Collider))]
 public class EntityProjectile : MonoBehaviour
 {
@@ -7,16 +6,18 @@ public class EntityProjectile : MonoBehaviour
     private Vector3 _direction;
     private float _speed;
     private float _damage;
+    private float _knockbackForce;
     private Transform _owner;
     private bool _isInitialized = false;
-    public void Init(Vector3 direction, float speed, float dmg, float lifetime, Transform owner)
+    public void Init(Vector3 direction, float speed, float dmg, float lifetime, Transform owner, float knockbackForce = 0f)
     {
         _direction = direction;
-        _direction.y = 0f; 
+        _direction.y = 0f;
         _direction.Normalize();
 
         _speed = speed;
         _damage = dmg;
+        _knockbackForce = knockbackForce;
         _owner = owner;
         _isInitialized = true;
 
@@ -44,7 +45,17 @@ public class EntityProjectile : MonoBehaviour
         PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
         if (health != null)
         {
-            health.TakeDamage(_damage);
+            bool damageApplied = health.TakeDamage(_damage);
+
+            if (damageApplied && _knockbackForce > 0f)
+            {
+                PlayerMovement movement = other.GetComponentInParent<PlayerMovement>();
+                if (movement != null)
+                {
+                    movement.ApplyKnockback(_direction, _knockbackForce);
+                }
+            }
+
             Destroy(gameObject);
         }
     }

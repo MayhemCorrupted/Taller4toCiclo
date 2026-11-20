@@ -138,7 +138,7 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     SpeakerSprite: {fileID: 0}
-    CustomTextSpeed: 0.0664
+    CustomTextSpeed: 0.3
     LineEndEventID: 
   Options: []
   SequenceEndEventID: StartGameplay

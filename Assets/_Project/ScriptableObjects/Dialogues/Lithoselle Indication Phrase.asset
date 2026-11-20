@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
   m_Name: Lithoselle Indication Phrase
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  CustomUIID: 
+  id: 
   Lines:
   - SpeakerName:
       m_TableReference:
@@ -33,7 +33,7 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     SpeakerSprite: {fileID: -255916515, guid: b3fe72aa6101bda448847006d1adfd2e, type: 3}
-    CustomTextSpeed: 0
+    CustomTextSpeed: 0.01
     LineEndEventID: 
   Options: []
   SequenceEndEventID: 

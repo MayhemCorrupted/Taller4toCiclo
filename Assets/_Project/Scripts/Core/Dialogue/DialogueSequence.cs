@@ -6,7 +6,7 @@ using UnityEngine.Localization;
     public LocalizedString SpeakerName;
     public LocalizedString DialogueText;
     public Sprite SpeakerSprite;
-    [Range(0.01f, 0.5f)] public float CustomTextSpeed;
+    [Range(0, 0.5f)] public float CustomTextSpeed;
     [Header("Eventos de Línea")]
     public string LineEndEventID;
 }

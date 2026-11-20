@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Presentation
+  m_Name: Lithoselle Seq_04A_EncargoPilares
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  CustomUIID: 
+  id: 
   Lines:
   - SpeakerName:
       m_TableReference:
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128514
+        m_KeyId: 13087623656128519
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128515
+        m_KeyId: 13087623656128520
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -69,7 +69,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128516
+        m_KeyId: 13087623656128521
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128517
+        m_KeyId: 13087623656128522
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128518
+        m_KeyId: 13087623656128523
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -120,7 +120,7 @@ MonoBehaviour:
     CustomTextSpeed: 0
     LineEndEventID: 
   Options: []
-  SequenceEndEventID: StartCombatTutorial
+  SequenceEndEventID: IniciarPilares
   references:
     version: 2
     RefIds: []
