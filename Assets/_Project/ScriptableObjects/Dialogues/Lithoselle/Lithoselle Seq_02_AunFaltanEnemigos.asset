@@ -16,9 +16,9 @@ MonoBehaviour:
   Lines:
   - SpeakerName:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
       m_TableEntryReference:
-        m_KeyId: 0
+        m_KeyId: 9003239739113472
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0

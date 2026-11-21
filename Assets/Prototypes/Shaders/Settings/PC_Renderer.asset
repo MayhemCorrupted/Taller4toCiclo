@@ -70,14 +70,14 @@ MonoBehaviour:
   m_Active: 1
   m_Settings:
     AOMethod: 1
-    Downsample: 1
+    Downsample: 0
     AfterOpaque: 1
     Source: 0
-    NormalSamples: 0
-    Intensity: 5.23
-    DirectLightingStrength: 0.121
-    Radius: 0.71
-    Samples: 2
-    BlurQuality: 2
-    Falloff: 21.12
+    NormalSamples: 2
+    Intensity: 2
+    DirectLightingStrength: 1
+    Radius: 0.5
+    Samples: 0
+    BlurQuality: 0
+    Falloff: 500
     SampleCount: -1

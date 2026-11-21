@@ -15,40 +15,32 @@ MonoBehaviour:
   m_TableCollectionName: DialoguesTable
   m_TableCollectionNameGuidString: 87896db2562e33b4eb3af09bcb455886
   m_Entries:
-  - m_Id: 1020483465789440
-    m_Key: TEST_A_OPTION
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1020483805528064
-    m_Key: TEST_B_OPTION
-    m_Metadata:
-      m_Items: []
   - m_Id: 12889339876491264
     m_Key: NARRATOR_INITIAL_PHRASE
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390656
-    m_Key: VILEUTCH_INITIAL1
+  - m_Id: 14747556141613056
+    m_Key: VILEUTCH_MONOLOGUE1
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390657
-    m_Key: VILEUTCH_INITIAL2
+  - m_Id: 14747556208721920
+    m_Key: VILEUTCH_MONOLOGUE2
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390658
-    m_Key: VILEUTCH_INITIAL3
+  - m_Id: 14747556208721921
+    m_Key: VILEUTCH_MONOLOGUE3
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390659
-    m_Key: VILEUTCH_INITIAL4
+  - m_Id: 14747556208721922
+    m_Key: VILEUTCH_MONOLOGUE4
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390660
-    m_Key: VILEUTCH_INITIAL5
+  - m_Id: 14747556208721923
+    m_Key: VILEUTCH_MONOLOGUE5
     m_Metadata:
       m_Items: []
-  - m_Id: 12889340392390661
-    m_Key: VILEUTCH_INITIAL6
+  - m_Id: 14747556208721924
+    m_Key: VILEUTCH_MONOLOGUE6
     m_Metadata:
       m_Items: []
   - m_Id: 12889340392390662
@@ -75,16 +67,16 @@ MonoBehaviour:
     m_Key: LITHOSELLE_PRESENTATION2
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128516
-    m_Key: LITHOSELLE_ANATHEMA1
+  - m_Id: 14747556208721925
+    m_Key: LITHOSELLE_COMBAT1
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128517
-    m_Key: LITHOSELLE_ANATHEMA2
+  - m_Id: 14747556208721926
+    m_Key: LITHOSELLE_COMBAT2
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128518
-    m_Key: LITHOSELLE_ANATHEMA3
+  - m_Id: 14747556208721927
+    m_Key: LITHOSELLE_COMBAT3
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128519
@@ -100,11 +92,19 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128521
-    m_Key: LITHOSELLE_PILLAR3
+    m_Key: LITHOSELLE_PILLAR4
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128522
-    m_Key: LITHOSELLE_PILLAR4
+  - m_Id: 14747556208721928
+    m_Key: LITHOSELLE_PILLAR5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14747556208721929
+    m_Key: LITHOSELLE_REMINDER
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14747556208721930
+    m_Key: LITHOSELLE_NORMAL
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128524

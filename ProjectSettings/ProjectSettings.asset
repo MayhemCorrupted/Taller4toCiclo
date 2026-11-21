@@ -852,7 +852,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Taller4toCiclo
-  metroPackageVersion: 
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -860,7 +860,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: Taller4toCiclo
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: RotBound
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
