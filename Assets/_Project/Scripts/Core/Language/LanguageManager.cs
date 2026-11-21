@@ -4,9 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-
-[Serializable]
-public struct LocalizedTMP
+[Serializable] public struct LocalizedTMP
 {
     public string localizedName;
     public LocalizedString localizedText;
@@ -21,14 +19,37 @@ public class LanguageManager : MonoBehaviour
         public LocalizedString LocString;
         public LocalizedString.ChangeHandler Handler;
     }
-    private readonly Dictionary<TextMeshProUGUI, BindingInfo> _activeBindings = new();
+
+    private readonly Dictionary<TMP_Text, BindingInfo> _activeBindings = new();
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+    private void OnDestroy()
+    {
+        if (Instance != this) return;
+
+        foreach (var kvp in _activeBindings)
+        {
+            if (kvp.Value.LocString != null && kvp.Value.Handler != null)
+            {
+                kvp.Value.LocString.StringChanged -= kvp.Value.Handler;
+            }
+        }
+
+        _activeBindings.Clear();
+        Instance = null;
     }
     public void RegisterElements(LocalizedTMP[] elements)
     {
+        if (elements == null) return;
+
         foreach (var element in elements)
         {
             BindText(element.localizedTMP, element.localizedText);
@@ -36,35 +57,45 @@ public class LanguageManager : MonoBehaviour
     }
     public void UnregisterElements(LocalizedTMP[] elements)
     {
+        if (elements == null) return;
+
         foreach (var element in elements)
         {
             UnbindText(element.localizedTMP);
         }
     }
-    public void BindText(TextMeshProUGUI uiText, LocalizedString locString, Action<string> onUpdate = null)
+    public void BindText(TMP_Text uiText, LocalizedString locString, Action<string> onUpdate = null)
     {
         if (uiText == null || locString == null) return;
 
         UnbindText(uiText);
 
-        void handler(string translatedText)
+        if (locString.IsEmpty) return;
+
+        void Handler(string translatedText)
         {
+            if (uiText == null)
+            {
+                UnbindText(uiText);
+                return;
+            }
+
             if (onUpdate != null)
             {
                 onUpdate.Invoke(translatedText);
             }
-            else if (uiText != null)
+            else
             {
                 uiText.text = translatedText;
             }
         }
 
-        locString.StringChanged += handler;
-        _activeBindings[uiText] = new BindingInfo { LocString = locString, Handler = handler };
+        locString.StringChanged += Handler;
+        _activeBindings[uiText] = new BindingInfo { LocString = locString, Handler = Handler };
     }
-    public void UnbindText(TextMeshProUGUI uiText)
+    public void UnbindText(TMP_Text uiText)
     {
-        if (uiText == null) return;
+        if (ReferenceEquals(uiText, null)) return;
 
         if (_activeBindings.TryGetValue(uiText, out BindingInfo info))
         {
@@ -79,13 +110,14 @@ public class LanguageManager : MonoBehaviour
     {
         if (!LocalizationSettings.InitializationOperation.IsDone) return;
 
-        if (localeIndex >= 0 && localeIndex < LocalizationSettings.AvailableLocales.Locales.Count)
+        var locales = LocalizationSettings.AvailableLocales.Locales;
+        if (localeIndex >= 0 && localeIndex < locales.Count)
         {
-            LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[localeIndex];
+            LocalizationSettings.SelectedLocale = locales[localeIndex];
         }
         else
         {
-            Debug.LogWarning($"El índice de idioma {localeIndex} no es válido.");
+            GameLogger.LogWarning($"[LanguageManager] El índice de idioma {localeIndex} no es válido.");
         }
     }
 }

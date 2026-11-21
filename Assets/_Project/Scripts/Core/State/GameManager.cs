@@ -118,7 +118,6 @@ public class GameManager : MonoBehaviour
 
         SubscribePlayerHealth();
 
-        // Sincroniza estado si venimos de "Continuar Partida" o de cambiar de Stage 1 a Stage 2
         SyncFromSaveManager();
 
         EvaluateVesaniaState(forceNotify: true);
@@ -202,7 +201,6 @@ public class GameManager : MonoBehaviour
         OnCheckpointActivated?.Invoke();
         OnCheckpointActivatedEvent?.Invoke();
 
-        // Guardado automático al activar la Estatua por primera vez
         if (SaveManager.Instance != null)
         {
             _ = SaveManager.Instance.AutoSaveRunAsync();
@@ -272,7 +270,6 @@ public class GameManager : MonoBehaviour
 
             EvaluateVesaniaState();
 
-            // Guardado inmediato anti-save-scum: registra la pérdida de vida y subida de Vesania en disco
             if (SaveManager.Instance != null)
             {
                 SaveManager.Instance.RegisterPartialDeath();
@@ -335,7 +332,6 @@ public class GameManager : MonoBehaviour
 
         Vector3 deathPosition = _player != null ? _player.transform.position : Vector3.zero;
 
-        // Ejecuta el protocolo de Permadeath (File.Delete + envío al Ranking y Global_Remains)
         if (SaveManager.Instance != null)
         {
             _ = SaveManager.Instance.HandlePermadeathAsync(deathPosition);

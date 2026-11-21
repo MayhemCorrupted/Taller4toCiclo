@@ -87,6 +87,7 @@ public class StateManager : MonoBehaviour
         if (_dialogueManager != null)
             _dialogueManager.OnDialogueEventTriggered -= HandleDialogueEvent;
     }
+
     private void SyncFromSaveManager()
     {
         if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession) return;
@@ -298,6 +299,7 @@ public class StateManager : MonoBehaviour
                 _killsByStateAndTag[(rec.state, rec.tag)] = rec.count;
             }
         }
+
         if (_goals != null)
         {
             for (int i = 0; i < _goals.Length; i++)

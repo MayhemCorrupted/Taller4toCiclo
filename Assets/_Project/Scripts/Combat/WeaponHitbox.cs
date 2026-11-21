@@ -46,6 +46,12 @@ public class WeaponHitbox : MonoBehaviour
         _alreadyHitEntities.Add(targetHealth);
         OnEntityHit?.Invoke();
         OnHitTarget?.Invoke(targetHealth, _isHeavyAttack);
+
+        if (CameraShakeManager.Instance != null)
+        {
+            if (_isHeavyAttack) CameraShakeManager.Instance.ShakeHeavyHit();
+            else CameraShakeManager.Instance.ShakeLightHit();
+        }
 #if UNITY_EDITOR
         Debug.Log($"{gameObject.name} Pegó a {other.name} daño inflingido: {_currentDamage}");
 #endif

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Localization;
 [Serializable] public class DialogueBranch
 {
     [Tooltip("Nombre descriptivo para identificar este diálogo en el Inspector.")]
@@ -33,6 +34,10 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
         public DialogueSequence Sequence;
         public string OverrideUIID;
     }
+    [Header("Prompt de Interacción")]
+    [Tooltip("Texto localizado con '{key}' (Ej: '[{key}] Hablar').")]
+    [SerializeField] private LocalizedString _interactionPrompt;
+
     [Header("Diálogo por Defecto")]
     [Tooltip("Se reproduce si ningún estado configurado coincide.")]
     [SerializeField] private DialogueSequence _defaultDialogue;
@@ -46,6 +51,7 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
 
     [Header("Evento en Cada Interacción (Opcional)")]
     public UnityEvent OnInteract;
+    public LocalizedString InteractionPrompt => _interactionPrompt;
     public bool HasBeenUsed
     {
         get => _hasBeenUsed;
@@ -107,9 +113,6 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
             enabled = false;
         }
     }
-    /// <summary>
-    /// Busca el diálogo que coincida con el estado actual y cumpla la mayor cantidad de requiredFlags.
-    /// </summary>
     private DialogueBranch FindBestBranch(out DialogueSequence sequence, out string uiID, out int bestIndex)
     {
         sequence = _defaultDialogue;
@@ -166,6 +169,7 @@ public class DialogueInteraction : MonoBehaviour, IInteractable
 
         return true;
     }
+
     private void TriggerBranchEvent(DialogueBranch branch, int branchIndex)
     {
         if (branch.onStart == null) return;

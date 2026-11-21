@@ -1,0 +1,238 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7920749183523323072
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2122498084069008872}
+  - component: {fileID: 2106215514738430402}
+  - component: {fileID: 4624146465247737725}
+  m_Layer: 8
+  m_Name: Lithoselle
+  m_TagString: ShowInteract
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2122498084069008872
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7920749183523323072}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 158.14, y: 1.97, z: -131.33}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2195545723283748982}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!114 &2106215514738430402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7920749183523323072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ded70407f7c0a82419b76bf6e4af5410, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  _defaultDialogue: {fileID: 0}
+  _branches:
+  - title: Intro y entrega de Anathema
+    state: 0
+    requiredFlags: []
+    dialogue: {fileID: 11400000, guid: 9cfb1ffeb3ccad84ab164564ff298f4f, type: 2}
+    runOnce: 1
+    onStart:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 0}
+          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+          m_MethodName: ActivateCheckpoint
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    customUIID: 
+  - title: Recordatorio enemigos
+    state: 1
+    requiredFlags: []
+    dialogue: {fileID: 11400000, guid: 513b5b1e8c726fd48902f72e479b0e3c, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Confirmar solo enemigos
+    state: 1
+    requiredFlags:
+    - ErrantesDerrotados
+    dialogue: {fileID: 11400000, guid: e9b7c06745c331b419636e4dbcb5c9b1, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Confirmar enemigos + pilares
+    state: 1
+    requiredFlags:
+    - ErrantesDerrotados
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: 2f841c8ea20c07a44a8fd6ead3e557d2, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Recordatorio pilares
+    state: 2
+    requiredFlags: []
+    dialogue: {fileID: 11400000, guid: fa0d70b9fee9daf49b16048b241dcf2b, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: Confirmar pilares
+    state: 2
+    requiredFlags:
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: d4d995f30a8a0394a837569099cdb585, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  - title: "Post-misi\xF3n (Catedral abierta)"
+    state: 3
+    requiredFlags:
+    - PilaresRotos
+    dialogue: {fileID: 11400000, guid: 95895c36adae20349ad5878568f77207, type: 2}
+    runOnce: 0
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIID: 
+  _defaultUIID: 
+  _canRepeat: 1
+  OnInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  references:
+    version: 2
+    RefIds: []
+--- !u!65 &4624146465247737725
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7920749183523323072}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.5, y: 1, z: 2}
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!1001 &1869728656596262813
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2122498084069008872}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_Name
+      value: Model
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+      propertyPath: m_TagString
+      value: ShowInteract
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+--- !u!4 &2195545723283748982 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ddbeff35eaf44744cb848a81c8a31db8, type: 3}
+  m_PrefabInstance: {fileID: 1869728656596262813}
+  m_PrefabAsset: {fileID: 0}

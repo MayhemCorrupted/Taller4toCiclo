@@ -1,14 +1,17 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-
+using UnityEngine.Localization;
 public class DoorController : MonoBehaviour, IInteractable
 {
+    [Header("Prompt de Interacción")]
+    [Tooltip("Texto localizado con '{key}' (Ej: '[{key}] Abrir').")]
+    [SerializeField] private LocalizedString _interactionPrompt;
+
     [Header("Door Settings")]
     [SerializeField] private Transform _hinge;
     [SerializeField] private float _openAngle = 90f;
     [SerializeField] private float _doorSpeed = 0.5f;
-
     [Header("Lock Settings")]
     [Tooltip("Si está activo, el jugador no podrá abrirla interactuando directamente hasta desbloquearla.")]
     [SerializeField] private bool _isLocked = false;
@@ -20,7 +23,7 @@ public class DoorController : MonoBehaviour, IInteractable
     [Header("Direction Restrictions")]
     [SerializeField] private bool _revertDirection = false;
     [SerializeField][Range(-1, 1)] private int _forcedDirection = 0;
-
+    public LocalizedString InteractionPrompt => _interactionPrompt;
     public bool IsLocked
     {
         get => _isLocked;
@@ -34,7 +37,6 @@ public class DoorController : MonoBehaviour, IInteractable
     private bool _isMoving = false;
     private Transform _playerTransform;
     private Coroutine _moveCoroutine;
-
     private void Awake()
     {
         if (_hinge == null)
@@ -100,6 +102,7 @@ public class DoorController : MonoBehaviour, IInteractable
     {
         UnlockAndOpenDoor();
     }
+
     public void CloseDoor()
     {
         if (!_isOpen && !_isMoving) return;
@@ -111,6 +114,7 @@ public class DoorController : MonoBehaviour, IInteractable
         if (_isOpen) CloseDoor();
         else OpenDoor();
     }
+
     public void LockDoor()
     {
         SetLocked(true);

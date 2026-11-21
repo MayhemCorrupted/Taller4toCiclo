@@ -1,10 +1,14 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
-
+using UnityEngine.Localization;
 public class CathedralPortal : MonoBehaviour, IInteractable
-
 {
+    [Header("Prompt de Interacción")]
+    [Tooltip("Texto localizado con '{key}' (Ej: '[{key}] Cruzar umbral').")]
+    [SerializeField] private LocalizedString _interactionPrompt;
+
+    [Header("Configuración del Portal")]
     [Tooltip("Desactívalo en el Portal A y déjalo activo en el Portal B")]
     [SerializeField] private bool isUnlocked = false;
     [SerializeField] private CathedralPortal linkedPortal;
@@ -24,11 +28,12 @@ public class CathedralPortal : MonoBehaviour, IInteractable
     public UnityEvent onTeleportStarted;
     public UnityEvent onTeleportCompleted;
 
+    public LocalizedString InteractionPrompt => _interactionPrompt;
+
     private bool isTeleporting = false;
     private GameObject cachedPlayer;
     private CharacterController playerCC;
     private PlayerInputs playerInputs;
-
     private void Awake()
     {
         if (portalInteriorVisual != null)
@@ -36,7 +41,6 @@ public class CathedralPortal : MonoBehaviour, IInteractable
             portalInteriorVisual.SetActive(isUnlocked);
         }
     }
-
     private void Start()
     {
         cachedPlayer = GameObject.FindGameObjectWithTag(playerTag);
@@ -46,7 +50,6 @@ public class CathedralPortal : MonoBehaviour, IInteractable
             playerInputs = cachedPlayer.GetComponent<PlayerInputs>();
         }
     }
-
     public void Interact()
     {
         if (isTeleporting) return;
@@ -62,7 +65,6 @@ public class CathedralPortal : MonoBehaviour, IInteractable
             StartCoroutine(TeleportRoutine());
         }
     }
-
     public void UnlockPortal()
     {
         if (isUnlocked) return;
@@ -76,7 +78,6 @@ public class CathedralPortal : MonoBehaviour, IInteractable
 
         onPortalUnlocked?.Invoke();
     }
-
     private IEnumerator TeleportRoutine()
     {
         isTeleporting = true;
@@ -111,7 +112,8 @@ public class CathedralPortal : MonoBehaviour, IInteractable
             playerInputs.enabled = true;
         }
 
-        yield return new WaitForSeconds(0.2f);
+        WaitForSeconds waitForSeconds = new(0.2f);
+        yield return waitForSeconds;
         isTeleporting = false;
         linkedPortal.isTeleporting = false;
     }

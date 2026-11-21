@@ -67,9 +67,8 @@ public class PlayerCombat : MonoBehaviour
     private PlayerHealth _playerHealth;
     private PlayerAnimator _playerAnimator;
     private Camera _mainCamera;
-
     private readonly Collider[] _hitEnemiesBuffer = new Collider[15];
-    private bool _isHitboxActive = false;
+    public bool IsHeavyAttackActive { get; private set; } = false;
     public bool IsWeaponActive
     {
         get => _isWeaponActive;
@@ -276,14 +275,23 @@ public class PlayerCombat : MonoBehaviour
         {
             float damage = CalculateGrossDamage(3.0f);
             int hitCount = Physics.OverlapSphereNonAlloc(transform.position, _areaSkillRadius, _hitEnemiesBuffer, _enemyLayer);
+            bool hitAnyEnemy = false;
 
             for (int i = 0; i < hitCount; i++)
             {
                 if (_hitEnemiesBuffer[i].TryGetComponent(out Health enemyHealth))
                 {
-                    enemyHealth.TakeDamage(damage);
-                    OnAreaSkillHitEnemy?.Invoke(enemyHealth);
+                    if (enemyHealth.TakeDamage(damage))
+                    {
+                        hitAnyEnemy = true;
+                        OnAreaSkillHitEnemy?.Invoke(enemyHealth);
+                    }
                 }
+            }
+
+            if (hitAnyEnemy && CameraShakeManager.Instance != null)
+            {
+                CameraShakeManager.Instance.ShakeSkillHit();
             }
         }
     }
@@ -353,7 +361,7 @@ public class PlayerCombat : MonoBehaviour
     {
         if (!_isWeaponActive) return;
 
-        _isHitboxActive = true;
+        IsHeavyAttackActive = isHeavyAttack;
 
         float attackMultiplier = isHeavyAttack ? 2.2f : 1.0f;
         float grossDamage = CalculateGrossDamage(attackMultiplier);
@@ -372,7 +380,7 @@ public class PlayerCombat : MonoBehaviour
     }
     public void DeactivateWeapon()
     {
-        _isHitboxActive = false;
+        IsHeavyAttackActive = false;
         if (_weaponHitbox != null) _weaponHitbox.DisableHitbox();
     }
 

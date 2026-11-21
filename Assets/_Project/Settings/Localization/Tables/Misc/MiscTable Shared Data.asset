@@ -23,6 +23,10 @@ MonoBehaviour:
     m_Key: DIALOGUE_NEXT
     m_Metadata:
       m_Items: []
+  - m_Id: 15063875468279808
+    m_Key: INTERACT_DEFAULT
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

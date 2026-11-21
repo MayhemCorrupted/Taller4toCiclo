@@ -26,6 +26,10 @@ MonoBehaviour:
     m_Localized: '[{key}] Next'
     m_Metadata:
       m_Items: []
+  - m_Id: 15063875468279808
+    m_Localized: '[{key}] Interact'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

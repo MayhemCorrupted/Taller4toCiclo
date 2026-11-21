@@ -44,6 +44,7 @@ public class PlayerProjectile : MonoBehaviour
                 _hitEnemies.Add(enemyHealth);
                 OnAnyProjectileHitEnemy?.Invoke(enemyHealth);
             }
+            CameraShakeManager.Instance.ShakeLightHit();   
         }
     }
 }
