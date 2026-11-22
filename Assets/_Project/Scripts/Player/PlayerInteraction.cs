@@ -45,11 +45,15 @@ public class PlayerInteraction : MonoBehaviour
     private string _cachedRawLocalizedText;
     private string _lastDeviceMode;
     private bool _isPromptBound;
+    private bool _isPromptActive;
     private void Awake()
     {
         _playerFSM = GetComponent<PlayerFSM>();
         _playerInputs = GetComponent<PlayerInputs>();
         _mainCamera = Camera.main;
+
+        if (_promptText != null)
+            _promptText.text = string.Empty;
 
         if (_promptContainer != null)
         {
@@ -94,7 +98,7 @@ public class PlayerInteraction : MonoBehaviour
 
         if (CanInteract && _currentClosestInteractable != _boundInteractable)
         {
-            BindTargetPrompt(_currentClosestInteractable);
+            BindTargetPrompt(_currentClosestInteractable, fadeInWhenReady: !_isPromptActive);
         }
 
         if (CanInteract && _playerInputs != null && _playerInputs.CurrentDeviceMode != _lastDeviceMode)
@@ -104,7 +108,7 @@ public class PlayerInteraction : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if (!CanInteract || _currentAnchorTransform == null || _promptContainer == null)
+        if (!CanInteract || !_isPromptActive || _currentAnchorTransform == null || _promptContainer == null)
             return;
 
         UpdatePromptScreenPosition();
@@ -163,8 +167,8 @@ public class PlayerInteraction : MonoBehaviour
     }
     private Transform ResolveTaggedAnchor(Collider col, IInteractable interactable)
     {
-        Component component = (interactable as Component);
-        Transform root = component != null ? component.transform : null ?? col.transform;
+        Component component = interactable as Component;
+        Transform root = component != null ? component.transform : col.transform;
 
         if (_anchorCache.TryGetValue(root, out Transform cachedAnchor) && cachedAnchor != null)
             return cachedAnchor;
@@ -191,8 +195,7 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
 
-        foundAnchor =
-        foundAnchor != null ? foundAnchor : root;
+        foundAnchor = foundAnchor != null ? foundAnchor : root;
         _anchorCache[root] = foundAnchor;
         return foundAnchor;
     }
@@ -221,11 +224,25 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (_promptContainer == null) return;
 
-        BindTargetPrompt(_currentClosestInteractable);
-        UpdatePromptScreenPosition();
-
         LeanTween.cancel(_promptContainer.gameObject);
+        _isPromptActive = false;
+
+        if (_promptCanvasGroup != null && !_promptContainer.gameObject.activeSelf)
+        {
+            _promptCanvasGroup.alpha = 0f;
+        }
+
+        BindTargetPrompt(_currentClosestInteractable, fadeInWhenReady: true);
+    }
+    private void BeginFadeIn()
+    {
+        if (!CanInteract || _promptContainer == null) return;
+
+        _isPromptActive = true;
+        LeanTween.cancel(_promptContainer.gameObject);
+
         _promptContainer.gameObject.SetActive(true);
+        UpdatePromptScreenPosition();
 
         if (_promptCanvasGroup != null)
         {
@@ -237,6 +254,7 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (_promptContainer == null) return;
 
+        _isPromptActive = false;
         LeanTween.cancel(_promptContainer.gameObject);
 
         if (immediate || _promptCanvasGroup == null || !_promptContainer.gameObject.activeInHierarchy)
@@ -258,39 +276,53 @@ public class PlayerInteraction : MonoBehaviour
                      }
                  });
     }
-    private void BindTargetPrompt(IInteractable target)
+    private void BindTargetPrompt(IInteractable target, bool fadeInWhenReady)
     {
         UnbindPromptText();
         _boundInteractable = target;
 
-        if (_promptText == null) return;
+        if (_promptText == null)
+        {
+            if (fadeInWhenReady) BeginFadeIn();
+            return;
+        }
 
         LocalizedString objectPrompt = target?.InteractionPrompt;
         LocalizedString targetString = (objectPrompt != null && !objectPrompt.IsEmpty)
             ? objectPrompt
             : _defaultPrompt;
 
-        if (targetString == null || targetString.IsEmpty)
+        if (targetString == null || targetString.IsEmpty || LanguageManager.Instance == null)
         {
             _promptText.text = string.Empty;
+            if (fadeInWhenReady) BeginFadeIn();
             return;
         }
 
-        if (LanguageManager.Instance != null)
+        _isPromptBound = true;
+        LanguageManager.Instance.BindText(_promptText, targetString, rawText =>
         {
-            _isPromptBound = true;
-            LanguageManager.Instance.BindText(_promptText, targetString, rawText =>
+            if (!CanInteract || _boundInteractable != target) return;
+
+            _cachedRawLocalizedText = rawText;
+            RefreshPromptKeyDisplay();
+
+            if (fadeInWhenReady || !_isPromptActive)
             {
-                _cachedRawLocalizedText = rawText;
-                RefreshPromptKeyDisplay();
-            });
-        }
+                BeginFadeIn();
+            }
+        });
     }
     private void UnbindPromptText()
     {
         if (_isPromptBound && _promptText != null && LanguageManager.Instance != null)
         {
             LanguageManager.Instance.UnbindText(_promptText);
+        }
+
+        if (_promptText != null)
+        {
+            _promptText.text = string.Empty;
         }
 
         _isPromptBound = false;
@@ -303,6 +335,7 @@ public class PlayerInteraction : MonoBehaviour
 
         string keyName = GetCurrentInteractKeyName();
         _promptText.text = _cachedRawLocalizedText.Replace("{key}", keyName);
+        _promptText.ForceMeshUpdate();
     }
     private string GetCurrentInteractKeyName()
     {
