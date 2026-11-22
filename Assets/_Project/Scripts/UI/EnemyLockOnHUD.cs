@@ -1,23 +1,20 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+
 public class EnemyLockOnHUD : MonoBehaviour
 {
     [Header("Referencias UI Enemigo")]
     [Tooltip("Contenedor padre de la barra de vida en el Canvas principal.")]
     [SerializeField] private GameObject _enemyHudContainer;
-    [Tooltip("Imagen configurada en Image Type = Filled.")]
-    [SerializeField] private Image _enemyHealthFillImage;
+    [SerializeField] private DelayedHealthBar _enemyHealthBar = new();
     [Tooltip("Texto que mostrará el porcentaje de vida (ej: 85%).")]
     [SerializeField] private TextMeshProUGUI _healthPercentageText;
-    [SerializeField] private float _lerpSpeed = 12f;
 
     private PlayerCombat _playerCombat;
     private readonly List<EntityCombat> _detectingScreenUIEnemies = new();
     private EntityCombat _displayedEnemy;
     private Health _displayedEnemyHealth;
-    private float _targetFillAmount;
     private void Awake()
     {
         _playerCombat = FindAnyObjectByType<PlayerCombat>();
@@ -58,6 +55,7 @@ public class EnemyLockOnHUD : MonoBehaviour
             return;
 
         UpdateHealthValues(instant: false);
+        _enemyHealthBar.Tick(Time.deltaTime);
     }
     private bool UsesScreenUI(EntityCombat enemy)
     {
@@ -123,19 +121,17 @@ public class EnemyLockOnHUD : MonoBehaviour
     {
         if (_displayedEnemyHealth.MaxHealth <= 0f) return;
 
-        _targetFillAmount = Mathf.Clamp01(_displayedEnemyHealth.CurrentHealth / _displayedEnemyHealth.MaxHealth);
+        float targetRatio = Mathf.Clamp01(_displayedEnemyHealth.CurrentHealth / _displayedEnemyHealth.MaxHealth);
 
-        if (_enemyHealthFillImage != null)
-        {
-            _enemyHealthFillImage.fillAmount = instant
-                ? _targetFillAmount
-                : Mathf.Lerp(_enemyHealthFillImage.fillAmount, _targetFillAmount, Time.deltaTime * _lerpSpeed);
-        }
+        if (instant)
+            _enemyHealthBar.SetInstant(targetRatio);
+        else
+            _enemyHealthBar.SetTarget(targetRatio);
 
         if (_healthPercentageText != null)
         {
             int percentage = _displayedEnemyHealth.CurrentHealth > 0f
-                ? Mathf.Max(1, Mathf.RoundToInt(_targetFillAmount * 100f))
+                ? Mathf.Max(1, Mathf.RoundToInt(targetRatio * 100f))
                 : 0;
 
             _healthPercentageText.text = $"{percentage}%";

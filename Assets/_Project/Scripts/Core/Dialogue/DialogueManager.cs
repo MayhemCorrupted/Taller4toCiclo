@@ -100,12 +100,17 @@ public class DialogueManager : MonoBehaviour
         LoadSequence(sequence);
         _isTransitioning = true;
 
+        if (_currentSequence != null && _currentLineIndex < _currentSequence.Lines.Length)
+        {
+            _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex], startTyping: false);
+        }
+
         _dialogueUI.OpenUI(() =>
         {
             _isTransitioning = false;
-            if (_isDialogueActive && _currentSequence != null && _currentLineIndex < _currentSequence.Lines.Length)
+            if (_isDialogueActive && _currentSequence != null)
             {
-                _dialogueUI.ShowLine(_currentSequence.Lines[_currentLineIndex]);
+                _dialogueUI.StartTyping();
             }
         });
     }

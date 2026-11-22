@@ -69,6 +69,8 @@ public class DialogueUI : MonoBehaviour
     private Coroutine _promptCoroutine;
     private float _currentTextSpeed;
     private string _interactKeyName = "E";
+    private bool _canStartTyping = true;
+    private bool _hasPendingTyping = false;
     private void Reset()
     {
         _defaultUI = new DialogueUIPreset
@@ -116,6 +118,9 @@ public class DialogueUI : MonoBehaviour
 
         if (preset.canvasGroup == null && preset.panel != null)
             preset.canvasGroup = preset.panel.GetComponent<CanvasGroup>();
+
+        if (preset.canvasGroup != null)
+            preset.canvasGroup.alpha = 0f;
 
         if (preset.panel != null)
             preset.panel.SetActive(false);
@@ -197,8 +202,8 @@ public class DialogueUI : MonoBehaviour
 
         if (_activeUI.panel != null && !_activeUI.panel.activeSelf)
         {
-            _activeUI.panel.SetActive(true);
             if (_activeUI.canvasGroup != null) _activeUI.canvasGroup.alpha = 1f;
+            _activeUI.panel.SetActive(true);
         }
     }
     public void OpenUI(Action onComplete)
@@ -206,20 +211,28 @@ public class DialogueUI : MonoBehaviour
         if (_playerHUD != null) _playerHUD.SetActive(false);
 
         DeactivateAllPanelsExcept(_activeUI.panel);
-
-        if (_activeUI.panel != null) _activeUI.panel.SetActive(true);
         HideAllOptions();
+
+        if (_activeUI.promptText != null)
+            _activeUI.promptText.gameObject.SetActive(false);
 
         if (_activeUI.canvasGroup != null)
         {
             LeanTween.cancel(_activeUI.canvasGroup.gameObject);
             _activeUI.canvasGroup.alpha = 0f;
+
+            if (_activeUI.panel != null)
+                _activeUI.panel.SetActive(true);
+
             LeanTween.alphaCanvas(_activeUI.canvasGroup, 1f, _fadeDuration)
                      .setEaseOutCubic()
                      .setOnComplete(() => onComplete?.Invoke());
         }
         else
         {
+            if (_activeUI.panel != null)
+                _activeUI.panel.SetActive(true);
+
             onComplete?.Invoke();
         }
     }
@@ -247,9 +260,19 @@ public class DialogueUI : MonoBehaviour
     {
         if (_activeUI.panel != null) _activeUI.panel.SetActive(false);
         if (_playerHUD != null) _playerHUD.SetActive(true);
-        if (_activeUI.bodyText != null) _activeUI.bodyText.text = string.Empty;
 
+        if (_activeUI.nameText != null) _activeUI.nameText.text = string.Empty;
+        if (_activeUI.bodyText != null) _activeUI.bodyText.text = string.Empty;
+        if (_activeUI.portrait != null)
+        {
+            _activeUI.portrait.sprite = null;
+            _activeUI.portrait.gameObject.SetActive(false);
+        }
+
+        _canStartTyping = true;
+        _hasPendingTyping = false;
         _activeUI = _defaultUI;
+
         onComplete?.Invoke();
     }
     private void DeactivateAllPanelsExcept(GameObject activePanel)
@@ -268,6 +291,7 @@ public class DialogueUI : MonoBehaviour
     {
         _interactKeyName = keyName;
     }
+
     private void UnsubscribeCurrentLine()
     {
         if (LanguageManager.Instance == null) return;
@@ -278,10 +302,35 @@ public class DialogueUI : MonoBehaviour
         if (_activeUI.bodyText != null)
             LanguageManager.Instance.UnbindText(_activeUI.bodyText);
     }
-    public void ShowLine(DialogueLine line)
+    /// <summary>
+    /// Carga retrato, nombre y texto localizado. Si startTyping es false, deja el texto preparado
+    /// con 0 caracteres visibles hasta que se llame a StartTyping() al finalizar el fade.
+    /// </summary>
+    public void ShowLine(DialogueLine line, bool startTyping = true)
     {
         UnsubscribeCurrentLine();
+
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+        }
+
+        if (_promptCoroutine != null)
+        {
+            StopCoroutine(_promptCoroutine);
+            _promptCoroutine = null;
+        }
+
+        if (_activeUI.promptText != null)
+            _activeUI.promptText.gameObject.SetActive(false);
+
         IsTyping = false;
+        _canStartTyping = startTyping;
+        _hasPendingTyping = false;
+
+        if (_activeUI.nameText != null)
+            _activeUI.nameText.text = string.Empty;
 
         if (_activeUI.bodyText != null)
         {
@@ -309,12 +358,43 @@ public class DialogueUI : MonoBehaviour
             {
                 if (_activeUI.bodyText.text == text && IsTyping) return;
 
-                if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+                if (_typingCoroutine != null)
+                {
+                    StopCoroutine(_typingCoroutine);
+                    _typingCoroutine = null;
+                }
 
                 _activeUI.bodyText.text = text;
                 _activeUI.bodyText.maxVisibleCharacters = 0;
-                _typingCoroutine = StartCoroutine(TypewriterRoutine());
+
+                if (_canStartTyping)
+                {
+                    _hasPendingTyping = false;
+                    _typingCoroutine = StartCoroutine(TypewriterRoutine());
+                }
+                else
+                {
+                    _hasPendingTyping = true;
+                }
             });
+        }
+    }
+    /// <summary>
+    /// Inicia el efecto de máquina de escribir una vez que el fade de apertura ha terminado.
+    /// </summary>
+    public void StartTyping()
+    {
+        _canStartTyping = true;
+
+        if (_hasPendingTyping)
+        {
+            _hasPendingTyping = false;
+            if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
+            _typingCoroutine = StartCoroutine(TypewriterRoutine());
+        }
+        else if (!IsTyping)
+        {
+            UpdateInteractionPrompt();
         }
     }
     private IEnumerator TypewriterRoutine()
@@ -379,6 +459,7 @@ public class DialogueUI : MonoBehaviour
             _typingCoroutine = null;
         }
 
+        _hasPendingTyping = false;
         _activeUI.bodyText.maxVisibleCharacters = 99999;
         IsTyping = false;
         UpdateInteractionPrompt();

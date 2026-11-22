@@ -8,9 +8,9 @@ public class PlayerHUD : MonoBehaviour
     [SerializeField] private bool _hideOutsideGameplay = true;
 
     [Header("Barras de Estado")]
-    [SerializeField] private Image _healthFillImage;
+    [SerializeField] private DelayedHealthBar _healthBar = new();
     [SerializeField] private Image _staminaFillImage;
-    [SerializeField] private float _lerpSpeed = 10f;
+    [SerializeField] private float _staminaLerpSpeed = 10f;
 
     [Header("Interfaz de Habilidades (Ataques)")]
     [Tooltip("Contenedor padre de la UI de ataques/habilidades que se ocultará cuando IsWeaponActive sea falso.")]
@@ -36,7 +36,6 @@ public class PlayerHUD : MonoBehaviour
     private PlayerCombat _playerCombat;
     private InventoryManager _inventoryManager;
 
-    private float _targetHealthFill;
     private float _targetStaminaFill;
     private float _originalSkillIconY;
     private bool _hasCapturedOriginalY;
@@ -94,11 +93,10 @@ public class PlayerHUD : MonoBehaviour
 
         float dt = Time.unscaledDeltaTime;
 
-        if (_healthFillImage != null)
-            _healthFillImage.fillAmount = Mathf.Lerp(_healthFillImage.fillAmount, _targetHealthFill, dt * _lerpSpeed);
+        _healthBar.Tick(dt);
 
         if (_staminaFillImage != null)
-            _staminaFillImage.fillAmount = Mathf.Lerp(_staminaFillImage.fillAmount, _targetStaminaFill, dt * _lerpSpeed);
+            _staminaFillImage.fillAmount = Mathf.Lerp(_staminaFillImage.fillAmount, _targetStaminaFill, dt * _staminaLerpSpeed);
 
         if (_playerCombat != null && _skillCooldownFill != null)
         {
@@ -124,9 +122,12 @@ public class PlayerHUD : MonoBehaviour
         }
 
         UpdateStaminaBar();
-        UpdateHealthBar();
 
-        if (_healthFillImage != null) _healthFillImage.fillAmount = _targetHealthFill;
+        if (_playerHealth != null && _playerHealth.MaxHealth > 0f)
+        {
+            _healthBar.SetInstant(_playerHealth.CurrentHealth / _playerHealth.MaxHealth);
+        }
+
         if (_staminaFillImage != null) _staminaFillImage.fillAmount = _targetStaminaFill;
 
         if (_playerCombat != null)
@@ -163,12 +164,12 @@ public class PlayerHUD : MonoBehaviour
     }
     private void UpdateHealthBar()
     {
-        if (_playerHealth == null || _playerHealth.MaxHealth <= 0) return;
-        _targetHealthFill = _playerHealth.CurrentHealth / _playerHealth.MaxHealth;
+        if (_playerHealth == null || _playerHealth.MaxHealth <= 0f) return;
+        _healthBar.SetTarget(_playerHealth.CurrentHealth / _playerHealth.MaxHealth);
     }
     private void UpdateStaminaBar()
     {
-        if (_playerStamina == null || _playerStats == null || _playerStats.MaxStamina <= 0) return;
+        if (_playerStamina == null || _playerStats == null || _playerStats.MaxStamina <= 0f) return;
         _targetStaminaFill = _playerStamina.CurrentStamina / _playerStats.MaxStamina;
     }
     private void HandleSkillSwappedAnimated(int skillID)

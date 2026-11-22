@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 public class EnemyWorldHealthHUD : MonoBehaviour
 {
     [Header("Referencias del Enemigo")]
@@ -11,21 +10,21 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     [Header("Elementos UI World-Space")]
     [SerializeField] private Canvas _worldCanvas;
     [SerializeField] private GameObject _worldHudContainer;
-    [SerializeField] private Image _healthFillImage;
+    [SerializeField] private DelayedHealthBar _healthBar = new();
     [SerializeField] private TextMeshProUGUI _healthPercentageText;
 
     [Header("Posicionamiento y Visibilidad")]
     [SerializeField] private Transform _anchorTarget;
     [SerializeField] private Vector3 _verticalOffset = new(0f, 2.2f, 0f);
-    [SerializeField] private bool _onlyShowWhenDamagedOrAlerted = false;
+    [SerializeField] private bool _onlyShowWhenDamagedOrAlerted = true;
 
     [Header("Ajustes Visuales")]
-    [SerializeField] private float _lerpSpeed = 12f;
     [SerializeField] private bool _faceCamera = true;
 
     private Camera _mainCamera;
-    private float _targetFillAmount = 1f;
     private bool _isEnabledForThisEnemy = false;
+    private bool _isInitialized = false;
+
     private void Awake()
     {
         if (_brain == null) _brain = GetComponentInParent<EntityBrain>();
@@ -43,23 +42,7 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     }
     private void Start()
     {
-        EntityData data = _brain != null ? _brain.Data : null;
-        _isEnabledForThisEnemy = (data != null && data.healthBarMode == EnemyHealthBarMode.WorldSpace);
-
-        if (!_isEnabledForThisEnemy)
-        {
-            if (_worldHudContainer != null) _worldHudContainer.SetActive(false);
-            return;
-        }
-
-        if (_health != null)
-        {
-            _health.OnHealthChanged += HandleHealthChanged;
-            _health.OnDeath += HandleDeath;
-            UpdateVisuals(instant: true);
-        }
-
-        RefreshVisibility();
+        InitializeFromEntityData();
     }
     private void OnDestroy()
     {
@@ -69,8 +52,43 @@ public class EnemyWorldHealthHUD : MonoBehaviour
             _health.OnDeath -= HandleDeath;
         }
     }
+    public void InitializeFromEntityData()
+    {
+        EntityData data = _brain != null ? _brain.Data : (_combat != null ? _combat.Data : null);
+        if (data == null)
+        {
+            if (_worldHudContainer != null) _worldHudContainer.SetActive(false);
+            return;
+        }
+
+        _isInitialized = true;
+        _isEnabledForThisEnemy = (data.healthBarMode == EnemyHealthBarMode.WorldSpace);
+
+        if (!_isEnabledForThisEnemy)
+        {
+            if (_worldHudContainer != null) _worldHudContainer.SetActive(false);
+            return;
+        }
+
+        if (_health != null)
+        {
+            _health.OnHealthChanged -= HandleHealthChanged;
+            _health.OnDeath -= HandleDeath;
+            _health.OnHealthChanged += HandleHealthChanged;
+            _health.OnDeath += HandleDeath;
+            UpdateVisuals(instant: true);
+        }
+
+        RefreshVisibility();
+    }
     private void LateUpdate()
     {
+        if (!_isInitialized)
+        {
+            InitializeFromEntityData();
+            if (!_isInitialized) return;
+        }
+
         if (!_isEnabledForThisEnemy || _worldHudContainer == null)
             return;
 
@@ -97,10 +115,7 @@ public class EnemyWorldHealthHUD : MonoBehaviour
                 transform.rotation = _mainCamera.transform.rotation;
         }
 
-        if (_healthFillImage != null)
-        {
-            _healthFillImage.fillAmount = Mathf.Lerp(_healthFillImage.fillAmount, _targetFillAmount, Time.deltaTime * _lerpSpeed);
-        }
+        _healthBar.Tick(Time.deltaTime);
     }
     private void RefreshVisibility()
     {
@@ -133,15 +148,17 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     {
         if (_health == null || _health.MaxHealth <= 0f) return;
 
-        _targetFillAmount = Mathf.Clamp01(_health.CurrentHealth / _health.MaxHealth);
+        float targetRatio = Mathf.Clamp01(_health.CurrentHealth / _health.MaxHealth);
 
-        if (instant && _healthFillImage != null)
-            _healthFillImage.fillAmount = _targetFillAmount;
+        if (instant)
+            _healthBar.SetInstant(targetRatio);
+        else
+            _healthBar.SetTarget(targetRatio);
 
         if (_healthPercentageText != null)
         {
             int percentage = _health.CurrentHealth > 0f
-                ? Mathf.Max(1, Mathf.RoundToInt(_targetFillAmount * 100f))
+                ? Mathf.Max(1, Mathf.RoundToInt(targetRatio * 100f))
                 : 0;
 
             _healthPercentageText.text = $"{percentage}%";
