@@ -12849,7 +12849,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &416960201
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23029,13 +23029,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 762272400}
+  - component: {fileID: 762272401}
   m_Layer: 5
   m_Name: Graphic Section
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &762272400
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23057,6 +23058,28 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &762272401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 762272399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b89778627b3925a47b52892bb50db6bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GraphicsOptionsUI
+  _resolutionDropdown: {fileID: 1161066959}
+  _screenModeDropdown: {fileID: 1073656741}
+  _qualityDropdown: {fileID: 1650988029}
+  _shadowsDropdown: {fileID: 1882771126}
+  _fpsLimitDropdown: {fileID: 1348557254}
+  _antiAliasingDropdown: {fileID: 834095026}
+  _vSyncToggle: {fileID: 2117212993}
+  _resolutionRowObject: {fileID: 1789803499}
+  _screenModeRowObject: {fileID: 869832976}
+  _vSyncRowObject: {fileID: 1041723143}
 --- !u!4 &763257855 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3014035706127421481, guid: b75c9aa0f13f9d64a8f78ec5fe05de77, type: 3}
@@ -57563,7 +57586,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1724346328
 RectTransform:
   m_ObjectHideFlags: 0

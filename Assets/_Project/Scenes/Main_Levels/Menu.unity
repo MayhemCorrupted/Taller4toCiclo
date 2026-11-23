@@ -18568,7 +18568,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SaveManager
   _mainMenuSceneName: Menu
   _introSetupSceneName: Intro_CharacterSetup
-  _stage1SceneName: StageOneScene Alex
+  _stage1SceneName: Stage1_Bosque
   _stage2SceneName: StageTwoScene Alex
   _transitionFadeUI: {fileID: 1058753731}
   _sceneFadeDuration: 0.45
