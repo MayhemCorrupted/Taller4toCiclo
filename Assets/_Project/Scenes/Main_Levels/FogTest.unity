@@ -4144,12 +4144,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46838acd8b23bef4e8e62845c1d1aeeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenuUI
-  _mainPauseContainer: {fileID: 1724346327}
-  _optionsContainer: {fileID: 2038507037}
-  _quitContainer: {fileID: 749882731}
-  _configContainer: {fileID: 0}
+  _mainContainer: {fileID: 0}
+  _mainCanvasGroup: {fileID: 0}
+  _selectionContainer: {fileID: 0}
+  _optionsPanelUI: {fileID: 0}
+  _configPanelUI: {fileID: 0}
+  _exitPanelUI: {fileID: 0}
   _resumeButton: {fileID: 1488896666}
-  _transitionDuration: 0.35
+  _optionsButton: {fileID: 0}
+  _quitButton: {fileID: 0}
+  _fadeDuration: 0.25
+  _slideDuration: 0.3
+  _slideFromRight: 0
   _easeIn: 12
   _easeOut: 13
 --- !u!1001 &229606702
@@ -5193,6 +5199,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickUp
   _itemData: {fileID: 11400000, guid: 52fcdb34ce689b245b2876ef1e82eae8, type: 2}
   _amount: 1
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &268135882
 Transform:
   m_ObjectHideFlags: 0
@@ -12748,11 +12766,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23202aee96e49ef4ab0f6368c3f3fc9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   _hinge: {fileID: 430152121}
   _openAngle: 70
   _doorSpeed: 2
+  _isLocked: 0
+  OnInteractWhileLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorUnlocked:
+    m_PersistentCalls:
+      m_Calls: []
   _revertDirection: 1
   _forcedDirection: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &441935428
 GameObject:
   m_ObjectHideFlags: 0
@@ -13081,6 +13118,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7783803791589267474, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_Size.x
+      value: 0.4829949
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783803791589267474, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
+      propertyPath: m_Center.x
+      value: -0.25850162
+      objectReference: {fileID: 0}
     - target: {fileID: 7798809012958015243, guid: 83ad7619c294e48408c1c7332319214d, type: 3}
       propertyPath: m_LocalScale.x
       value: 127.01134
@@ -14270,6 +14315,9 @@ MonoBehaviour:
   OnVesaniaChangedEvent:
     m_PersistentCalls:
       m_Calls: []
+  OnCheckpointActivatedEvent:
+    m_PersistentCalls:
+      m_Calls: []
   OnLifeLostEvent:
     m_PersistentCalls:
       m_Calls:
@@ -14292,6 +14340,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _player: {fileID: 1291526395}
+  _startingLives: 3
+  _vesania4HealthThreshold: 0.2
+  _resetVesaniaOnPurify: 1
   _vesaniaSpawnGroups: []
   _statueCheckpointTransform: {fileID: 1559732516}
 --- !u!1001 &493754141
@@ -18127,6 +18178,7 @@ MonoBehaviour:
   _panelObject: {fileID: 1882830358}
   _disablePanelOnComplete: 1
   _useUnscaledTime: 0
+  _defaultTransitionDuration: 0.45
   _fadeSettings:
   - eventName: LostFade
     fadeInDuration: 1
@@ -30028,10 +30080,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EntityDirector
   globalAttackDelay: 1
-  baseSurroundRadius: 4
-  repelledSurroundRadius: 12
+  bossAttackDelay: 0.25
+  bossPassiveStandoffRadius: 13
+  meleeSurroundRadius: 2.8
   ambushPredictionTime: 0.8
+  rangedLineDistance: 8.5
+  rangedLineSpacing: 2.2
   minSeparationDistance: 2.5
+  bodyguardRadius: 2.6
+  shieldRingRadius: 4.2
 --- !u!1001 &914275013
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39708,6 +39765,14 @@ MonoBehaviour:
   _health: {fileID: 1053689688}
   _combat: {fileID: 0}
   _movement: {fileID: 1053689696}
+  _aggroRadius: 10
+  _lossDetectionBuffer: 2
+  _lossDetectionDuration: 3
+  _personalSpaceRadius: 1.6
+  _shortRangeRadius: 4.5
+  _mediumRangeRadius: 8.5
+  _longRangeRadius: 13
+  _showRangeGizmos: 1
   _passiveAgonizeCheckInterval: 1
   OnDeathAnimationFinishedEvent:
     m_PersistentCalls:
@@ -39748,14 +39813,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
   _brain: {fileID: 1053689694}
   _combat: {fileID: 0}
-  _obstacleLayer:
+  _wallLayer:
     serializedVersion: 2
     m_Bits: 0
   _patrolWaitingTime: 1
   _patrolRadius: 5
+  _patrolTurnDelay: 0.25
+  _patrolRotationSpeed: 6
   _enableOrbitalMovement: 1
-  _orbitStrafeDistance: 2.5
+  _orbitAngularSpeed: 45
   _orbitDirectionChangeInterval: 3.5
+  _retreatSpeedMultiplier: 1.15
+  _combatRotationSpeed: 14
   _stunDuration: 0.5
   _knockbackForce: 8.5
   _knockbackFriction: 8
@@ -57331,31 +57400,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateManager
   _currentState: 0
-  _tagRequirements: []
-  _stateSequence:
-  - requiredStateValue: 0
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls: []
-  - requiredStateValue: 1
-    onStateTriggered:
-      m_PersistentCalls:
-        m_Calls: []
-  _currentProgression:
-    EntitiesKilled: 0
-    TotalEntities: 0
-    InteractionsCompleted: 0
-    TotalInteractions: 0
-  _progressionMilestones: []
-  onCombatCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onInteractionsCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  onTotalProgressionCompleted:
-    m_PersistentCalls:
-      m_Calls: []
+  _goals: []
+  _onStateEnter: []
+  _dialogueEvents: []
 --- !u!1001 &1495404470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -58925,43 +58972,43 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueUI
   _playerHUD: {fileID: 7795036303825140426}
-  _dialoguePanel: {fileID: 1863666169}
-  _canvasGroup: {fileID: 0}
-  _speakerNameTMP: {fileID: 1704020201}
-  _dialogueTextTMP: {fileID: 1419789774}
-  _speakerPortrait: {fileID: 1453253771}
-  _optionsContainer: {fileID: 1341516861}
-  _optionButtons:
-  - {fileID: 634121183}
-  - {fileID: 1613708219}
-  - {fileID: 1328767739}
-  _optionTMP:
-  - {fileID: 1908108219}
-  - {fileID: 191637264}
-  - {fileID: 1750018382}
-  _interactionPromptTMP: {fileID: 638315035}
-  _skipTypingLocalizedString:
-    m_TableReference:
-      m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
-    m_TableEntryReference:
-      m_KeyId: 1076780030640128
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  _nextLineLocalizedString:
-    m_TableReference:
-      m_TableCollectionName: GUID:9a5edb2a14d8b1142b46cb6fd703c931
-    m_TableEntryReference:
-      m_KeyId: 1076780043223040
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  _fadePanelDuration: 0.3
-  _skipPromptDelay: 3
-  _nextPromptDelay: 1
-  defaultTextSpeed: 0.03
+  _defaultUI:
+    id: 
+    panel: {fileID: 0}
+    canvasGroup: {fileID: 0}
+    nameText: {fileID: 0}
+    bodyText: {fileID: 0}
+    portrait: {fileID: 0}
+    optionsPanel: {fileID: 0}
+    optionButtons: []
+    optionTexts: []
+    promptText: {fileID: 0}
+    skipText:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextText:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    textSpeed: 0.03
+    skipDelay: 0
+    nextDelay: 0
+    commaPause: 0
+    periodPause: 0
+    signPause: 0
+  _customUIs: []
+  _fadeDuration: 0.3
   references:
     version: 2
     RefIds: []
@@ -61399,6 +61446,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickUp
   _itemData: {fileID: 11400000, guid: 4af4af80d0ef7ec46899e6e61c768c18, type: 2}
   _amount: 1
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &1684873166
 Transform:
   m_ObjectHideFlags: 0
@@ -62473,17 +62532,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OptionsMenuUI
   _pauseMenuUI: {fileID: 225891066}
-  _exitPanelUI: {fileID: 1724346332}
-  _configPanelUI: {fileID: 1724346333}
-  _optionsPanel: {fileID: 2038507037}
+  _optionsSection: {fileID: 0}
   _graphicsSectionButton: {fileID: 1186018822}
   _audioSectionButton: {fileID: 175777816}
   _controlsSectionButton: {fileID: 1449291804}
   _accessibilitySectionButton: {fileID: 1255813587}
-  _optionsButton: {fileID: 654808328}
   _returnButton: {fileID: 981556690}
   _transitionDuration: 0.35
-  _fastReturnBtnDuration: 0.12
+  _slideFromRight: 0
   _easeIn: 12
   _easeOut: 13
 --- !u!114 &1724346332
@@ -62498,14 +62554,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 700374e069e69da44ab5e52c1ad6e990, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExitPanelUI
-  _pausePanelUI: {fileID: 225891066}
-  _optionsPanelUI: {fileID: 1724346331}
-  _quitPanel: {fileID: 749882731}
-  _quitButton: {fileID: 562364648}
+  _pauseMenuUI: {fileID: 0}
+  _exitContainer: {fileID: 0}
   _leaveGameButton: {fileID: 967492035}
   _continueButton: {fileID: 0}
-  sceneName: 
+  _mainMenuSceneName: 
   _transitionDuration: 0.35
+  _slideFromRight: 0
   _easeIn: 12
   _easeOut: 13
 --- !u!114 &1724346333
@@ -62520,16 +62575,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb607cba7bb9d5b409cafd29d3bcafc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConfigPanelUI
-  _optionsPanelUI: {fileID: 1724346331}
-  _pausePanelUI: {fileID: 225891066}
-  _configPanel: {fileID: 416960200}
+  _pauseMenuUI: {fileID: 0}
+  _configContainer: {fileID: 0}
   _graphicsSection: {fileID: 762272399}
   _audioSection: {fileID: 1571696361}
   _controlsSection: {fileID: 316685223}
   _accessibilitySection: {fileID: 585141155}
   _returnButton: {fileID: 107014469}
   _transitionDuration: 0.35
-  _fastReturnBtnDuration: 0.12
+  _slideFromRight: 0
   _easeIn: 12
   _easeOut: 13
 --- !u!1001 &1726812490
@@ -65863,9 +65917,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   _pauseMenuUI: {fileID: 225891066}
   _inventoryPanelUI: {fileID: 812672202}
+  _gameOverUI: {fileID: 0}
   _panelToggleCooldown: 0.1
   _gameplayCursorTexture: {fileID: 2800000, guid: eff1a78f9ce85dc4ba16d5a438c3994d, type: 3}
   _gameplayCursorHotspot: {x: 16, y: 16}
+  _interactCursorTexture: {fileID: 0}
+  _interactCursorHotspot: {x: 16, y: 16}
   _uiCursorTexture: {fileID: 2800000, guid: 29a21c31172978f4c9bea66fc499e546, type: 3}
   _uiCursorHotspot: {x: 0, y: 0}
 --- !u!1 &1773690193
@@ -68222,6 +68279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f995485b5aebf148b3509816029844c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  _itemCatalog: []
   _generalSlots:
   - Item: {fileID: 0}
     Quantity: 0
@@ -69437,6 +69495,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickUp
   _itemData: {fileID: 11400000, guid: 52fcdb34ce689b245b2876ef1e82eae8, type: 2}
   _amount: 1
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &1920432929
 Transform:
   m_ObjectHideFlags: 0
@@ -77256,11 +77326,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23202aee96e49ef4ab0f6368c3f3fc9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   _hinge: {fileID: 2118185935}
   _openAngle: 70
   _doorSpeed: 2
+  _isLocked: 0
+  OnInteractWhileLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorUnlocked:
+    m_PersistentCalls:
+      m_Calls: []
   _revertDirection: 1
   _forcedDirection: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!65 &2118185937
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -77701,24 +77790,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ded70407f7c0a82419b76bf6e4af5410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueInteraction
-  defaultSequence: {fileID: 0}
-  conditionalOverrides: []
-  loopDialogue: 0
-  OnInteractDialogue:
+  _interactionPrompt:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  _defaultDialogue: {fileID: 0}
+  _branches: []
+  _defaultUIID: 
+  _canRepeat: 1
+  OnInteract:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 851241653}
-        m_TargetAssemblyTypeName: DialogueManager, Assembly-CSharp
-        m_MethodName: StartDialogue
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 11400000, guid: ed8caee3ec396034d8a95d52a62bcdb3, type: 2}
-          m_ObjectArgumentAssemblyTypeName: DialogueSequence, Assembly-CSharp
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!1001 &2145508548
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79401,9 +79491,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d7a3b0c362199d44961a4c0383fb4f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHUD
-  _healthFillImage: {fileID: 5271956393460159690}
+  _hudCanvasGroup: {fileID: 0}
+  _hideOutsideGameplay: 1
+  _healthBar:
+    _redFillImage: {fileID: 0}
+    _whiteTrailImage: {fileID: 0}
+    _instantRedDrop: 1
+    _redLerpSpeed: 25
+    _trailDelay: 0.85
+    _whiteDrainSpeed: 0.45
   _staminaFillImage: {fileID: 1461399243141561864}
-  _lerpSpeed: 12
+  _staminaLerpSpeed: 10
+  _attacksContainer: {fileID: 0}
   _skillIconImage: {fileID: 5500785581105229227}
   _skillCooldownFill: {fileID: 7216824995432402109}
   _distanceSkillSprite: {fileID: 1996173994, guid: 440bfc25fe2e9e94b93a011698a6e0ad, type: 3}
@@ -79520,9 +79619,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyLockOnHUD
   _enemyHudContainer: {fileID: 346788556}
-  _enemyHealthFillImage: {fileID: 163012616}
+  _enemyHealthBar:
+    _redFillImage: {fileID: 0}
+    _whiteTrailImage: {fileID: 0}
+    _instantRedDrop: 1
+    _redLerpSpeed: 25
+    _trailDelay: 0.85
+    _whiteDrainSpeed: 0.45
   _healthPercentageText: {fileID: 1233012618}
-  _lerpSpeed: 12
 --- !u!114 &7806074223070800582
 MonoBehaviour:
   m_ObjectHideFlags: 0
