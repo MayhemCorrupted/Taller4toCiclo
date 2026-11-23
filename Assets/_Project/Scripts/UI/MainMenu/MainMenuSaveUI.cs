@@ -1,90 +1,293 @@
-using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+[Serializable]
+public struct SaveSlotButtonBinding
+{
+    public Button slotButton;
+    public TMP_Text characterNameText;
+    public TMP_Text playTimeText;
+}
+
 public class MainMenuSaveUI : MonoBehaviour
 {
-    [Header("Controles de Partida")]
-    [SerializeField] private Button _continueButton;
-    [SerializeField] private TMP_InputField _nicknameInput;
+    private enum SlotMenuMode { NewGame, LoadGame }
 
-    [Header("Indicador Online / Offline")]
-    [SerializeField] private TMP_Text _connectionStatusText;
+    [Header("Controlador de Paneles")]
+    [SerializeField] private MainMenuPanelUI _mainMenuPanelUI;
 
-    [Header("UI de Ranking")]
-    [SerializeField] private TMP_Text _rankingListText;
+    [Header("Botones Principales (En MainMenuContainer)")]
+    [SerializeField] private Button _newGameButton;
+    [SerializeField] private Button _loadGameButton;
+
+    [Header("Panel Principal de Partida (Slots + Nombre)")]
+    [Tooltip("Contenedor raíz que agrupa los slots, el subcontenedor de nombre y el botón Return principal.")]
+    [SerializeField] private GameObject _playRootContainer;
+    [Tooltip("Contenedor específico de los 3 botones de slot.")]
+    [SerializeField] private GameObject _slotsContainer;
+    [Tooltip("Botón Return principal para volver al Menú Principal (se apaga al abrir el subcontenedor de nombre).")]
+    [SerializeField] private Button _closeSlotsButton;
+    [SerializeField] private SaveSlotButtonBinding[] _slotBindings = new SaveSlotButtonBinding[3];
+
+    [Header("Sub-Contenedor de Nombre (Nueva Partida)")]
+    [SerializeField] private GameObject _nameInputSubContainer;
+    [SerializeField] private TMP_InputField _nicknameInputField;
+    [SerializeField] private Button _confirmNameButton;
+    [SerializeField] private Button _cancelNameButton;
+    [Tooltip("Si está activo y _slotsContainer es independiente de _nameInputSubContainer, oculta los slots mientras se escribe el nombre.")]
+    [SerializeField] private bool _hideSlotsWhileNaming = false;
+
+    [Header("Textos por Defecto")]
+    [SerializeField] private string _emptySlotLabel = "Ranura Vacía";
+    [SerializeField] private string _emptyTimeLabel = "--:--:--";
+    [SerializeField] private string _defaultNickname = "Faulvalier";
+
+    private SaveSlotSummary[] _cachedSummaries;
+    private SlotMenuMode _currentMode = SlotMenuMode.NewGame;
+    private int _selectedSlotIndex = -1;
+    private bool _isStartingGame;
+    private void Awake()
+    {
+        if (_mainMenuPanelUI == null)
+            _mainMenuPanelUI = GetComponentInParent<MainMenuPanelUI>(true);
+
+        if (_mainMenuPanelUI == null)
+            _mainMenuPanelUI = FindAnyObjectByType<MainMenuPanelUI>(FindObjectsInactive.Include);
+    }
     private async void Start()
     {
         BinarySaveService.Initialize();
 
-        if (_continueButton != null)
-        {
-            _continueButton.interactable = BinarySaveService.HasActiveRun();
-        }
+        SetActiveSafe(_nameInputSubContainer, false);
+        SetActiveSafe(_slotsContainer, false);
+        SetActiveSafe(_playRootContainer, false);
 
-        if (CloudSyncService.Instance != null)
-        {
-            CloudSyncService.Instance.OnConnectionStatusChanged += UpdateConnectionLabel;
-            bool isOnline = await CloudSyncService.Instance.CheckServerConnectionAsync();
-            UpdateConnectionLabel(isOnline);
-
-            if (isOnline)
-            {
-                await RefreshLeaderboardAsync();
-            }
-            else if (_rankingListText != null)
-            {
-                _rankingListText.text = "Modo Offline: Conéctate a internet para ver el Ranking.";
-            }
-        }
+        RegisterListeners();
+        await RefreshSlotsDataAsync();
     }
     private void OnDestroy()
     {
-        if (CloudSyncService.Instance != null)
-        {
-            CloudSyncService.Instance.OnConnectionStatusChanged -= UpdateConnectionLabel;
-        }
+        UnregisterListeners();
     }
-    private void UpdateConnectionLabel(bool isOnline)
+    private void RegisterListeners()
     {
-        if (_connectionStatusText != null)
-        {
-            _connectionStatusText.text = isOnline ? "ONLINE" : "OFFLINE";
-        }
-    }
-    public void OnClickNewGame()
-    {
-        string nick = _nicknameInput != null ? _nicknameInput.text : "Faulvalier";
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.StartNewGame(nick);
-        }
-    }
-    public void OnClickContinueGame()
-    {
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.ContinueSavedGame();
-        }
-    }
-    public async System.Threading.Tasks.Task RefreshLeaderboardAsync()
-    {
-        if (CloudSyncService.Instance == null || _rankingListText == null) return;
+        if (_newGameButton != null) _newGameButton.onClick.AddListener(OnClickNewGameButton);
+        if (_loadGameButton != null) _loadGameButton.onClick.AddListener(OnClickLoadGameButton);
+        if (_closeSlotsButton != null) _closeSlotsButton.onClick.AddListener(CloseSlotsContainer);
 
-        List<LeaderboardEntry> entries = await CloudSyncService.Instance.FetchLeaderboardAsync();
-        if (entries.Count == 0)
+        if (_confirmNameButton != null) _confirmNameButton.onClick.AddListener(OnClickConfirmNewGame);
+        if (_cancelNameButton != null) _cancelNameButton.onClick.AddListener(OnClickCancelNameInput);
+
+        for (int i = 0; i < _slotBindings.Length; i++)
         {
-            _rankingListText.text = "Aún no hay victorias registradas.";
+            int capturedIndex = i;
+            if (_slotBindings[i].slotButton != null)
+            {
+                _slotBindings[i].slotButton.onClick.AddListener(() => OnClickSlot(capturedIndex));
+            }
+        }
+    }
+    private void UnregisterListeners()
+    {
+        if (_newGameButton != null) _newGameButton.onClick.RemoveListener(OnClickNewGameButton);
+        if (_loadGameButton != null) _loadGameButton.onClick.RemoveListener(OnClickLoadGameButton);
+        if (_closeSlotsButton != null) _closeSlotsButton.onClick.RemoveListener(CloseSlotsContainer);
+
+        if (_confirmNameButton != null) _confirmNameButton.onClick.RemoveListener(OnClickConfirmNewGame);
+        if (_cancelNameButton != null) _cancelNameButton.onClick.RemoveListener(OnClickCancelNameInput);
+
+        for (int i = 0; i < _slotBindings.Length; i++)
+        {
+            if (_slotBindings[i].slotButton != null)
+                _slotBindings[i].slotButton.onClick.RemoveAllListeners();
+        }
+    }
+    public async Task RefreshSlotsDataAsync()
+    {
+        _cachedSummaries = await BinarySaveService.GetAllSlotSummariesAsync();
+
+        bool hasAnySave = false;
+        for (int i = 0; i < _cachedSummaries.Length; i++)
+        {
+            if (_cachedSummaries[i].isOccupied)
+            {
+                hasAnySave = true;
+                break;
+            }
+        }
+
+        if (_loadGameButton != null)
+        {
+            _loadGameButton.gameObject.SetActive(hasAnySave);
+        }
+
+        UpdateSlotButtonsVisuals(slotsInteractable: true);
+    }
+    private void UpdateSlotButtonsVisuals(bool slotsInteractable)
+    {
+        if (_cachedSummaries == null) return;
+
+        for (int i = 0; i < _slotBindings.Length && i < _cachedSummaries.Length; i++)
+        {
+            SaveSlotSummary summary = _cachedSummaries[i];
+            SaveSlotButtonBinding binding = _slotBindings[i];
+
+            if (summary.isOccupied)
+            {
+                if (binding.characterNameText != null)
+                    binding.characterNameText.text = summary.nickname;
+
+                if (binding.playTimeText != null)
+                    binding.playTimeText.text = FormatPlayTime(summary.playTimeSeconds);
+            }
+            else
+            {
+                if (binding.characterNameText != null)
+                    binding.characterNameText.text = _emptySlotLabel;
+
+                if (binding.playTimeText != null)
+                    binding.playTimeText.text = _emptyTimeLabel;
+            }
+
+            if (binding.slotButton != null)
+            {
+                bool modeAllowsClick = (_currentMode == SlotMenuMode.NewGame) || summary.isOccupied;
+                binding.slotButton.interactable = slotsInteractable && modeAllowsClick;
+            }
+        }
+    }
+    private void OnClickNewGameButton()
+    {
+        if (_isStartingGame) return;
+        OpenPlayPanelWithMode(SlotMenuMode.NewGame);
+    }
+    private void OnClickLoadGameButton()
+    {
+        if (_isStartingGame) return;
+        OpenPlayPanelWithMode(SlotMenuMode.LoadGame);
+    }
+    private void OpenPlayPanelWithMode(SlotMenuMode mode)
+    {
+        _currentMode = mode;
+        _selectedSlotIndex = -1;
+
+        if (_mainMenuPanelUI != null)
+        {
+            _mainMenuPanelUI.OpenPlayPanel();
+        }
+
+        SetActiveSafe(_playRootContainer, true);
+        SetActiveSafe(_slotsContainer, true);
+        SetActiveSafe(_nameInputSubContainer, false);
+
+        if (_closeSlotsButton != null)
+            _closeSlotsButton.gameObject.SetActive(true);
+
+        UpdateSlotButtonsVisuals(slotsInteractable: true);
+    }
+    private void CloseSlotsContainer()
+    {
+        if (_isStartingGame) return;
+
+        _selectedSlotIndex = -1;
+        SetActiveSafe(_nameInputSubContainer, false);
+        SetActiveSafe(_slotsContainer, false);
+        SetActiveSafe(_playRootContainer, false);
+
+        if (_mainMenuPanelUI != null)
+        {
+            _mainMenuPanelUI.ClosePlayPanelToMainMenu();
+        }
+    }
+    private async void OnClickSlot(int slotIndex)
+    {
+        if (_isStartingGame || _cachedSummaries == null || slotIndex < 0 || slotIndex >= _cachedSummaries.Length)
             return;
+
+        if (_currentMode == SlotMenuMode.LoadGame)
+        {
+            if (!_cachedSummaries[slotIndex].isOccupied) return;
+
+            _isStartingGame = true;
+            if (SaveManager.Instance != null)
+            {
+                await SaveManager.Instance.ContinueSavedGameAsync(slotIndex);
+            }
+            _isStartingGame = false;
+        }
+        else
+        {
+            _selectedSlotIndex = slotIndex;
+
+            if (_nicknameInputField != null)
+                _nicknameInputField.text = string.Empty;
+
+            if (_closeSlotsButton != null)
+                _closeSlotsButton.gameObject.SetActive(false);
+
+            UpdateSlotButtonsVisuals(slotsInteractable: false);
+
+            if (_hideSlotsWhileNaming && CanHideSlotsSafely())
+            {
+                SetActiveSafe(_slotsContainer, false);
+            }
+
+            SetActiveSafe(_nameInputSubContainer, true);
+
+            if (_nicknameInputField != null)
+                _nicknameInputField.ActivateInputField();
+        }
+    }
+    private void OnClickCancelNameInput()
+    {
+        if (_isStartingGame) return;
+
+        _selectedSlotIndex = -1;
+        SetActiveSafe(_nameInputSubContainer, false);
+        SetActiveSafe(_slotsContainer, true);
+
+        if (_closeSlotsButton != null)
+            _closeSlotsButton.gameObject.SetActive(true);
+
+        UpdateSlotButtonsVisuals(slotsInteractable: true);
+    }
+    private async void OnClickConfirmNewGame()
+    {
+        if (_isStartingGame || _selectedSlotIndex < 0) return;
+
+        _isStartingGame = true;
+
+        string chosenNickname = _nicknameInputField != null && !string.IsNullOrWhiteSpace(_nicknameInputField.text)
+            ? _nicknameInputField.text.Trim()
+            : _defaultNickname;
+
+        if (SaveManager.Instance != null)
+        {
+            await SaveManager.Instance.StartNewGameAsync(_selectedSlotIndex, chosenNickname);
         }
 
-        System.Text.StringBuilder sb = new();
-        for (int i = 0; i < entries.Count; i++)
-        {
-            int minutes = Mathf.FloorToInt(entries[i].playTime / 60f);
-            int seconds = Mathf.FloorToInt(entries[i].playTime % 60f);
-            sb.AppendLine($"#{i + 1}  {entries[i].nickname}  -  {minutes:00}:{seconds:00}  ({entries[i].deaths} muertes)");
-        }
-        _rankingListText.text = sb.ToString();
+        _isStartingGame = false;
+    }
+    private bool CanHideSlotsSafely()
+    {
+        if (_slotsContainer == null || _nameInputSubContainer == null) return false;
+        if (_slotsContainer == _nameInputSubContainer) return false;
+        return !_nameInputSubContainer.transform.IsChildOf(_slotsContainer.transform);
+    }
+    private static void SetActiveSafe(GameObject target, bool active)
+    {
+        if (target != null && target.activeSelf != active)
+            target.SetActive(active);
+    }
+    public static string FormatPlayTime(float totalSeconds)
+    {
+        int secondsInt = Mathf.Max(0, Mathf.FloorToInt(totalSeconds));
+        int hours = secondsInt / 3600;
+        int minutes = (secondsInt % 3600) / 60;
+        int seconds = secondsInt % 60;
+        return $"{hours:00}:{minutes:00}:{seconds:00}";
     }
 }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 public static class BinarySaveService
 {
-    private const string RUN_FILE_NAME = "rotbound_run.bin";
-    private const string FALLEN_FILE_NAME = "rotbound_fallen.bin";
-    private const string PENDING_FILE_NAME = "rotbound_pending.bin";
+    public const int MAX_SLOTS = 3;
+    private const string SLOT_FILE_PREFIX = "rotbound_slot_";
+    private const string SLOT_FILE_EXT = ".bin";
 
     private static readonly byte[] AES_KEY = Encoding.UTF8.GetBytes("Rotbound_Pandemoniac_Key_2026_32");
     private static readonly byte[] AES_IV = Encoding.UTF8.GetBytes("Rotbound_IV_16By");
@@ -21,26 +21,41 @@ public static class BinarySaveService
         _baseDirectory = Application.persistentDataPath;
         _isInitialized = true;
     }
-    private static string GetFullPath(string fileName)
+    private static string GetSlotPath(int slotIndex)
     {
         if (!_isInitialized) Initialize();
-        return Path.Combine(_baseDirectory, fileName);
+        int clampedSlot = Mathf.Clamp(slotIndex, 0, MAX_SLOTS - 1);
+        return Path.Combine(_baseDirectory, $"{SLOT_FILE_PREFIX}{clampedSlot}{SLOT_FILE_EXT}");
     }
-    public static bool HasActiveRun() => File.Exists(GetFullPath(RUN_FILE_NAME));
-
-    public static async Task SaveRunAsync(GameSaveContainer container)
+    public static bool HasSlotSave(int slotIndex)
     {
-        if (container == null) return;
+        if (slotIndex < 0 || slotIndex >= MAX_SLOTS) return false;
+        return File.Exists(GetSlotPath(slotIndex));
+    }
+    public static bool HasAnySave()
+    {
+        for (int i = 0; i < MAX_SLOTS; i++)
+        {
+            if (HasSlotSave(i)) return true;
+        }
+        return false;
+    }
+    public static async Task SaveSlotAsync(int slotIndex, GameSaveContainer container)
+    {
+        if (container == null || slotIndex < 0 || slotIndex >= MAX_SLOTS) return;
 
-        string path = GetFullPath(RUN_FILE_NAME);
+        container.player.slotIndex = slotIndex;
+        string path = GetSlotPath(slotIndex);
         string plainJson = JsonUtility.ToJson(container, false);
 
         await Task.Run(() => WriteEncryptedBinary(path, plainJson));
-        GameLogger.LogInfo("Partida encriptada y guardada en disco.");
+        GameLogger.LogInfo($"Partida guardada en Slot {slotIndex + 1}.");
     }
-    public static async Task<GameSaveContainer> LoadRunAsync()
+    public static async Task<GameSaveContainer> LoadSlotAsync(int slotIndex)
     {
-        string path = GetFullPath(RUN_FILE_NAME);
+        if (slotIndex < 0 || slotIndex >= MAX_SLOTS) return null;
+
+        string path = GetSlotPath(slotIndex);
         if (!File.Exists(path)) return null;
 
         try
@@ -52,79 +67,67 @@ public static class BinarySaveService
         }
         catch (Exception ex)
         {
-            GameLogger.LogError($"Archivo de guardado corrupto o alterado: {ex.Message}");
-            DeleteRunSave();
+            GameLogger.LogError($"Archivo de guardado corrupto en Slot {slotIndex + 1}: {ex.Message}");
+            DeleteSlotSave(slotIndex);
             return null;
         }
     }
-    public static void DeleteRunSave()
+    public static async Task<SaveSlotSummary[]> GetAllSlotSummariesAsync()
     {
+        SaveSlotSummary[] summaries = new SaveSlotSummary[MAX_SLOTS];
+
+        for (int i = 0; i < MAX_SLOTS; i++)
+        {
+            if (!HasSlotSave(i))
+            {
+                summaries[i] = new SaveSlotSummary
+                {
+                    slotIndex = i,
+                    isOccupied = false,
+                    nickname = string.Empty,
+                    playTimeSeconds = 0f,
+                    currentScene = string.Empty
+                };
+                continue;
+            }
+
+            GameSaveContainer data = await LoadSlotAsync(i);
+            if (data != null && data.player != null)
+            {
+                summaries[i] = new SaveSlotSummary
+                {
+                    slotIndex = i,
+                    isOccupied = true,
+                    nickname = data.player.nickname,
+                    playTimeSeconds = data.player.playTimeSeconds,
+                    currentScene = data.player.currentScene
+                };
+            }
+            else
+            {
+                summaries[i] = new SaveSlotSummary { slotIndex = i, isOccupied = false };
+            }
+        }
+
+        return summaries;
+    }
+    public static void DeleteSlotSave(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= MAX_SLOTS) return;
+
         try
         {
-            string path = GetFullPath(RUN_FILE_NAME);
+            string path = GetSlotPath(slotIndex);
             if (File.Exists(path))
             {
                 File.Delete(path);
-                GameLogger.LogInfo("Permadeath/Fin: Archivo local de partida eliminado.");
+                GameLogger.LogInfo($"Slot {slotIndex + 1} eliminado del disco.");
             }
         }
         catch (Exception ex)
         {
-            GameLogger.LogError($"Error al borrar archivo local: {ex.Message}");
+            GameLogger.LogError($"Error al borrar Slot {slotIndex + 1}: {ex.Message}");
         }
-    }
-    public static async Task SaveLocalFallenRemainAsync(FallenRemainRecord record)
-    {
-        string path = GetFullPath(FALLEN_FILE_NAME);
-        FallenRemainsList list = await LoadLocalFallenRemainsAsync();
-        list.records.Add(record);
-
-        string json = JsonUtility.ToJson(list, false);
-        await Task.Run(() => WriteEncryptedBinary(path, json));
-    }
-    public static async Task<FallenRemainsList> LoadLocalFallenRemainsAsync()
-    {
-        string path = GetFullPath(FALLEN_FILE_NAME);
-        if (!File.Exists(path)) return new FallenRemainsList();
-
-        try
-        {
-            string json = await Task.Run(() => ReadEncryptedBinary(path));
-            return JsonUtility.FromJson<FallenRemainsList>(json) ?? new FallenRemainsList();
-        }
-        catch
-        {
-            return new FallenRemainsList();
-        }
-    }
-    public static async Task EnqueuePendingSubmissionAsync(RunSubmissionPayload payload)
-    {
-        string path = GetFullPath(PENDING_FILE_NAME);
-        PendingSubmissionsList list = await LoadPendingSubmissionsAsync();
-        list.pendingRuns.Add(payload);
-
-        string json = JsonUtility.ToJson(list, false);
-        await Task.Run(() => WriteEncryptedBinary(path, json));
-    }
-    public static async Task<PendingSubmissionsList> LoadPendingSubmissionsAsync()
-    {
-        string path = GetFullPath(PENDING_FILE_NAME);
-        if (!File.Exists(path)) return new PendingSubmissionsList();
-
-        try
-        {
-            string json = await Task.Run(() => ReadEncryptedBinary(path));
-            return JsonUtility.FromJson<PendingSubmissionsList>(json) ?? new PendingSubmissionsList();
-        }
-        catch
-        {
-            return new PendingSubmissionsList();
-        }
-    }
-    public static void ClearPendingSubmissions()
-    {
-        string path = GetFullPath(PENDING_FILE_NAME);
-        if (File.Exists(path)) File.Delete(path);
     }
     private static void WriteEncryptedBinary(string filePath, string plainJson)
     {

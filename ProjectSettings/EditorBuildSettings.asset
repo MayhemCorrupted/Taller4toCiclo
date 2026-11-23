@@ -9,8 +9,14 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/Main_Levels/Menu.unity
     guid: 8dfa968c4a7b76b4d9e3bbce82f9d109
   - enabled: 1
+    path: Assets/_Project/Scenes/Main_Levels/Intro_CharacterSetup.unity
+    guid: c2504944423c4db408bab41511547c43
+  - enabled: 1
     path: Assets/_Project/Scenes/Main_Levels/StageOneScene Alex.unity
     guid: e03f7127bd8f66a479e2a94a7b7692ef
+  - enabled: 1
+    path: Assets/_Project/Scenes/Main_Levels/StageTwoScene Alex.unity
+    guid: a8acc0c90ebf804429645944fd508858
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 97c2476c5ca5687459222f0d41062135, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}

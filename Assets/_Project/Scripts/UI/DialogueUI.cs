@@ -116,8 +116,14 @@ public class DialogueUI : MonoBehaviour
         if (preset.textSpeed <= 0f)
             preset.textSpeed = 0.03f;
 
-        if (preset.canvasGroup == null && preset.panel != null)
-            preset.canvasGroup = preset.panel.GetComponent<CanvasGroup>();
+        if (preset.panel != null)
+        {
+            if (preset.canvasGroup == null)
+                preset.canvasGroup = preset.panel.GetComponent<CanvasGroup>();
+
+            if (preset.canvasGroup == null)
+                preset.canvasGroup = preset.panel.AddComponent<CanvasGroup>();
+        }
 
         if (preset.canvasGroup != null)
             preset.canvasGroup.alpha = 0f;
@@ -226,6 +232,7 @@ public class DialogueUI : MonoBehaviour
 
             LeanTween.alphaCanvas(_activeUI.canvasGroup, 1f, _fadeDuration)
                      .setEaseOutCubic()
+                     .setIgnoreTimeScale(true)
                      .setOnComplete(() => onComplete?.Invoke());
         }
         else
@@ -236,23 +243,41 @@ public class DialogueUI : MonoBehaviour
             onComplete?.Invoke();
         }
     }
-    public void CloseUI(Action onComplete)
+    public void CloseUI(Action onComplete, float customFadeDuration = -1f)
     {
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+        }
+
         UnsubscribeCurrentLine();
         HideAllOptions();
 
-        if (_promptCoroutine != null) StopCoroutine(_promptCoroutine);
-        if (_activeUI.promptText != null) _activeUI.promptText.gameObject.SetActive(false);
+        if (_promptCoroutine != null)
+        {
+            StopCoroutine(_promptCoroutine);
+            _promptCoroutine = null;
+        }
 
-        if (_activeUI.canvasGroup != null)
+        if (_activeUI.promptText != null)
+            _activeUI.promptText.gameObject.SetActive(false);
+
+        float duration = customFadeDuration >= 0f ? customFadeDuration : _fadeDuration;
+
+        if (_activeUI.canvasGroup != null && duration > 0f)
         {
             LeanTween.cancel(_activeUI.canvasGroup.gameObject);
-            LeanTween.alphaCanvas(_activeUI.canvasGroup, 0f, _fadeDuration)
+            LeanTween.alphaCanvas(_activeUI.canvasGroup, 0f, duration)
                      .setEaseInCubic()
+                     .setIgnoreTimeScale(true)
                      .setOnComplete(() => FinalizeClose(onComplete));
         }
         else
         {
+            if (_activeUI.canvasGroup != null)
+                _activeUI.canvasGroup.alpha = 0f;
+
             FinalizeClose(onComplete);
         }
     }
@@ -291,7 +316,6 @@ public class DialogueUI : MonoBehaviour
     {
         _interactKeyName = keyName;
     }
-
     private void UnsubscribeCurrentLine()
     {
         if (LanguageManager.Instance == null) return;

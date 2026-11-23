@@ -54,7 +54,6 @@ public class GraphicsOptionsUI : MonoBehaviour
     }
     private void PopulateAllDropdowns()
     {
-        // 1. Resoluciones
         if (_resolutionDropdown != null)
         {
             _resolutionDropdown.ClearOptions();
@@ -67,26 +66,29 @@ public class GraphicsOptionsUI : MonoBehaviour
             _resolutionDropdown.AddOptions(resOptions);
         }
 
-        // 2. Modo de pantalla
         if (_screenModeDropdown != null)
         {
             _screenModeDropdown.ClearOptions();
             _screenModeDropdown.AddOptions(new List<string>
             {
                 "Pantalla completa",
-                "Ventana sin bordes",
-                "Modo ventana"
+                "Sin bordes",
+                "Ventana"
             });
         }
 
-        // 3. Calidad general (lee los presets de Project Settings > Quality)
         if (_qualityDropdown != null)
         {
             _qualityDropdown.ClearOptions();
-            _qualityDropdown.AddOptions(new List<string>(QualitySettings.names));
+            _qualityDropdown.AddOptions(new List<string>
+            {
+                "Baja",
+                "Media",
+                "Alta",
+                "Ultra"
+            });
         }
 
-        // 4. Sombras
         if (_shadowsDropdown != null)
         {
             _shadowsDropdown.ClearOptions();
@@ -99,7 +101,6 @@ public class GraphicsOptionsUI : MonoBehaviour
             });
         }
 
-        // 5. Límite de fotogramas
         if (_fpsLimitDropdown != null)
         {
             _fpsLimitDropdown.ClearOptions();
@@ -112,7 +113,6 @@ public class GraphicsOptionsUI : MonoBehaviour
             });
         }
 
-        // 6. Antialiasing
         if (_antiAliasingDropdown != null)
         {
             _antiAliasingDropdown.ClearOptions();
@@ -158,11 +158,39 @@ public class GraphicsOptionsUI : MonoBehaviour
         if (_antiAliasingDropdown != null) _antiAliasingDropdown.onValueChanged.RemoveListener(OnAntiAliasingChanged);
         if (_vSyncToggle != null) _vSyncToggle.onValueChanged.RemoveListener(OnVSyncChanged);
     }
-    private void OnResolutionChanged(int index) => GraphicsManager.Instance?.SetResolution(index);
-    private void OnScreenModeChanged(int index) => GraphicsManager.Instance?.SetScreenMode(index);
-    private void OnQualityChanged(int index) => GraphicsManager.Instance?.SetQuality(index);
-    private void OnShadowsChanged(int index) => GraphicsManager.Instance?.SetShadows(index);
-    private void OnFpsLimitChanged(int index) => GraphicsManager.Instance?.SetFrameLimit(index);
-    private void OnAntiAliasingChanged(int index) => GraphicsManager.Instance?.SetAntiAliasing(index);
-    private void OnVSyncChanged(bool isOn) => GraphicsManager.Instance?.SetVSync(isOn);
+    private void OnResolutionChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetResolution(index);
+    }
+    private void OnScreenModeChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetScreenMode(index);
+    }
+    private void OnQualityChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetQuality(index);
+    }
+    private void OnShadowsChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetShadows(index);
+    }
+    private void OnFpsLimitChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetFrameLimit(index);
+    }
+    private void OnAntiAliasingChanged(int index)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetAntiAliasing(index);
+    }
+    private void OnVSyncChanged(bool isOn)
+    {
+        if (GraphicsManager.Instance != null)
+            GraphicsManager.Instance.SetVSync(isOn);
+    }
 }

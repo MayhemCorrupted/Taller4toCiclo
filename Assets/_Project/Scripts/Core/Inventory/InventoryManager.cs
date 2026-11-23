@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 [Serializable] public class InventorySlot
@@ -20,16 +21,26 @@ public class InventoryManager : MonoBehaviour
     public event Action<InventorySlot[]> OnInventoryUpdated;
     public event Action<InventorySlot[]> OnArmorInventoryUpdated;
     public event Action<ItemData, int> OnItemAdded;
+
+    [Header("Catálogo de Ítems (Reconstrucción al Cargar)")]
+    [Tooltip("Arrastra aquí todos los ScriptableObjects de ítems (Armaduras y Consumibles) para restaurarlos por ItemID.")]
+    [SerializeField] private ItemData[] _itemCatalog;
+
+    [Header("Slots de Inventario")]
+    [SerializeField] private InventorySlot[] _generalSlots = new InventorySlot[6];
+    [SerializeField] private InventorySlot[] _armorInventorySlots = new InventorySlot[3];
+
     public InventorySlot[] GeneralSlots => _generalSlots;
     public InventorySlot[] ArmorInventorySlots => _armorInventorySlots;
     public ArmorItem EquippedArmor => _equippedArmor;
     public ConsumableItem EquippedConsumable => _equippedConsumable;
     public int ConsumableCount => _consumableCount;
+
     private ArmorItem _equippedArmor;
     private ConsumableItem _equippedConsumable;
     private int _consumableCount = 0;
-    [SerializeField] private InventorySlot[] _generalSlots = new InventorySlot[6];
-    [SerializeField] private InventorySlot[] _armorInventorySlots = new InventorySlot[3];
+
+    private readonly Dictionary<string, ItemData> _itemLookup = new(StringComparer.Ordinal);
     private PlayerInputs _playerInputs;
     private PlayerStats _playerStats;
     private PlayerHealth _playerHealth;
@@ -42,6 +53,8 @@ public class InventoryManager : MonoBehaviour
         _playerStats = FindAnyObjectByType<PlayerStats>();
         _playerHealth = FindAnyObjectByType<PlayerHealth>();
         _playerFSM = FindAnyObjectByType<PlayerFSM>();
+
+        BuildItemLookup();
 
         for (int i = 0; i < _generalSlots.Length; i++)
         {
@@ -59,6 +72,147 @@ public class InventoryManager : MonoBehaviour
     private void OnDisable()
     {
         if (_playerInputs != null) _playerInputs.OnUseItem -= UseEquippedConsumable;
+    }
+    private void Start()
+    {
+        SyncFromSaveManager();
+    }
+    private void BuildItemLookup()
+    {
+        _itemLookup.Clear();
+
+        if (_itemCatalog != null)
+        {
+            for (int i = 0; i < _itemCatalog.Length; i++)
+            {
+                ItemData item = _itemCatalog[i];
+                if (item != null && !string.IsNullOrWhiteSpace(item.ItemID))
+                {
+                    _itemLookup[item.ItemID.Trim()] = item;
+                }
+            }
+        }
+
+        // Respaldo automático si algún ítem está en carpetas Resources
+        ItemData[] resourceItems = Resources.LoadAll<ItemData>(string.Empty);
+        for (int i = 0; i < resourceItems.Length; i++)
+        {
+            ItemData item = resourceItems[i];
+            if (item != null && !string.IsNullOrWhiteSpace(item.ItemID) && !_itemLookup.ContainsKey(item.ItemID.Trim()))
+            {
+                _itemLookup[item.ItemID.Trim()] = item;
+            }
+        }
+    }
+    private ItemData ResolveItemByID(string itemID)
+    {
+        if (string.IsNullOrWhiteSpace(itemID)) return null;
+        return _itemLookup.TryGetValue(itemID.Trim(), out ItemData found) ? found : null;
+    }
+    private void SyncFromSaveManager()
+    {
+        if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession || SaveManager.Instance.CurrentRun == null)
+            return;
+
+        ImportInventoryData(SaveManager.Instance.CurrentRun.inventory);
+    }
+    public void ExportInventoryData(InventorySaveData targetData)
+    {
+        if (targetData == null) return;
+
+        targetData.equippedArmorID = _equippedArmor != null ? _equippedArmor.ItemID : string.Empty;
+        targetData.equippedConsumableID = _equippedConsumable != null ? _equippedConsumable.ItemID : string.Empty;
+        targetData.equippedConsumableCount = _equippedConsumable != null ? _consumableCount : 0;
+
+        targetData.generalSlots.Clear();
+        for (int i = 0; i < _generalSlots.Length; i++)
+        {
+            if (!_generalSlots[i].IsEmpty && !string.IsNullOrWhiteSpace(_generalSlots[i].Item.ItemID))
+            {
+                targetData.generalSlots.Add(new SerializedInventorySlot
+                {
+                    slotIndex = i,
+                    itemID = _generalSlots[i].Item.ItemID,
+                    quantity = _generalSlots[i].Quantity
+                });
+            }
+        }
+
+        targetData.armorSlots.Clear();
+        for (int i = 0; i < _armorInventorySlots.Length; i++)
+        {
+            if (!_armorInventorySlots[i].IsEmpty && !string.IsNullOrWhiteSpace(_armorInventorySlots[i].Item.ItemID))
+            {
+                targetData.armorSlots.Add(new SerializedInventorySlot
+                {
+                    slotIndex = i,
+                    itemID = _armorInventorySlots[i].Item.ItemID,
+                    quantity = _armorInventorySlots[i].Quantity
+                });
+            }
+        }
+    }
+    public void ImportInventoryData(InventorySaveData sourceData)
+    {
+        if (sourceData == null) return;
+
+        for (int i = 0; i < _generalSlots.Length; i++) _generalSlots[i].Clear();
+        for (int i = 0; i < _armorInventorySlots.Length; i++) _armorInventorySlots[i].Clear();
+
+        _equippedArmor = ResolveItemByID(sourceData.equippedArmorID) as ArmorItem;
+        if (_playerStats != null)
+        {
+            _playerStats._armorDefense = _equippedArmor != null ? _equippedArmor.DefenseBonus : 0f;
+            _playerStats.RecalculateStats();
+        }
+        OnArmorEquipped?.Invoke(_equippedArmor);
+
+        ConsumableItem loadedConsumable = ResolveItemByID(sourceData.equippedConsumableID) as ConsumableItem;
+        if (loadedConsumable != null && sourceData.equippedConsumableCount > 0)
+        {
+            _equippedConsumable = loadedConsumable;
+            _consumableCount = sourceData.equippedConsumableCount;
+        }
+        else
+        {
+            _equippedConsumable = null;
+            _consumableCount = 0;
+        }
+        OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
+
+        if (sourceData.generalSlots != null)
+        {
+            for (int i = 0; i < sourceData.generalSlots.Count; i++)
+            {
+                SerializedInventorySlot savedSlot = sourceData.generalSlots[i];
+                if (savedSlot.slotIndex < 0 || savedSlot.slotIndex >= _generalSlots.Length) continue;
+
+                ItemData item = ResolveItemByID(savedSlot.itemID);
+                if (item != null && savedSlot.quantity > 0)
+                {
+                    _generalSlots[savedSlot.slotIndex].Item = item;
+                    _generalSlots[savedSlot.slotIndex].Quantity = savedSlot.quantity;
+                }
+            }
+        }
+        OnInventoryUpdated?.Invoke(_generalSlots);
+
+        if (sourceData.armorSlots != null)
+        {
+            for (int i = 0; i < sourceData.armorSlots.Count; i++)
+            {
+                SerializedInventorySlot savedSlot = sourceData.armorSlots[i];
+                if (savedSlot.slotIndex < 0 || savedSlot.slotIndex >= _armorInventorySlots.Length) continue;
+
+                ItemData item = ResolveItemByID(savedSlot.itemID);
+                if (item != null && savedSlot.quantity > 0)
+                {
+                    _armorInventorySlots[savedSlot.slotIndex].Item = item;
+                    _armorInventorySlots[savedSlot.slotIndex].Quantity = savedSlot.quantity;
+                }
+            }
+        }
+        OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
     }
     public void AddItem(ItemData item)
     {
@@ -102,7 +256,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[InventoryManager] Inventario lleno. No se pudo añadir '{item.name}' (x{amount}).");
+            GameLogger.LogWarning($"[InventoryManager] Inventario lleno. No se pudo añadir '{item.name}' (x{amount}).");
         }
 
         return added;
@@ -160,8 +314,11 @@ public class InventoryManager : MonoBehaviour
         ArmorItem previousArmor = _equippedArmor;
 
         _equippedArmor = armor;
-        _playerStats._armorDefense = armor.DefenseBonus;
-        _playerStats.RecalculateStats();
+        if (_playerStats != null)
+        {
+            _playerStats._armorDefense = armor.DefenseBonus;
+            _playerStats.RecalculateStats();
+        }
 
         OnArmorEquipped?.Invoke(_equippedArmor);
 
@@ -223,8 +380,11 @@ public class InventoryManager : MonoBehaviour
         _armorInventorySlots[targetSlotIndex].Quantity = 1;
 
         _equippedArmor = null;
-        _playerStats._armorDefense = 0;
-        _playerStats.RecalculateStats();
+        if (_playerStats != null)
+        {
+            _playerStats._armorDefense = 0;
+            _playerStats.RecalculateStats();
+        }
 
         OnArmorEquipped?.Invoke(null);
         OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
@@ -243,6 +403,7 @@ public class InventoryManager : MonoBehaviour
         OnConsumableEquipped?.Invoke(null, 0);
         OnInventoryUpdated?.Invoke(_generalSlots);
     }
+
     private void UseEquippedConsumable()
     {
         if (_equippedConsumable == null || _consumableCount <= 0) return;
@@ -258,7 +419,7 @@ public class InventoryManager : MonoBehaviour
         if (_equippedConsumable.EffectType == ConsumableEffectType.Heal &&
             _playerHealth != null && _playerHealth.CurrentHealth >= _playerHealth.MaxHealth)
         {
-            Debug.Log("[Inventory] La salud ya está al máximo.");
+            GameLogger.LogInfo("[Inventory] La salud ya está al máximo.");
             return;
         }
 
@@ -289,10 +450,11 @@ public class InventoryManager : MonoBehaviour
 
             case ConsumableEffectType.StatBoost:
                 StatsUI statsUI = FindAnyObjectByType<StatsUI>();
-                statsUI.GrantStatPoints(_consumableCount);
+                if (statsUI != null) statsUI.GrantStatPoints(_consumableCount);
                 wasUsed = true;
                 break;
         }
+
         if (wasUsed)
         {
             _consumableCount--;

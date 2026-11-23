@@ -87,13 +87,13 @@ public class StateManager : MonoBehaviour
         if (_dialogueManager != null)
             _dialogueManager.OnDialogueEventTriggered -= HandleDialogueEvent;
     }
-
     private void SyncFromSaveManager()
     {
         if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession) return;
         if (SaveManager.Instance.CurrentRun == null) return;
 
-        ImportStateData(SaveManager.Instance.CurrentRun.world);
+        StageSaveData stageData = SaveManager.Instance.GetActiveStageSaveData();
+        ImportStateData(stageData);
     }
     private void BuildStateLookup()
     {
@@ -245,7 +245,7 @@ public class StateManager : MonoBehaviour
                 _goals[i].isCompleted = false;
         }
     }
-    public void ExportStateData(WorldSaveData targetData)
+    public void ExportStateData(StageSaveData targetData)
     {
         if (targetData == null) return;
 
@@ -270,7 +270,8 @@ public class StateManager : MonoBehaviour
             });
         }
     }
-    public void ImportStateData(WorldSaveData sourceData)
+
+    public void ImportStateData(StageSaveData sourceData)
     {
         if (sourceData == null) return;
 

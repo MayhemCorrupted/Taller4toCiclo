@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-
 public class PlayerStats : MonoBehaviour
 {
     public event Action OnStatsUpdated;
@@ -19,21 +18,22 @@ public class PlayerStats : MonoBehaviour
     public float Defense { get; private set; }
     public float VesaniaDamageBonus { get; private set; }
     public float ConsumableDamageBonus { get; private set; }
-
     private void Awake()
     {
+        SyncLevelsFromSaveManager();
         RecalculateStats();
     }
-
     private void Start()
     {
+        SyncLevelsFromSaveManager();
+        RecalculateStats();
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnVesaniaChanged += HandleVesaniaChanged;
             UpdateVesaniaBonus(GameManager.Instance.CurrentVesania);
         }
     }
-
     private void OnDestroy()
     {
         if (GameManager.Instance != null)
@@ -41,12 +41,21 @@ public class PlayerStats : MonoBehaviour
             GameManager.Instance.OnVesaniaChanged -= HandleVesaniaChanged;
         }
     }
+    private void SyncLevelsFromSaveManager()
+    {
+        if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession || SaveManager.Instance.CurrentRun == null)
+            return;
 
+        PlayerSaveData pData = SaveManager.Instance.CurrentRun.player;
+        _lifeLevel = Mathf.Clamp(pData.statVida, 1, 10);
+        _staminaLevel = Mathf.Clamp(pData.statStamina, 1, 10);
+        _strengthLevel = Mathf.Clamp(pData.statFuerza, 1, 10);
+        _agilityLevel = Mathf.Clamp(pData.statAgilidad, 1, 10);
+    }
     private void HandleVesaniaChanged(int newVesaniaLevel)
     {
         UpdateVesaniaBonus(newVesaniaLevel);
     }
-
     private void UpdateVesaniaBonus(int level)
     {
         VesaniaDamageBonus = 0f;
@@ -57,17 +66,15 @@ public class PlayerStats : MonoBehaviour
 
         RecalculateStats();
     }
-
     public void ApplyTemporaryDamageBoost(float amount)
     {
         ConsumableDamageBonus = amount;
         RecalculateStats();
     }
-    
     public void RecalculateStats()
     {
         MaxHealth = 80 + (12 * _lifeLevel);
-        MaxStamina = 60 + (8 * _staminaLevel); 
+        MaxStamina = 60 + (8 * _staminaLevel);
         float strengthBonus;
         if (_strengthLevel <= 6) strengthBonus = _strengthLevel * 0.05f;
         else strengthBonus = (6 * 0.05f) + ((_strengthLevel - 6) * 0.03f);

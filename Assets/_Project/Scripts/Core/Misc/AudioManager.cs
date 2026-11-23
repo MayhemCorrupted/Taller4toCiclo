@@ -12,7 +12,7 @@ public class AudioManager : MonoBehaviour
     private const string SFX_PARAM = "SFXVolume";
     private const string MISC_PARAM = "MiscVolume";
 
-    private const float DEFAULT_VOLUME = 0.8f;
+    private const float DEFAULT_VOLUME = 1.0f;
     private const float MIN_LINEAR_VOLUME = 0.0001f;
 
     public event Action OnVolumesChanged;

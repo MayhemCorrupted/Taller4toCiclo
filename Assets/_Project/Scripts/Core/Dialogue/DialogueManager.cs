@@ -1,9 +1,11 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 public class DialogueManager : MonoBehaviour
 {
     public event Action<string> OnDialogueEventTriggered;
+    public event Action OnDialogueEnded;
 
     private DialogueUI _dialogueUI;
     private PlayerInputs _playerInputs;
@@ -13,6 +15,7 @@ public class DialogueManager : MonoBehaviour
     private bool _isWaitingForChoice = false;
     private bool _isTransitioning = false;
     private string _pendingUIID = null;
+    private float _customCloseFadeDuration = -1f;
     private void Awake()
     {
         _playerInputs = FindAnyObjectByType<PlayerInputs>();
@@ -26,9 +29,50 @@ public class DialogueManager : MonoBehaviour
     {
         if (_playerInputs != null) _playerInputs.OnInteract -= AdvanceDialogue;
     }
+    private void Update()
+    {
+        if (_playerInputs != null || !_isDialogueActive || _isWaitingForChoice || _isTransitioning)
+            return;
+
+        if (WasFallbackAdvancePressed())
+        {
+            AdvanceDialogue();
+        }
+    }
+    private static bool WasFallbackAdvancePressed()
+    {
+        if (Keyboard.current != null &&
+            (Keyboard.current.eKey.wasPressedThisFrame ||
+             Keyboard.current.spaceKey.wasPressedThisFrame ||
+             Keyboard.current.enterKey.wasPressedThisFrame))
+        {
+            return true;
+        }
+
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            return true;
+        }
+
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public void RequestAdvanceDialogue() => AdvanceDialogue();
     public void SetPendingUI(string uiID)
     {
         _pendingUIID = uiID;
+    }
+    /// <summary>
+    /// Define una duración personalizada para el fade de cierre del diálogo actual (en segundos).
+    /// Se restablece automáticamente al cerrarse el diálogo.
+    /// </summary>
+    public void SetCloseFadeDuration(float duration)
+    {
+        _customCloseFadeDuration = duration;
     }
     public void StartDialogue(DialogueSequence sequence)
     {
@@ -213,6 +257,8 @@ public class DialogueManager : MonoBehaviour
         if (!_isDialogueActive && _isTransitioning) return;
 
         DialogueSequence finishedSequence = _currentSequence;
+        float closeFadeDuration = _customCloseFadeDuration;
+        _customCloseFadeDuration = -1f;
 
         _isDialogueActive = false;
         _isWaitingForChoice = false;
@@ -233,11 +279,14 @@ public class DialogueManager : MonoBehaviour
         _dialogueUI.CloseUI(() =>
         {
             _isTransitioning = false;
-            if (!_isDialogueActive && UIManager.Instance != null)
+            if (!_isDialogueActive)
             {
-                UIManager.Instance.SetGameState(GameState.Gameplay);
+                if (UIManager.Instance != null)
+                    UIManager.Instance.SetGameState(GameState.Gameplay);
+
+                OnDialogueEnded?.Invoke();
             }
-        });
+        }, closeFadeDuration);
     }
     private void UpdateUIInteractKey()
     {

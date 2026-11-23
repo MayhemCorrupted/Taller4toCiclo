@@ -323,24 +323,20 @@ public class GameManager : MonoBehaviour
         float healthRatio = _playerHealth.CurrentHealth / _playerHealth.MaxHealth;
         return healthRatio <= _vesania4HealthThreshold;
     }
-
     private void TriggerGameOver()
     {
         GameLogger.LogInfo(_isCheckpointActivated
             ? "Muerte definitiva. Las 3 vidas se han agotado."
             : "Muerte antes de activar el checkpoint. Reinicio requerido.");
 
-        Vector3 deathPosition = _player != null ? _player.transform.position : Vector3.zero;
-
         if (SaveManager.Instance != null)
         {
-            _ = SaveManager.Instance.HandlePermadeathAsync(deathPosition);
+            _ = SaveManager.Instance.HandlePermadeathAsync();
         }
 
         OnGameOver?.Invoke();
         OnGameOverEvent?.Invoke();
     }
-
     public void RespawnPlayerAtCheckpoint()
     {
         if (_player == null)

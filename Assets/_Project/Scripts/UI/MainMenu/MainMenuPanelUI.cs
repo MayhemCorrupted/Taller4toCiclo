@@ -3,6 +3,7 @@ public class MainMenuPanelUI : MonoBehaviour
 {
     [Header("Contenedores Principales")]
     [SerializeField] private GameObject _mainMenuContainer;
+    [SerializeField] private GameObject _playRootContainer;
     [SerializeField] private GameObject _optionsRootContainer;
 
     [Header("Sub-contenedores de Opciones")]
@@ -19,15 +20,32 @@ public class MainMenuPanelUI : MonoBehaviour
         ShowMainMenu();
     }
     /// <summary>
-    /// Muestra el menú principal y oculta todos los contenedores de opciones.
+    /// Muestra el menú principal y oculta los contenedores de partida y opciones.
     /// </summary>
     public void ShowMainMenu()
     {
         SetActiveSafe(_mainMenuContainer, true);
+        SetActiveSafe(_playRootContainer, false);
         SetActiveSafe(_optionsRootContainer, false);
         SetActiveSafe(_optionsCategorySelectorContainer, false);
         SetActiveSafe(_audioPanelContainer, false);
         SetActiveSafe(_graphicsPanelContainer, false);
+    }
+    /// <summary>
+    /// Cambia del menú principal al panel raíz de Slots y Nombre.
+    /// </summary>
+    public void OpenPlayPanel()
+    {
+        SetActiveSafe(_mainMenuContainer, false);
+        SetActiveSafe(_optionsRootContainer, false);
+        SetActiveSafe(_playRootContainer, true);
+    }
+    /// <summary>
+    /// Cierra el panel de Slots y regresa al menú principal.
+    /// </summary>
+    public void ClosePlayPanelToMainMenu()
+    {
+        ShowMainMenu();
     }
     /// <summary>
     /// Vincula este método al botón 'Opciones' del menú principal.
@@ -35,6 +53,7 @@ public class MainMenuPanelUI : MonoBehaviour
     public void OpenOptions()
     {
         SetActiveSafe(_mainMenuContainer, false);
+        SetActiveSafe(_playRootContainer, false);
         SetActiveSafe(_optionsRootContainer, true);
 
         if (_openAudioByDefault)
