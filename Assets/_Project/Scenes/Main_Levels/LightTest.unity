@@ -19448,6 +19448,7 @@ MonoBehaviour:
   _panelObject: {fileID: 1882830358}
   _disablePanelOnComplete: 1
   _useUnscaledTime: 1
+  _defaultTransitionDuration: 0.45
   _fadeSettings:
   - eventName: LostFade
     fadeInDuration: 0.5
@@ -44683,7 +44684,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!108 &1384624964
 Light:
   m_ObjectHideFlags: 0
@@ -64210,6 +64211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f995485b5aebf148b3509816029844c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  _itemCatalog: []
   _generalSlots:
   - Item: {fileID: 0}
     Quantity: 0
