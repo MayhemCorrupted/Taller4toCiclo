@@ -27,48 +27,6 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128514
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 9003239739113472
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
-        m_KeyId: 13087623656128515
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 9003239739113472
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
         m_KeyId: 14747556208721925
         m_Key: 
       m_FallbackState: 0
@@ -112,6 +70,48 @@ MonoBehaviour:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
         m_KeyId: 14747556208721927
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
+    CustomTextSpeed: 0
+    LineEndEventID: 
+  - SpeakerName:
+      m_TableReference:
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
+      m_TableEntryReference:
+        m_KeyId: 9003239739113472
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    DialogueText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 15794610445631488
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
+    CustomTextSpeed: 0
+    LineEndEventID: 
+  - SpeakerName:
+      m_TableReference:
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
+      m_TableEntryReference:
+        m_KeyId: 9003239739113472
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    DialogueText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 15794610751815680
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0

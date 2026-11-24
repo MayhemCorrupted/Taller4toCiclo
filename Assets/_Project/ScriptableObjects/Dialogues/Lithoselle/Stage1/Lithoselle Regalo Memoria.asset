@@ -10,43 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Seq_03A_ConfirmarEnemigos
+  m_Name: Lithoselle Regalo Memoria
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  id: 
+  CustomUIID: 
   Lines:
   - SpeakerName:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
       m_TableEntryReference:
-        m_KeyId: 0
+        m_KeyId: 9003239739113472
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
     DialogueText:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 0
+        m_KeyId: 13087623656128529
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 0}
+    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
     CustomTextSpeed: 0
     LineEndEventID: 
-  Options:
-  - OptionText:
-      m_TableReference:
-        m_TableCollectionName: 
-      m_TableEntryReference:
-        m_KeyId: 0
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    NextSequence: {fileID: 11400000, guid: 5dbacfe0ce262b9468582ae04bade181, type: 2}
-  SequenceEndEventID: 
+  Options: []
+  SequenceEndEventID: GiftMemory
   references:
     version: 2
     RefIds: []

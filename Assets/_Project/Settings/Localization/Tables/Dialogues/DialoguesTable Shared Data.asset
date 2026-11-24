@@ -59,14 +59,6 @@ MonoBehaviour:
     m_Key: LITHOSELLE_WARNING2
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128514
-    m_Key: LITHOSELLE_PRESENTATION1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 13087623656128515
-    m_Key: LITHOSELLE_PRESENTATION2
-    m_Metadata:
-      m_Items: []
   - m_Id: 14747556208721925
     m_Key: LITHOSELLE_COMBAT1
     m_Metadata:
@@ -77,6 +69,26 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 14747556208721927
     m_Key: LITHOSELLE_COMBAT3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610445631488
+    m_Key: LITHOSELLE_COMBAT4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815680
+    m_Key: LITHOSELLE_COMBAT5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815681
+    m_Key: LITHOSELLE_ENEMY_REMINDER
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815682
+    m_Key: LITHOSELLE_ENEMY_CONFIRM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815683
+    m_Key: LITHOSELLE_ENEMY_OPTION
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128519
@@ -91,20 +103,36 @@ MonoBehaviour:
     m_Key: LITHOSELLE_PILLAR3
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128521
-    m_Key: LITHOSELLE_PILLAR4
+  - m_Id: 15794610751815684
+    m_Key: LITHOSELLE_PILLAR_REMINDER
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721928
-    m_Key: LITHOSELLE_PILLAR5
+  - m_Id: 15794610751815685
+    m_Key: LITHOSELLE_PILLAR_CONFIRM
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721929
-    m_Key: LITHOSELLE_REMINDER
+  - m_Id: 15794610751815686
+    m_Key: LITHOSELLE_PILLAR_OPTION
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721930
-    m_Key: LITHOSELLE_NORMAL
+  - m_Id: 15794610751815687
+    m_Key: LITHOSELLE_BOTH
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815688
+    m_Key: LITHOSELLE_BOTH_OPTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815689
+    m_Key: LITHOSELLE_A_ANSWER1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815690
+    m_Key: LITHOSELLE_A_ANSWER2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815691
+    m_Key: LITHOSELLE_B_ANSWER1
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128524

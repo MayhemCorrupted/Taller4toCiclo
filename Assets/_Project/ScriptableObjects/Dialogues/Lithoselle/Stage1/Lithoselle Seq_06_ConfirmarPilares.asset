@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Redoma Selected
+  m_Name: Lithoselle Seq_06_ConfirmarPilares
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  CustomUIID: 
+  id: 
   Lines:
   - SpeakerName:
       m_TableReference:
@@ -27,16 +27,26 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128527
+        m_KeyId: 15794610751815685
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
+    SpeakerSprite: {fileID: 0}
     CustomTextSpeed: 0
     LineEndEventID: 
-  Options: []
-  SequenceEndEventID: GiftRedoma
+  Options:
+  - OptionText:
+      m_TableReference:
+        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
+      m_TableEntryReference:
+        m_KeyId: 15794610751815686
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    NextSequence: {fileID: 11400000, guid: 2e357fc65f252624fb130aeb9cf40540, type: 2}
+  SequenceEndEventID: 
   references:
     version: 2
     RefIds: []

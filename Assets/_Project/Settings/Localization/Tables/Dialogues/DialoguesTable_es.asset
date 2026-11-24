@@ -42,17 +42,6 @@ MonoBehaviour:
       yo os aguardo m\xE1s all\xE1."
     m_Metadata:
       m_Items: []
-  - m_Id: 13087623656128514
-    m_Localized: "Al fin lleg\xE1is a mi cobijo, mi buen caballero. Soy apenas un
-      alma cautiva en esta piedra, mas el destino ha querido que sea yo quien vele
-      por vuestros pasos."
-    m_Metadata:
-      m_Items: []
-  - m_Id: 13087623656128515
-    m_Localized: "De m\xED no resta sino este m\xE1rmol agrietado y mi palabra. Mas
-      mi voz ser\xE1 lumbre en vuestra desventura."
-    m_Metadata:
-      m_Items: []
   - m_Id: 13087623656128519
     m_Localized: "Valor hab\xE9is mostrado, mi caballero, mas vuestra carga a\xFAn
       no concluye."
@@ -64,9 +53,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128521
-    m_Localized: "Una vez dentro, habr\xE9is de buscar a quien desat\xF3 toda esta
-      desdicha. Hallad al Profeta y dadle muerte, os lo ruego, para que tras tantos
-      a\xF1os salga al fin de su miseria."
+    m_Localized: "Volved al bosque y quebradlos con vuestro acero. Solo as\xED se
+      abrir\xE1 el camino."
     m_Metadata:
       m_Items: []
   - m_Id: 13087623656128524
@@ -155,27 +143,77 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 14747556208721925
+    m_Localized: "Al fin lleg\xE1is a mi cobijo, mi buen caballero. Soy apenas un
+      alma cautiva en esta piedra, mas el destino ha querido que sea yo quien vele
+      por vuestros pasos."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14747556208721926
+    m_Localized: "De m\xED no resta sino este m\xE1rmol agrietado y mi palabra. Mas
+      mi voz ser\xE1 lumbre en vuestra desventura."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14747556208721927
     m_Localized: No os quiero indefenso ante esos pobres desdichados que han perdido
       el alma.
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721926
+  - m_Id: 15794610445631488
     m_Localized: Tomad esta hoja, mi caballero. Anathema se llama. Aferraos a ella
       aunque sus espinas os hieran, que solo su filo comparte vuestra condena.
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721927
+  - m_Id: 15794610751815680
     m_Localized: "Probad su temple con quienes os cierren el paso, y volved a m\xED,
       que bajo mi sombra hallar\xE9is reposo."
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721928
+  - m_Id: 15794610751815681
+    m_Localized: '"Inserte texto de recordar de derrotar a los errantes"'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815682
+    m_Localized: "\"Inserte Texto confirmando si se derrot\xF3 a los enemigos\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815683
+    m_Localized: '"Inserte texto confirmando la mision"'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815684
+    m_Localized: '"Inserte texto de recordar destruir los pilares"'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815685
+    m_Localized: '"Inserte texto de confirmar si destruyo los pilares"'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815686
+    m_Localized: "\"Inserte texto de confirmar la destrucci\xF3n de los pilares\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815687
+    m_Localized: '"Inserte texto confirmando si destruyo a los enemigos y los pilares" '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815688
+    m_Localized: '"Inserte texto afirmandolo"'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815689
+    m_Localized: "Una vez dentro, habr\xE9is de buscar a quien desat\xF3 toda esta
+      desdicha. Hallad al Profeta y dadle muerte, os lo ruego, para que tras tantos
+      a\xF1os salga al fin de su miseria."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15794610751815690
     m_Localized: "Mas no part\xE1is con las manos vac\xEDas. De una de estas reliquias
       puedo desprenderme; escoged con tiento:"
     m_Metadata:
       m_Items: []
-  - m_Id: 14747556208721929
-    m_Localized: '"Inserte texto de recordar destruir los pilares"'
+  - m_Id: 15794610751815691
+    m_Localized: '"Inserte texto explicando lo del A pero sabiendo que hizo lo de
+      los pilares antes"'
     m_Metadata:
       m_Items: []
   references:

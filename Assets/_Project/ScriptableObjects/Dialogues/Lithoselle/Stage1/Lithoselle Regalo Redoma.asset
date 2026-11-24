@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Stat Selected
+  m_Name: Lithoselle Regalo Redoma
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   CustomUIID: 
   Lines:
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13166524747104259
+        m_KeyId: 13087623656128527
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
     CustomTextSpeed: 0
     LineEndEventID: 
   Options: []
-  SequenceEndEventID: OpenStat
+  SequenceEndEventID: GiftRedoma
   references:
     version: 2
     RefIds: []

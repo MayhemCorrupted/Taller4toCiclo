@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Seq_04A_EncargoPilares
+  m_Name: Lithoselle Seq_07_FinalizarMision
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   id: 
   Lines:
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128519
+        m_KeyId: 15794610751815689
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128520
+        m_KeyId: 15794610751815690
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -56,71 +56,38 @@ MonoBehaviour:
     SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
     CustomTextSpeed: 0
     LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 9003239739113472
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
+  Options:
+  - OptionText:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128521
+        m_KeyId: 13087623656128524
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 9003239739113472
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
+    NextSequence: {fileID: 11400000, guid: 99632711985c0054aaaeb34b5f3f9c1b, type: 2}
+  - OptionText:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128522
+        m_KeyId: 13087623656128525
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  - SpeakerName:
-      m_TableReference:
-        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
-      m_TableEntryReference:
-        m_KeyId: 9003239739113472
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    DialogueText:
+    NextSequence: {fileID: 11400000, guid: 8f5acac9a26c1f54c80753941e4343bf, type: 2}
+  - OptionText:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128523
+        m_KeyId: 13087623656128526
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
-    CustomTextSpeed: 0
-    LineEndEventID: 
-  Options: []
-  SequenceEndEventID: IniciarPilares
+    NextSequence: {fileID: 11400000, guid: 25706efb7b12c1941ae597f059cc57d0, type: 2}
+  SequenceEndEventID: FinalizarMision
   references:
     version: 2
     RefIds: []

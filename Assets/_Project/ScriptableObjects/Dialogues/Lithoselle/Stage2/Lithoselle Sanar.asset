@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Seq_06_ConfirmarPilares
+  m_Name: Lithoselle Sanar
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   id: 
   Lines:
   - SpeakerName:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName: GUID:41ff67ec690917d4da8f9970ffac9588
       m_TableEntryReference:
-        m_KeyId: 0
+        m_KeyId: 9003239739113472
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -35,17 +35,7 @@ MonoBehaviour:
     SpeakerSprite: {fileID: 0}
     CustomTextSpeed: 0
     LineEndEventID: 
-  Options:
-  - OptionText:
-      m_TableReference:
-        m_TableCollectionName: 
-      m_TableEntryReference:
-        m_KeyId: 0
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    NextSequence: {fileID: 11400000, guid: 2e357fc65f252624fb130aeb9cf40540, type: 2}
+  Options: []
   SequenceEndEventID: 
   references:
     version: 2

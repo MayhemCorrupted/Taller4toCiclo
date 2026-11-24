@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Talk
+  m_Name: Lithoselle Abrir Stats
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   CustomUIID: 
   Lines:
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13166523996323840
+        m_KeyId: 13166524747104259
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -35,28 +35,8 @@ MonoBehaviour:
     SpeakerSprite: {fileID: 427594766, guid: 0f101b76a38c9a44395fc7d891ef8d01, type: 3}
     CustomTextSpeed: 0
     LineEndEventID: 
-  Options:
-  - OptionText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
-        m_KeyId: 13166524747104256
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    NextSequence: {fileID: 11400000, guid: 9ef440ce8c11d4b43b5f633e255eb55f, type: 2}
-  - OptionText:
-      m_TableReference:
-        m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
-      m_TableEntryReference:
-        m_KeyId: 13166524747104257
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    NextSequence: {fileID: 11400000, guid: e9ac8e45af4247e418bdf57b230b6003, type: 2}
-  SequenceEndEventID: 
+  Options: []
+  SequenceEndEventID: OpenStat
   references:
     version: 2
     RefIds: []

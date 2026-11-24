@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5faf9fdc6a9c0314d9ce022728e7cda0, type: 3}
-  m_Name: Lithoselle Memory Selected
+  m_Name: Lithoselle Seq_04B_AunFaltanPilares
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  CustomUIID: 
+  id: 
   Lines:
   - SpeakerName:
       m_TableReference:
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:87896db2562e33b4eb3af09bcb455886
       m_TableEntryReference:
-        m_KeyId: 13087623656128529
+        m_KeyId: 15794610751815684
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
     CustomTextSpeed: 0
     LineEndEventID: 
   Options: []
-  SequenceEndEventID: GiftMemory
+  SequenceEndEventID: 
   references:
     version: 2
     RefIds: []
