@@ -7,15 +7,18 @@ public class PlayerAnimator : MonoBehaviour
     public bool IsBlockHitPlaying => _isBlockHitPlaying;
     public bool IsLaying { get; private set; }
     public bool IsStandingUp { get; private set; }
+
     [Header("Referencias")]
     [SerializeField] private Animator _animator;
+
     [Header("Configuración de Layers")]
     [Tooltip("Nombre del Layer de Combate en el Animator (si no se encuentra, usará el índice 1).")]
     [SerializeField] private string _combatLayerName = "Combat";
     [Tooltip("Nombre exacto del Layer en el Animator dedicado a Laying y StandUp.")]
     [SerializeField] private string _layingLayerName = "Laying";
-    [Tooltip("Si está activo, el jugador comenzará la escena tirado en el suelo con el layer de Laying en weight 1.")]
+    [Tooltip("Si está activo, el jugador comenzará tirado solo al iniciar partida en Stage 1 antes de alcanzar su checkpoint.")]
     [SerializeField] private bool _startLaying = false;
+
     private PlayerFSM _playerFSM;
     private PlayerInputs _playerInputs;
     private PlayerCombat _playerCombat;
@@ -93,7 +96,7 @@ public class PlayerAnimator : MonoBehaviour
         ResolveLayerIndices();
         SetCombatLayerWeight(0f);
 
-        if (_startLaying)
+        if (ShouldStartLaying())
         {
             StartLaying();
         }
@@ -101,6 +104,18 @@ public class PlayerAnimator : MonoBehaviour
         {
             StopLaying();
         }
+    }
+    private bool ShouldStartLaying()
+    {
+        if (!_startLaying)
+            return false;
+
+        if (SaveManager.Instance != null && SaveManager.Instance.HasActiveSession)
+        {
+            return SaveManager.Instance.ShouldPlayerStartLaying();
+        }
+
+        return true;
     }
     private void OnEnable()
     {

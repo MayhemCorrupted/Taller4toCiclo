@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-[Serializable] public class MissionGoal
+
+[Serializable]
+public class MissionGoal
 {
     [Tooltip("Nombre para identificar este objetivo en el Inspector.")]
     public string title = "Nuevo Objetivo";
@@ -27,21 +29,45 @@ using UnityEngine.Events;
 
     [HideInInspector] public bool isCompleted;
 }
-[Serializable] public struct StateAction
+
+[Serializable]
+public struct StateAction
 {
     [Tooltip("Número de estado que dispara este evento.")]
     public int state;
     public UnityEvent onEnter;
 }
-[Serializable] public struct DialogueEventAction
+
+[Serializable]
+public struct DialogueEventAction
 {
     [Tooltip("Debe coincidir con el SequenceEndEventID o LineEndEventID del diálogo.")]
     public string eventID;
     public UnityEvent onTriggered;
 }
+
 public class StateManager : MonoBehaviour
 {
-    public static StateManager Instance { get; private set; }
+    private static StateManager _instance;
+    private static bool _isAutoCreated;
+
+    public static StateManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindAnyObjectByType<StateManager>(FindObjectsInactive.Include);
+                if (_instance == null && Application.isPlaying)
+                {
+                    GameObject autoObj = new GameObject("StateManager (Auto)");
+                    _instance = autoObj.AddComponent<StateManager>();
+                    _isAutoCreated = true;
+                }
+            }
+            return _instance;
+        }
+    }
 
     [Header("Progreso Actual")]
     [SerializeField] private int _currentState = 0;
@@ -62,20 +88,30 @@ public class StateManager : MonoBehaviour
     private readonly HashSet<string> _triggeredEvents = new();
     private readonly Dictionary<int, UnityEvent> _stateLookup = new();
     private DialogueManager _dialogueManager;
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
-            Destroy(gameObject);
-            return;
+            if (_isAutoCreated)
+            {
+                Destroy(_instance.gameObject);
+                _isAutoCreated = false;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
 
-        Instance = this;
+        _instance = this;
         BuildStateLookup();
+        SyncFromSaveManager();
     }
     private void Start()
     {
-        _dialogueManager = FindAnyObjectByType<DialogueManager>();
+        _dialogueManager = FindAnyObjectByType<DialogueManager>(FindObjectsInactive.Include);
         if (_dialogueManager != null)
             _dialogueManager.OnDialogueEventTriggered += HandleDialogueEvent;
 
@@ -86,6 +122,12 @@ public class StateManager : MonoBehaviour
     {
         if (_dialogueManager != null)
             _dialogueManager.OnDialogueEventTriggered -= HandleDialogueEvent;
+
+        if (_instance == this)
+        {
+            _instance = null;
+            _isAutoCreated = false;
+        }
     }
     private void SyncFromSaveManager()
     {
@@ -270,7 +312,6 @@ public class StateManager : MonoBehaviour
             });
         }
     }
-
     public void ImportStateData(StageSaveData sourceData)
     {
         if (sourceData == null) return;

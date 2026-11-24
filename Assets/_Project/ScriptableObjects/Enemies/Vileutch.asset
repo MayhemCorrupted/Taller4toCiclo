@@ -16,7 +16,7 @@ MonoBehaviour:
   healthBarMode: 0
   health: 300
   defense: 50
-  moveSpeed: 2
+  moveSpeed: 1.5
   isStunnable: 0
   defaultArmorState: 1
   defaultHyperarmorMultiplier: 0.5

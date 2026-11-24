@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
-
     [Header("Nombres de Escenas (Build Settings)")]
     [SerializeField] private string _mainMenuSceneName = "MainMenu";
     [SerializeField] private string _introSetupSceneName = "Intro_CharacterSetup";
@@ -26,7 +26,7 @@ public class SaveManager : MonoBehaviour
     private bool _isLoadingFromDisk;
     private bool _isSaving;
     private bool _isTransitioningScene;
-
+    private readonly Dictionary<string, ItemData> _runtimeItemCache = new(StringComparer.OrdinalIgnoreCase);
     public GameSaveContainer CurrentRun => _currentRun;
     public int ActiveSlotIndex => _activeSlotIndex;
     public bool HasActiveSession => _hasActiveSession;
@@ -55,6 +55,64 @@ public class SaveManager : MonoBehaviour
         if (_onlyCountPlayTimeWhenFocused && !Application.isFocused) return;
 
         _currentRun.player.playTimeSeconds += Time.unscaledDeltaTime;
+    }
+    /// <summary>
+    /// Registra un ItemData en la caché persistente de SaveManager para transferirlo entre escenas.
+    /// </summary>
+    public void RegisterKnownItem(ItemData item)
+    {
+        if (item == null) return;
+
+        if (!string.IsNullOrWhiteSpace(item.ItemID))
+            _runtimeItemCache[item.ItemID.Trim()] = item;
+
+        if (!string.IsNullOrWhiteSpace(item.name))
+            _runtimeItemCache[item.name.Trim()] = item;
+    }
+    /// <summary>
+    /// Recupera un ItemData previamente registrado en la sesión por su ID o nombre de asset.
+    /// </summary>
+    public ItemData ResolveCachedItem(string itemID)
+    {
+        if (string.IsNullOrWhiteSpace(itemID)) return null;
+        return _runtimeItemCache.TryGetValue(itemID.Trim(), out ItemData cached) ? cached : null;
+    }
+    /// <summary>
+    /// Sincroniza en memoria el inventario actual cada vez que el jugador obtiene, equipa o consume un ítem.
+    /// </summary>
+    public void SyncInventoryFromManager(InventoryManager inventoryManager)
+    {
+        if (!_hasActiveSession || _currentRun == null || inventoryManager == null) return;
+
+        _currentRun.inventory ??= new InventorySaveData();
+        inventoryManager.ExportInventoryData(_currentRun.inventory);
+    }
+    /// <summary>
+    /// Determina si el jugador debe comenzar tirado en el suelo al cargar la escena actual.
+    /// Solo aplica al iniciar en Stage 1 antes de alcanzar su checkpoint.
+    /// </summary>
+    public bool ShouldPlayerStartLaying()
+    {
+        if (!_hasActiveSession || _currentRun == null)
+            return false;
+
+        string activeScene = SceneManager.GetActiveScene().name;
+        bool isStage1 = string.Equals(activeScene, _stage1SceneName, StringComparison.OrdinalIgnoreCase);
+        if (!isStage1)
+            return false;
+
+        bool checkpointReached = _currentRun.player.isCheckpointActivated ||
+                                 (GameManager.Instance != null && GameManager.Instance.IsCheckpointActivated);
+
+        return !checkpointReached;
+    }
+    /// <summary>
+    /// Sincroniza en memoria que el checkpoint de la escena actual fue alcanzado.
+    /// </summary>
+    public void NotifyCheckpointActivated()
+    {
+        if (!_hasActiveSession || _currentRun == null) return;
+        _currentRun.player.isCheckpointActivated = true;
     }
     /// <summary>
     /// Inicia una nueva partida en el slot elegido, guarda los datos iniciales
@@ -175,7 +233,8 @@ public class SaveManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// Guarda el progreso actual y carga de forma asíncrona el siguiente escenario (Stage 1 o Stage 2).
+    /// Guarda el progreso actual (estado, inventario, estadísticas) y carga de forma asíncrona
+    /// el siguiente escenario manteniendo el mismo currentState entre ambas escenas.
     /// </summary>
     public async Task TransitionToNextStageAsync(string nextSceneName, int newStateValue = -1)
     {
@@ -188,13 +247,28 @@ public class SaveManager : MonoBehaviour
             if (_activeSlotIndex < 0) _activeSlotIndex = 0;
         }
 
+        string currentActiveScene = SceneManager.GetActiveScene().name;
         CollectCurrentGameData(overrideSceneName: nextSceneName);
 
-        if (newStateValue >= 0)
+        if (!string.Equals(currentActiveScene, nextSceneName, StringComparison.OrdinalIgnoreCase))
         {
-            StageSaveData destinationStageData = _currentRun.world.GetStageData(nextSceneName, _stage1SceneName, _stage2SceneName);
-            destinationStageData.currentState = newStateValue;
+            _currentRun.player.isCheckpointActivated = false;
         }
+
+        StageSaveData sourceStageData = _currentRun.world.GetStageData(currentActiveScene, _stage1SceneName, _stage2SceneName);
+        int carriedState = StateManager.Instance != null
+            ? StateManager.Instance.CurrentState
+            : sourceStageData.currentState;
+
+        int resolvedState = newStateValue >= 0 ? newStateValue : carriedState;
+
+        StageSaveData destinationStageData = _currentRun.world.GetStageData(nextSceneName, _stage1SceneName, _stage2SceneName);
+        destinationStageData.currentState = resolvedState;
+
+        if (_currentRun.world.stage1 != null)
+            _currentRun.world.stage1.currentState = resolvedState;
+        if (_currentRun.world.stage2 != null)
+            _currentRun.world.stage2.currentState = resolvedState;
 
         _isLoadingFromDisk = false;
 
@@ -237,11 +311,17 @@ public class SaveManager : MonoBehaviour
         {
             StageSaveData activeStageData = _currentRun.world.GetStageData(currentActiveScene, _stage1SceneName, _stage2SceneName);
             StateManager.Instance.ExportStateData(activeStageData);
+
+            if (_currentRun.world.stage1 != null)
+                _currentRun.world.stage1.currentState = activeStageData.currentState;
+            if (_currentRun.world.stage2 != null)
+                _currentRun.world.stage2.currentState = activeStageData.currentState;
         }
 
-        InventoryManager inventoryManager = FindAnyObjectByType<InventoryManager>();
+        InventoryManager inventoryManager = FindAnyObjectByType<InventoryManager>(FindObjectsInactive.Include);
         if (inventoryManager != null)
         {
+            _currentRun.inventory ??= new InventorySaveData();
             inventoryManager.ExportInventoryData(_currentRun.inventory);
         }
     }

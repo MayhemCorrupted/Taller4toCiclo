@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-[Serializable] public class InventorySlot
+[Serializable]  public class InventorySlot
 {
     public ItemData Item;
     public int Quantity;
@@ -40,7 +40,7 @@ public class InventoryManager : MonoBehaviour
     private ConsumableItem _equippedConsumable;
     private int _consumableCount = 0;
 
-    private readonly Dictionary<string, ItemData> _itemLookup = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ItemData> _itemLookup = new(StringComparer.OrdinalIgnoreCase);
     private PlayerInputs _playerInputs;
     private PlayerStats _playerStats;
     private PlayerHealth _playerHealth;
@@ -49,10 +49,10 @@ public class InventoryManager : MonoBehaviour
     private Coroutine _activeHealCoroutine;
     private void Awake()
     {
-        _playerInputs = FindAnyObjectByType<PlayerInputs>();
-        _playerStats = FindAnyObjectByType<PlayerStats>();
-        _playerHealth = FindAnyObjectByType<PlayerHealth>();
-        _playerFSM = FindAnyObjectByType<PlayerFSM>();
+        _playerInputs = FindAnyObjectByType<PlayerInputs>(FindObjectsInactive.Include);
+        _playerStats = FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
+        _playerHealth = FindAnyObjectByType<PlayerHealth>(FindObjectsInactive.Include);
+        _playerFSM = FindAnyObjectByType<PlayerFSM>(FindObjectsInactive.Include);
 
         BuildItemLookup();
 
@@ -64,6 +64,8 @@ public class InventoryManager : MonoBehaviour
         {
             _armorInventorySlots[i] = new InventorySlot();
         }
+
+        SyncFromSaveManager();
     }
     private void OnEnable()
     {
@@ -75,8 +77,34 @@ public class InventoryManager : MonoBehaviour
     }
     private void Start()
     {
-        SyncFromSaveManager();
+        if (_playerStats == null)
+            _playerStats = FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
+
+        if (_playerStats != null)
+        {
+            _playerStats._armorDefense = _equippedArmor != null ? _equippedArmor.DefenseBonus : 0f;
+            _playerStats.RecalculateStats();
+        }
     }
+    private static string GetEffectiveItemID(ItemData item)
+    {
+        if (item == null) return string.Empty;
+        return !string.IsNullOrWhiteSpace(item.ItemID) ? item.ItemID.Trim() : item.name.Trim();
+    }
+    private void RegisterItemReference(ItemData item)
+    {
+        if (item == null) return;
+
+        if (!string.IsNullOrWhiteSpace(item.ItemID))
+            _itemLookup[item.ItemID.Trim()] = item;
+
+        if (!string.IsNullOrWhiteSpace(item.name))
+            _itemLookup[item.name.Trim()] = item;
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.RegisterKnownItem(item);
+    }
+
     private void BuildItemLookup()
     {
         _itemLookup.Clear();
@@ -85,30 +113,38 @@ public class InventoryManager : MonoBehaviour
         {
             for (int i = 0; i < _itemCatalog.Length; i++)
             {
-                ItemData item = _itemCatalog[i];
-                if (item != null && !string.IsNullOrWhiteSpace(item.ItemID))
-                {
-                    _itemLookup[item.ItemID.Trim()] = item;
-                }
+                RegisterItemReference(_itemCatalog[i]);
             }
         }
 
-        // Respaldo automático si algún ítem está en carpetas Resources
         ItemData[] resourceItems = Resources.LoadAll<ItemData>(string.Empty);
         for (int i = 0; i < resourceItems.Length; i++)
         {
-            ItemData item = resourceItems[i];
-            if (item != null && !string.IsNullOrWhiteSpace(item.ItemID) && !_itemLookup.ContainsKey(item.ItemID.Trim()))
-            {
-                _itemLookup[item.ItemID.Trim()] = item;
-            }
+            RegisterItemReference(resourceItems[i]);
         }
     }
     private ItemData ResolveItemByID(string itemID)
     {
         if (string.IsNullOrWhiteSpace(itemID)) return null;
-        return _itemLookup.TryGetValue(itemID.Trim(), out ItemData found) ? found : null;
+
+        string key = itemID.Trim();
+        if (_itemLookup.TryGetValue(key, out ItemData found))
+            return found;
+
+        if (SaveManager.Instance != null)
+        {
+            ItemData cached = SaveManager.Instance.ResolveCachedItem(key);
+            if (cached != null)
+            {
+                _itemLookup[key] = cached;
+                return cached;
+            }
+        }
+
+        GameLogger.LogWarning($"[InventoryManager] No se encontró ItemData con ID '{key}'. Asegúrate de asignarlo en _itemCatalog o Resources.");
+        return null;
     }
+
     private void SyncFromSaveManager()
     {
         if (SaveManager.Instance == null || !SaveManager.Instance.HasActiveSession || SaveManager.Instance.CurrentRun == null)
@@ -116,39 +152,59 @@ public class InventoryManager : MonoBehaviour
 
         ImportInventoryData(SaveManager.Instance.CurrentRun.inventory);
     }
+    private void NotifyInventoryStateChanged()
+    {
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.SyncInventoryFromManager(this);
+        }
+    }
     public void ExportInventoryData(InventorySaveData targetData)
     {
         if (targetData == null) return;
 
-        targetData.equippedArmorID = _equippedArmor != null ? _equippedArmor.ItemID : string.Empty;
-        targetData.equippedConsumableID = _equippedConsumable != null ? _equippedConsumable.ItemID : string.Empty;
+        if (_equippedArmor != null) RegisterItemReference(_equippedArmor);
+        if (_equippedConsumable != null) RegisterItemReference(_equippedConsumable);
+
+        targetData.equippedArmorID = _equippedArmor != null ? GetEffectiveItemID(_equippedArmor) : string.Empty;
+        targetData.equippedConsumableID = _equippedConsumable != null ? GetEffectiveItemID(_equippedConsumable) : string.Empty;
         targetData.equippedConsumableCount = _equippedConsumable != null ? _consumableCount : 0;
 
         targetData.generalSlots.Clear();
         for (int i = 0; i < _generalSlots.Length; i++)
         {
-            if (!_generalSlots[i].IsEmpty && !string.IsNullOrWhiteSpace(_generalSlots[i].Item.ItemID))
+            if (!_generalSlots[i].IsEmpty)
             {
-                targetData.generalSlots.Add(new SerializedInventorySlot
+                RegisterItemReference(_generalSlots[i].Item);
+                string resolvedID = GetEffectiveItemID(_generalSlots[i].Item);
+                if (!string.IsNullOrWhiteSpace(resolvedID))
                 {
-                    slotIndex = i,
-                    itemID = _generalSlots[i].Item.ItemID,
-                    quantity = _generalSlots[i].Quantity
-                });
+                    targetData.generalSlots.Add(new SerializedInventorySlot
+                    {
+                        slotIndex = i,
+                        itemID = resolvedID,
+                        quantity = _generalSlots[i].Quantity
+                    });
+                }
             }
         }
 
         targetData.armorSlots.Clear();
         for (int i = 0; i < _armorInventorySlots.Length; i++)
         {
-            if (!_armorInventorySlots[i].IsEmpty && !string.IsNullOrWhiteSpace(_armorInventorySlots[i].Item.ItemID))
+            if (!_armorInventorySlots[i].IsEmpty)
             {
-                targetData.armorSlots.Add(new SerializedInventorySlot
+                RegisterItemReference(_armorInventorySlots[i].Item);
+                string resolvedID = GetEffectiveItemID(_armorInventorySlots[i].Item);
+                if (!string.IsNullOrWhiteSpace(resolvedID))
                 {
-                    slotIndex = i,
-                    itemID = _armorInventorySlots[i].Item.ItemID,
-                    quantity = _armorInventorySlots[i].Quantity
-                });
+                    targetData.armorSlots.Add(new SerializedInventorySlot
+                    {
+                        slotIndex = i,
+                        itemID = resolvedID,
+                        quantity = _armorInventorySlots[i].Quantity
+                    });
+                }
             }
         }
     }
@@ -226,6 +282,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (item == null || amount <= 0) return false;
 
+        RegisterItemReference(item);
         bool added;
 
         if (item is ArmorItem)
@@ -234,7 +291,7 @@ public class InventoryManager : MonoBehaviour
         }
         else if (item is ConsumableItem consumable)
         {
-            if (_equippedConsumable != null && _equippedConsumable.ItemID == consumable.ItemID)
+            if (_equippedConsumable != null && GetEffectiveItemID(_equippedConsumable) == GetEffectiveItemID(consumable))
             {
                 _consumableCount += amount;
                 OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
@@ -253,6 +310,7 @@ public class InventoryManager : MonoBehaviour
         if (added)
         {
             OnItemAdded?.Invoke(item, amount);
+            NotifyInventoryStateChanged();
         }
         else
         {
@@ -265,7 +323,8 @@ public class InventoryManager : MonoBehaviour
     {
         if (allowStacking)
         {
-            InventorySlot existingSlot = slotArray.FirstOrDefault(s => !s.IsEmpty && s.Item.ItemID == item.ItemID);
+            string targetID = GetEffectiveItemID(item);
+            InventorySlot existingSlot = slotArray.FirstOrDefault(s => !s.IsEmpty && GetEffectiveItemID(s.Item) == targetID);
             if (existingSlot != null)
             {
                 existingSlot.Quantity += amount;
@@ -330,6 +389,7 @@ public class InventoryManager : MonoBehaviour
         else slot.Clear();
 
         OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
+        NotifyInventoryStateChanged();
     }
     public void EquipConsumableFromSlot(int slotIndex)
     {
@@ -356,6 +416,7 @@ public class InventoryManager : MonoBehaviour
             slot.Clear();
         }
         OnInventoryUpdated?.Invoke(_generalSlots);
+        NotifyInventoryStateChanged();
     }
     public void SwapGeneralSlots(int indexA, int indexB)
     {
@@ -363,6 +424,7 @@ public class InventoryManager : MonoBehaviour
 
         (_generalSlots[indexB], _generalSlots[indexA]) = (_generalSlots[indexA], _generalSlots[indexB]);
         OnInventoryUpdated?.Invoke(_generalSlots);
+        NotifyInventoryStateChanged();
     }
     public void SwapArmorInventorySlots(int indexA, int indexB)
     {
@@ -370,6 +432,7 @@ public class InventoryManager : MonoBehaviour
 
         (_armorInventorySlots[indexB], _armorInventorySlots[indexA]) = (_armorInventorySlots[indexA], _armorInventorySlots[indexB]);
         OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
+        NotifyInventoryStateChanged();
     }
     public void UnequipArmor(int targetSlotIndex)
     {
@@ -388,6 +451,7 @@ public class InventoryManager : MonoBehaviour
 
         OnArmorEquipped?.Invoke(null);
         OnArmorInventoryUpdated?.Invoke(_armorInventorySlots);
+        NotifyInventoryStateChanged();
     }
     public void UnequipConsumable(int targetSlotIndex)
     {
@@ -402,8 +466,8 @@ public class InventoryManager : MonoBehaviour
 
         OnConsumableEquipped?.Invoke(null, 0);
         OnInventoryUpdated?.Invoke(_generalSlots);
+        NotifyInventoryStateChanged();
     }
-
     private void UseEquippedConsumable()
     {
         if (_equippedConsumable == null || _consumableCount <= 0) return;
@@ -449,18 +513,18 @@ public class InventoryManager : MonoBehaviour
                 break;
 
             case ConsumableEffectType.StatBoost:
-                StatsUI statsUI = FindAnyObjectByType<StatsUI>();
+                StatsUI statsUI = FindAnyObjectByType<StatsUI>(FindObjectsInactive.Include);
                 if (statsUI != null) statsUI.GrantStatPoints(_consumableCount);
                 wasUsed = true;
                 break;
         }
-
         if (wasUsed)
         {
             _consumableCount--;
             if (_consumableCount <= 0) _equippedConsumable = null;
 
             OnConsumableEquipped?.Invoke(_equippedConsumable, _consumableCount);
+            NotifyInventoryStateChanged();
         }
     }
     private IEnumerator GradualHealRoutine(float totalHeal, float duration)

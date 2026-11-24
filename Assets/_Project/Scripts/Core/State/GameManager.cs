@@ -175,19 +175,16 @@ public class GameManager : MonoBehaviour
         _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
         _playerHealth.OnHealthChanged += HandlePlayerHealthChanged;
     }
-
     private void UnsubscribePlayerHealth()
     {
         if (_playerHealth == null) return;
 
         _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
     }
-
     private void HandlePlayerHealthChanged()
     {
         EvaluateVesaniaState();
     }
-
     public void ActivateCheckpoint()
     {
         if (_isCheckpointActivated) return;
@@ -203,10 +200,10 @@ public class GameManager : MonoBehaviour
 
         if (SaveManager.Instance != null)
         {
+            SaveManager.Instance.NotifyCheckpointActivated();
             _ = SaveManager.Instance.AutoSaveRunAsync();
         }
     }
-
     public void ActivateCheckpoint(Transform newCheckpointTransform)
     {
         if (newCheckpointTransform != null)

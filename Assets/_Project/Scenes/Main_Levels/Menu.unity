@@ -18533,7 +18533,7 @@ MonoBehaviour:
   _nicknameInputField: {fileID: 2056881043}
   _confirmNameButton: {fileID: 990448890}
   _cancelNameButton: {fileID: 1187002879}
-  _hideSlotsWhileNaming: 0
+  _hideSlotsWhileNaming: 1
   _emptySlotLabel: "Ranura Vac\xEDa"
   _emptyTimeLabel: --:--:--
   _defaultNickname: ???
@@ -18569,7 +18569,7 @@ MonoBehaviour:
   _mainMenuSceneName: Menu
   _introSetupSceneName: Intro_CharacterSetup
   _stage1SceneName: Stage1_Bosque
-  _stage2SceneName: StageTwoScene Alex
+  _stage2SceneName: Stage2_Catedral
   _transitionFadeUI: {fileID: 1058753731}
   _sceneFadeDuration: 0.45
   _onlyCountPlayTimeWhenFocused: 1
