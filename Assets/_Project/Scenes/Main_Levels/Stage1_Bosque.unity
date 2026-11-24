@@ -12712,15 +12712,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraShakeManager
   _noiseComponent: {fileID: 1399852359}
   _lightHitProfile:
-    intensity: 2
+    intensity: 3.2
     frequency: 2.5
     duration: 0.3
   _heavyHitProfile:
-    intensity: 2.6
+    intensity: 4
     frequency: 3.2
     duration: 0.35
   _skillHitProfile:
-    intensity: 3.2
+    intensity: 5
     frequency: 3.5
     duration: 0.4
   _falloffCurve:
@@ -26575,7 +26575,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
+  CustomBlends: {fileID: 11400000, guid: 8b2803c1e18fc174f82673e20c725cd2, type: 2}
 --- !u!114 &1709965400
 MonoBehaviour:
   m_ObjectHideFlags: 0
