@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &776834330303624004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8809053376190855590}
+  - component: {fileID: 4308234606810247650}
+  m_Layer: 0
+  m_Name: Main
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8809053376190855590
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776834330303624004}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4308234606810247650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776834330303624004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89b5e8f08a2ce124498ce878cac11fac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IsometricCameraManager
+  _cinemachineCamera: {fileID: 0}
+  _playerTarget: {fileID: 0}
+  _basePivotOffset: {x: 0, y: 0, z: 0}
+  _defaultYawSmoothTime: 0.35
+  _enablePlayerLookOffset: 1
+  _playerLookOffsetDistance: 1.6
+  _lookOffsetSmoothTime: 0.25
+  _enableMouseCircularOffset: 1
+  _mouseMaxOffsetRadius: 2
+  _mouseCenterDeadzone: 0.1
+  _mouseOffsetSmoothTime: 0.18
+  _enableGamepadStickOffset: 1
+  _gamepadMaxOffsetRadius: 2.8
+  _gamepadStickDeadzone: 0.15
+  _gamepadOffsetSmoothTime: 0.16
+  _invertGamepadY: 0
+  _maxCombinedExploratoryOffset: 2
+  _lockOnMidpointWeight: 0.45
+  _maxLockOnOffset: 4.5
+  _lockOnOffsetSmoothTime: 0.22
+  _defaultOrthoSmoothTime: 0.4
+  _minOrthoSize: 3
+  _maxOrthoSize: 20
+  _warpDistanceThreshold: 6
