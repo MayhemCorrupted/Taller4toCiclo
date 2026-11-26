@@ -1,0 +1,848 @@
+fileFormatVersion: 2
+guid: a04649a5e9787a249b178f71627c66cd
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: StatsScreenIcons_4
+      rect:
+        serializedVersion: 2
+        x: 590
+        y: 196
+        width: 8
+        height: 679
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd340873760fcf646bbe2a068ed88511
+      internalID: 1872974722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_5
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 195
+        width: 12
+        height: 708
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05a1fcfb4159f8240ad3dea7fe8ea6cd
+      internalID: -56035989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_6
+      rect:
+        serializedVersion: 2
+        x: 1401
+        y: 806
+        width: 404
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69ec6bf72a28ad74d892f4651d9a781e
+      internalID: -1105116708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_7
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 798
+        width: 649
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5090844bc1285a342a27e935b12ea641
+      internalID: -693404220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_11
+      rect:
+        serializedVersion: 2
+        x: 674
+        y: 728
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 92c1a81bd5917eb4c9a861a2b6513fed
+      internalID: 16010319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_12
+      rect:
+        serializedVersion: 2
+        x: 1146
+        y: 741
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d352453614da6104ead84d5c25b8ee10
+      internalID: -671105780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_13
+      rect:
+        serializedVersion: 2
+        x: 1267
+        y: 740
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a982a203ffad02540a64383dd43ff7d1
+      internalID: 225431192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_14
+      rect:
+        serializedVersion: 2
+        x: 1406
+        y: 740
+        width: 34
+        height: 31
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4724f57120934c40bacc9c459193dee
+      internalID: 1129984704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_18
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 707
+        width: 643
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef79280b3e6ff5f45b706081daa8c351
+      internalID: -164074679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_19
+      rect:
+        serializedVersion: 2
+        x: 1406
+        y: 682
+        width: 38
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 717e286a9cbbcf640bd67a36293deb05
+      internalID: 1552683088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_21
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 610
+        width: 53
+        height: 68
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e67ab4596bc427b40a2b790ffe2c961e
+      internalID: 272590575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_26
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 624
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a250421e9d53f7e44bab0eeb71eeda3c
+      internalID: -1236019304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_27
+      rect:
+        serializedVersion: 2
+        x: 1267
+        y: 624
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db0573b8ffb6c234491d2b08907bccbe
+      internalID: 1247424507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_28
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 619
+        width: 31
+        height: 39
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8187014e649e01428e74e4658dcc2ba
+      internalID: -190812627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_31
+      rect:
+        serializedVersion: 2
+        x: 1406
+        y: 565
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e031c8409b108143b8712dd33241752
+      internalID: -953361595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_32
+      rect:
+        serializedVersion: 2
+        x: 634
+        y: 569
+        width: 658
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 649c8b670a5920347b10bab7257d1e93
+      internalID: -1826199105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_36
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 365
+        width: 265
+        height: 490
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af634853bed878649b71a966e2288963
+      internalID: 380002978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_37
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 483
+        width: 59
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 806400805b749cf498c3c728a3fd3c33
+      internalID: 1653849674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_38
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 497
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d95610a31dce4a44b2f51c8707c23a3
+      internalID: 997882897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_39
+      rect:
+        serializedVersion: 2
+        x: 1267
+        y: 497
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d86173e6feeae642b05158be5d8f1fd
+      internalID: -849457537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_43
+      rect:
+        serializedVersion: 2
+        x: 1403
+        y: 469
+        width: 399
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08de18827e8490a4eb6db9de0d6a159f
+      internalID: -557882095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_44
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 442
+        width: 658
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68e5fb8d9789b5c46b7658220e3d46ad
+      internalID: 1985600313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_46
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 358
+        width: 59
+        height: 67
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1131b6f7eba7bf4d89df4ca1ffdf7f6
+      internalID: 1451596196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_47
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 373
+        width: 18
+        height: 28
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ee9de7748fb85d44819ebb2b4a8cc4f
+      internalID: 668277632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_48
+      rect:
+        serializedVersion: 2
+        x: 1267
+        y: 373
+        width: 17
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ee24501c15d0e0468683e7f347b4636
+      internalID: -1473615024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_50
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 315
+        width: 456
+        height: 31
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8486251a09aa7704ba584e2cdd16bf23
+      internalID: -125201014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_51
+      rect:
+        serializedVersion: 2
+        x: 634
+        y: 321
+        width: 658
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6661564dc3a241541bb2d6308e2ca5fc
+      internalID: -766364169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_52
+      rect:
+        serializedVersion: 2
+        x: 1410
+        y: 327
+        width: 390
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b15b5bb1f185a054c93ee462ad9edb6c
+      internalID: -1650931850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_53
+      rect:
+        serializedVersion: 2
+        x: 639
+        y: 229
+        width: 648
+        height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1be5987d0e93e04bb72957d16a7da8d
+      internalID: -736808712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StatsScreenIcons_55
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 164
+        width: 442
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddf4ac6ec848cf74ba3a556c6c6726c8
+      internalID: 2143584276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 92d8a7146c9031e43a653585cd43f647
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      StatsScreenIcons_0: 708186525
+      StatsScreenIcons_1: 1333235359
+      StatsScreenIcons_10: 1361735080
+      StatsScreenIcons_11: 16010319
+      StatsScreenIcons_12: -671105780
+      StatsScreenIcons_13: 225431192
+      StatsScreenIcons_14: 1129984704
+      StatsScreenIcons_15: 1535784521
+      StatsScreenIcons_16: -1848021353
+      StatsScreenIcons_17: 1476292398
+      StatsScreenIcons_18: -164074679
+      StatsScreenIcons_19: 1552683088
+      StatsScreenIcons_2: 1887889297
+      StatsScreenIcons_20: -612897552
+      StatsScreenIcons_21: 272590575
+      StatsScreenIcons_22: 1258765848
+      StatsScreenIcons_23: -323355352
+      StatsScreenIcons_24: 1078738749
+      StatsScreenIcons_25: -1139211721
+      StatsScreenIcons_26: -1236019304
+      StatsScreenIcons_27: 1247424507
+      StatsScreenIcons_28: -190812627
+      StatsScreenIcons_29: 1168709625
+      StatsScreenIcons_3: -1763467054
+      StatsScreenIcons_30: 194899737
+      StatsScreenIcons_31: -953361595
+      StatsScreenIcons_32: -1826199105
+      StatsScreenIcons_33: 506955799
+      StatsScreenIcons_34: 620465419
+      StatsScreenIcons_35: 164677697
+      StatsScreenIcons_36: 380002978
+      StatsScreenIcons_37: 1653849674
+      StatsScreenIcons_38: 997882897
+      StatsScreenIcons_39: -849457537
+      StatsScreenIcons_4: 1872974722
+      StatsScreenIcons_40: 1463999693
+      StatsScreenIcons_41: -567797932
+      StatsScreenIcons_42: -1183423316
+      StatsScreenIcons_43: -557882095
+      StatsScreenIcons_44: 1985600313
+      StatsScreenIcons_45: -703011681
+      StatsScreenIcons_46: 1451596196
+      StatsScreenIcons_47: 668277632
+      StatsScreenIcons_48: -1473615024
+      StatsScreenIcons_49: -1277370852
+      StatsScreenIcons_5: -56035989
+      StatsScreenIcons_50: -125201014
+      StatsScreenIcons_51: -766364169
+      StatsScreenIcons_52: -1650931850
+      StatsScreenIcons_53: -736808712
+      StatsScreenIcons_54: 1353046957
+      StatsScreenIcons_55: 2143584276
+      StatsScreenIcons_6: -1105116708
+      StatsScreenIcons_7: -693404220
+      StatsScreenIcons_8: 1597050796
+      StatsScreenIcons_9: -15479644
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
