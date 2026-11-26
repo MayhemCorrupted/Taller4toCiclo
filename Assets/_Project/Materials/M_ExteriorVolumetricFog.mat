@@ -38,16 +38,21 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DepthFadeDistance: 0.41
+    - _DepthFadeDistance: 2.5
     - _ExteriorFogDensity: 0.65
     - _ExteriorFogFalloff: 2
     - _ExteriorFogHeight: 1.5
-    - _NoiseScale: 0.08
+    - _FogClearFalloff: 3.6
+    - _FogClearRadius: 2.4
+    - _FogPushStrength: 0.35
+    - _NoiseScale: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
     - _ExteriorFogColor: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
     - _ExteriorFogWindSpeed: {r: 0.04, g: 0.02, b: 0, a: 0}
+    - _PlayerVelocity: {r: 0, g: 0, b: 0, a: 0}
+    - _PlayerWorldPos: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7211290845849353077
