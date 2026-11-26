@@ -17,43 +17,46 @@ public class ExteriorVolumetricFogController : MonoBehaviour
     [Range(0f, 1.5f)][SerializeField] private float _fogPushStrength = 0.35f;
     [Min(0.01f)][SerializeField] private float _velocitySmoothTime = 0.15f;
 
-    [Header("Configuración Visual Base")]
+    [Header("Configuración Visual e Integración con Iluminación")]
     [ColorUsage(true, true)]
-    [SerializeField] private Color _baseFogColor = new(0.45f, 0.52f, 0.62f, 1f);
+    [SerializeField] private Color _baseFogColor = new(0.22f, 0.26f, 0.32f, 1f);
+    [Tooltip("Multiplica el color de la niebla por la luz ambiental de la escena para que no se vea plana ni sobrepuesta.")]
+    [SerializeField] private bool _tintWithAmbientLight = true;
+    [Tooltip("Cuánto influye la luz ambiental de la escena en el color final de la niebla (0 = color puro, 1 = totalmente teñida por el ambiente).")]
+    [Range(0f, 1f)][SerializeField] private float _ambientLightInfluence = 0.7f;
+    [Tooltip("Tope máximo de opacidad real en el shader para no tapar las texturas del suelo.")]
+    [Range(0.05f, 1f)][SerializeField] private float _maxVisualOpacity = 0.45f;
+
+    [Header("Densidad y Altura Base")]
     [Tooltip("Densidad base fuera de cualquier VolumetricFogArea (0 = sin niebla hasta entrar en un trigger).")]
     [Range(0f, 1f)][SerializeField] private float _baseExteriorDensity = 0f;
     [Tooltip("Altura máxima en unidades de mundo (Y) donde se concentra la niebla.")]
     [SerializeField] private float _baseFogMaxHeight = 1.6f;
     [Tooltip("Suavizado vertical de la niebla.")]
     [Min(0.1f)][SerializeField] private float _fogHeightFalloff = 2.2f;
-    [SerializeField] private Vector2 _windSpeed = new(0.04f, 0.02f);
+    [SerializeField] private Vector2 _windSpeed = new(0.15f, 0.08f);
     [Min(0.05f)][SerializeField] private float _defaultTransitionDuration = 1.0f;
 
     [Header("Optimización de Capas (GPU)")]
     [Tooltip("Renderers de los planos horizontales de niebla que se apagan automáticamente cuando la densidad es 0.")]
     [SerializeField] private List<Renderer> _exteriorFogRenderers = new();
 
-    [Header("Sincronización con Niebla Ambiental URP")]
-    [SerializeField] private bool _syncUnityEnvironmentFog = true;
-    [Tooltip("Densidad máxima de RenderSettings.fogDensity cuando la niebla del shader está al 100% (1.0).")]
-    [Range(0f, 0.2f)][SerializeField] private float _maxEnvironmentFogDensity = 0.03f;
-
+    [Header("Sincronización con Niebla Ambiental URP (Desactivar en Isométrica)")]
+    [Tooltip("En cámaras ortográficas isométricas se recomienda dejarlo desactivado para no lavar las texturas.")]
+    [SerializeField] private bool _syncUnityEnvironmentFog = false;
+    [Range(0f, 0.2f)][SerializeField] private float _maxEnvironmentFogDensity = 0.015f;
     private readonly List<VolumetricFogArea> _activeFogAreas = new();
-
     private float _currentDensity;
     private float _targetDensity;
     private float _currentTransitionDuration;
-
     private Color _currentFogColor;
     private Color _targetFogColor;
     private float _currentFogHeight;
     private float _targetFogHeight;
-
     private Vector3 _lastPlayerPos;
     private Vector3 _smoothedPlayerVelocity;
     private Vector3 _velocityRef;
     private bool _hasLastPlayerPos;
-
     private static readonly int FogColorID = Shader.PropertyToID("_ExteriorFogColor");
     private static readonly int FogDensityID = Shader.PropertyToID("_ExteriorFogDensity");
     private static readonly int FogHeightID = Shader.PropertyToID("_ExteriorFogHeight");
@@ -96,7 +99,6 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         if (Instance == this)
             Instance = null;
     }
-
     private void Update()
     {
         UpdatePlayerReactivity();
@@ -151,7 +153,7 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         if (!Mathf.Approximately(_currentDensity, _targetDensity))
         {
             _currentDensity = Mathf.MoveTowards(_currentDensity, _targetDensity, stepSpeed);
-            Shader.SetGlobalFloat(FogDensityID, _currentDensity);
+            Shader.SetGlobalFloat(FogDensityID, _currentDensity * _maxVisualOpacity);
 
             if (_syncUnityEnvironmentFog)
             {
@@ -162,12 +164,14 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         if (_currentFogColor != _targetFogColor)
         {
             _currentFogColor = Color.Lerp(_currentFogColor, _targetFogColor, stepSpeed * 3f);
-            Shader.SetGlobalColor(FogColorID, _currentFogColor);
+        }
 
-            if (_syncUnityEnvironmentFog)
-            {
-                RenderSettings.fogColor = _currentFogColor;
-            }
+        Color finalLitColor = ComputeLitFogColor(_currentFogColor);
+        Shader.SetGlobalColor(FogColorID, finalLitColor);
+
+        if (_syncUnityEnvironmentFog)
+        {
+            RenderSettings.fogColor = finalLitColor;
         }
 
         if (!Mathf.Approximately(_currentFogHeight, _targetFogHeight))
@@ -177,6 +181,23 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         }
 
         UpdateRenderersVisibility(_currentDensity > 0.005f);
+    }
+    private Color ComputeLitFogColor(Color rawColor)
+    {
+        if (!_tintWithAmbientLight)
+            return rawColor;
+
+        Color ambient = RenderSettings.ambientLight;
+        Color litColor = new(
+            rawColor.r * ambient.r * 1.4f,
+            rawColor.g * ambient.g * 1.4f,
+            rawColor.b * ambient.b * 1.4f,
+            1f
+        );
+
+        Color blended = Color.Lerp(rawColor, litColor, _ambientLightInfluence);
+        blended.a = 1f;
+        return blended;
     }
     #region Control de Zonas (VolumetricFogArea)
     public void EnterFogArea(VolumetricFogArea area)
@@ -218,8 +239,10 @@ public class ExteriorVolumetricFogController : MonoBehaviour
     #endregion
     private void ApplyInitialShaderProperties()
     {
-        Shader.SetGlobalColor(FogColorID, _currentFogColor);
-        Shader.SetGlobalFloat(FogDensityID, _currentDensity);
+        Color finalLitColor = ComputeLitFogColor(_currentFogColor);
+
+        Shader.SetGlobalColor(FogColorID, finalLitColor);
+        Shader.SetGlobalFloat(FogDensityID, _currentDensity * _maxVisualOpacity);
         Shader.SetGlobalFloat(FogHeightID, _currentFogHeight);
         Shader.SetGlobalFloat(FogFalloffID, _fogHeightFalloff);
         Shader.SetGlobalVector(WindSpeedID, _windSpeed);
@@ -228,11 +251,11 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         Shader.SetGlobalFloat(FogClearFalloffID, _fogClearFalloff);
         Shader.SetGlobalFloat(FogPushStrengthID, _fogPushStrength);
 
+        RenderSettings.fog = _syncUnityEnvironmentFog;
         if (_syncUnityEnvironmentFog)
         {
-            RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = _currentFogColor;
+            RenderSettings.fogColor = finalLitColor;
             RenderSettings.fogDensity = _maxEnvironmentFogDensity * _currentDensity;
         }
     }
@@ -259,6 +282,7 @@ public class ExteriorVolumetricFogController : MonoBehaviour
         }
         else
         {
+            Shader.SetGlobalFloat(FogDensityID, _currentDensity * _maxVisualOpacity);
             Shader.SetGlobalFloat(FogFalloffID, _fogHeightFalloff);
             Shader.SetGlobalVector(WindSpeedID, _windSpeed);
             Shader.SetGlobalFloat(FogClearRadiusID, _fogClearRadius);
