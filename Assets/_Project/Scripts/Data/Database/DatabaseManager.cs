@@ -7,7 +7,7 @@ public class DatabaseManager : MonoBehaviour
 {
     public static DatabaseManager Instance;
 
-    [SerializeField] private string baseUrl = "https://progra262chgrupo1.samidareno.com/rotbound_api";
+    [SerializeField] private string baseUrl = "https://progra262chgrupo1.samidareno.com/rotbound_php";
 
     public int currentUserId = -1;
     public string currentUsername = "";
