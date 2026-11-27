@@ -638,7 +638,7 @@ MonoBehaviour:
   _healthPercentageText: {fileID: 0}
   _anchorTarget: {fileID: 1684321082760321475}
   _verticalOffset: {x: 0, y: 2.2, z: 0}
-  _onlyShowWhenDamagedOrAlerted: 0
+  _onlyShowWhenLockedOn: 1
   _faceCamera: 1
 --- !u!1 &2462788401816088814
 GameObject:

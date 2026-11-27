@@ -1,12 +1,12 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 public class EnemyWorldHealthHUD : MonoBehaviour
 {
     [Header("Referencias del Enemigo")]
     [SerializeField] private EntityBrain _brain;
     [SerializeField] private EntityCombat _combat;
     [SerializeField] private Health _health;
-
     [Header("Elementos UI World-Space")]
     [SerializeField] private Canvas _worldCanvas;
     [SerializeField] private GameObject _worldHudContainer;
@@ -16,15 +16,16 @@ public class EnemyWorldHealthHUD : MonoBehaviour
     [Header("Posicionamiento y Visibilidad")]
     [SerializeField] private Transform _anchorTarget;
     [SerializeField] private Vector3 _verticalOffset = new(0f, 2.2f, 0f);
-    [SerializeField] private bool _onlyShowWhenDamagedOrAlerted = true;
+    [FormerlySerializedAs("_onlyShowWhenDamagedOrAlerted")]
+    [SerializeField] private bool _onlyShowWhenLockedOn = true;
 
     [Header("Ajustes Visuales")]
     [SerializeField] private bool _faceCamera = true;
-
     private Camera _mainCamera;
+    private PlayerCombat _playerCombat;
+    private Transform _enemyRoot;
     private bool _isEnabledForThisEnemy = false;
     private bool _isInitialized = false;
-
     private void Awake()
     {
         if (_brain == null) _brain = GetComponentInParent<EntityBrain>();
@@ -32,7 +33,12 @@ public class EnemyWorldHealthHUD : MonoBehaviour
         if (_health == null) _health = GetComponentInParent<Health>();
         if (_worldCanvas == null) _worldCanvas = GetComponentInChildren<Canvas>(true);
 
+        _enemyRoot = _health != null ? _health.transform
+            : (_combat != null ? _combat.transform
+            : (_brain != null ? _brain.transform : transform.root));
+
         _mainCamera = Camera.main;
+        BindPlayerCombat();
 
         if (_worldCanvas != null)
         {
@@ -50,6 +56,22 @@ public class EnemyWorldHealthHUD : MonoBehaviour
         {
             _health.OnHealthChanged -= HandleHealthChanged;
             _health.OnDeath -= HandleDeath;
+        }
+
+        if (_playerCombat != null)
+        {
+            _playerCombat.OnLockOnTargetChanged -= HandleLockOnTargetChanged;
+        }
+    }
+    private void BindPlayerCombat()
+    {
+        if (_playerCombat != null) return;
+
+        _playerCombat = FindAnyObjectByType<PlayerCombat>();
+        if (_playerCombat != null)
+        {
+            _playerCombat.OnLockOnTargetChanged -= HandleLockOnTargetChanged;
+            _playerCombat.OnLockOnTargetChanged += HandleLockOnTargetChanged;
         }
     }
     public void InitializeFromEntityData()
@@ -117,22 +139,34 @@ public class EnemyWorldHealthHUD : MonoBehaviour
 
         _healthBar.Tick(Time.deltaTime);
     }
+    private bool IsThisEnemyLockedOn()
+    {
+        if (_playerCombat == null)
+            BindPlayerCombat();
+
+        if (_playerCombat == null || _playerCombat.LockOnTarget == null || _enemyRoot == null)
+            return false;
+
+        return _playerCombat.LockOnTarget.IsChildOf(_enemyRoot);
+    }
     private void RefreshVisibility()
     {
         if (_worldHudContainer == null) return;
 
-        if (!_onlyShowWhenDamagedOrAlerted)
+        if (!_onlyShowWhenLockedOn)
         {
             if (!_worldHudContainer.activeSelf) _worldHudContainer.SetActive(true);
             return;
         }
-
-        bool isDamaged = _health != null && _health.CurrentHealth < _health.MaxHealth;
-        bool isAlerted = _combat != null && _combat.CanSeeTarget;
-        bool shouldShow = isDamaged || isAlerted;
+        bool shouldShow = IsThisEnemyLockedOn();
 
         if (_worldHudContainer.activeSelf != shouldShow)
             _worldHudContainer.SetActive(shouldShow);
+    }
+    private void HandleLockOnTargetChanged(Transform newTarget)
+    {
+        if (!_isInitialized || !_isEnabledForThisEnemy) return;
+        RefreshVisibility();
     }
     private void HandleHealthChanged()
     {

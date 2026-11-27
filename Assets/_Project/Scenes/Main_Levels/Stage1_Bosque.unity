@@ -9638,18 +9638,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1263543384373387203, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.037
+      objectReference: {fileID: 0}
+    - target: {fileID: 1263543384373387203, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1263543384373387203, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0
+      objectReference: {fileID: 0}
     - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _promptText
       value: 
       objectReference: {fileID: 1967114676}
-    - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _interactRange
-      value: 2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _promptAnchorTag
-      value: ShowInteract
-      objectReference: {fileID: 0}
     - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: _promptContainer
       value: 
@@ -9658,22 +9662,6 @@ PrefabInstance:
       propertyPath: _promptCanvasGroup
       value: 
       objectReference: {fileID: 982918409}
-    - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _interactLayer.m_Bits
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _defaultPrompt.m_TableEntryReference.m_KeyId
-      value: 15063875468279808
-      objectReference: {fileID: 0}
-    - target: {fileID: 1295974886118244466, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _defaultPrompt.m_TableReference.m_TableCollectionName
-      value: GUID:9a5edb2a14d8b1142b46cb6fd703c931
-      objectReference: {fileID: 0}
-    - target: {fileID: 3114078892550905604, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
-      propertyPath: _isWeaponActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5401380329016130178, guid: fd326435e1d5af846a6f9a3d2b40ff8c, type: 3}
       propertyPath: m_Name
       value: Player
@@ -24022,10 +24010,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Errante Bosque
       objectReference: {fileID: 0}
-    - target: {fileID: 4835354187001355158, guid: 6958bd450a74fe94c979aae41a86e7f5, type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 1709965397}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
