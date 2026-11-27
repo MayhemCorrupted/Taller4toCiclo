@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 [Serializable] public class PlayerSaveData
 {
+    public int characterId = -1;
     public int slotIndex = 0;
     public string nickname = "Faulvalier";
     public string currentScene = "Stage1_Bosque";
@@ -71,9 +72,11 @@ using System.Collections.Generic;
 }
 public struct SaveSlotSummary
 {
+    public int characterId;
     public int slotIndex;
     public bool isOccupied;
     public string nickname;
     public float playTimeSeconds;
     public string currentScene;
+    public string runResult;
 }

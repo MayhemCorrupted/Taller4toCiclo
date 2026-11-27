@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 263.6065
+      value: -102.9935
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.84813
+      value: 4.8481236
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -118.061325
+      value: -36.561295
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: m_LocalRotation.w
@@ -51,7 +51,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 71154922be6cdc24097d9c671aa27fd8, type: 2}
+      objectReference: {fileID: 2100000, guid: 5d0cba725ca44474e9503c783eb156fa, type: 2}
     - target: {fileID: 919132149155446097, guid: bcccb35d6d8d1ad468c73d6f2ebcab31, type: 3}
       propertyPath: m_Name
       value: WallPreCorner_R

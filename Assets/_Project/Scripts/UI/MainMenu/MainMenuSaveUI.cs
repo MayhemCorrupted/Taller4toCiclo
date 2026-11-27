@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public struct SaveSlotButtonBinding
 {
     public Button slotButton;
+    public Button deleteButton;
     public TMP_Text characterNameText;
     public TMP_Text playTimeText;
 }
@@ -46,6 +47,7 @@ public class MainMenuSaveUI : MonoBehaviour
     [SerializeField] private string _defaultNickname = "Faulvalier";
 
     private SaveSlotSummary[] _cachedSummaries;
+    private string[] _cloudJsonPerSlot = new string[3];
     private SlotMenuMode _currentMode = SlotMenuMode.NewGame;
     private int _selectedSlotIndex = -1;
     private bool _isStartingGame;
@@ -107,25 +109,56 @@ public class MainMenuSaveUI : MonoBehaviour
     }
     public async Task RefreshSlotsDataAsync()
     {
-        _cachedSummaries = await BinarySaveService.GetAllSlotSummariesAsync();
+        _cachedSummaries = new SaveSlotSummary[BinarySaveService.MAX_SLOTS];
+        _cloudJsonPerSlot = new string[BinarySaveService.MAX_SLOTS];
 
-        bool hasAnySave = false;
+        if (DatabaseManager.Instance != null && DatabaseManager.Instance.IsLoggedIn())
+        {
+            var cloudChars = DatabaseManager.Instance.Characters.myCharacters;
+
+            for (int i = 0; i < BinarySaveService.MAX_SLOTS; i++)
+            {
+                if (cloudChars != null && i < cloudChars.Length)
+                {
+                    var c = cloudChars[i];
+                    _cloudJsonPerSlot[i] = c.save_json;
+                    _cachedSummaries[i] = new SaveSlotSummary
+                    {
+                        slotIndex = i,
+                        characterId = c.character_id,
+                        isOccupied = true,
+                        nickname = c.nickname,
+                        playTimeSeconds = c.play_time,
+                        runResult = c.result
+                    };
+                }
+                else
+                {
+                    _cachedSummaries[i] = new SaveSlotSummary { slotIndex = i, characterId = -1, isOccupied = false };
+                }
+            }
+        }
+        else
+        {
+            _cachedSummaries = await BinarySaveService.GetAllSlotSummariesAsync();
+        }
+
+        bool hasAnyPlayableSave = false;
         for (int i = 0; i < _cachedSummaries.Length; i++)
         {
-            if (_cachedSummaries[i].isOccupied)
+            if (_cachedSummaries[i].isOccupied && string.IsNullOrEmpty(_cachedSummaries[i].runResult))
             {
-                hasAnySave = true;
+                hasAnyPlayableSave = true;
                 break;
             }
         }
 
         if (_loadGameButton != null)
-        {
-            _loadGameButton.gameObject.SetActive(hasAnySave);
-        }
+            _loadGameButton.gameObject.SetActive(hasAnyPlayableSave);
 
         UpdateSlotButtonsVisuals(slotsInteractable: true);
     }
+
     private void UpdateSlotButtonsVisuals(bool slotsInteractable)
     {
         if (_cachedSummaries == null) return;
@@ -205,42 +238,18 @@ public class MainMenuSaveUI : MonoBehaviour
     private async void OnClickSlot(int slotIndex)
     {
         if (_isStartingGame || _cachedSummaries == null || slotIndex < 0 || slotIndex >= _cachedSummaries.Length)
-            return;
+        return;
 
-        if (_currentMode == SlotMenuMode.LoadGame)
-        {
-            if (!_cachedSummaries[slotIndex].isOccupied) return;
+    var summary = _cachedSummaries[slotIndex];
+    if (!summary.isOccupied) return;
 
-            _isStartingGame = true;
-            if (SaveManager.Instance != null)
-            {
-                await SaveManager.Instance.ContinueSavedGameAsync(slotIndex);
-            }
-            _isStartingGame = false;
-        }
-        else
-        {
-            _selectedSlotIndex = slotIndex;
+    BinarySaveService.DeleteSlotSave(slotIndex);
 
-            if (_nicknameInputField != null)
-                _nicknameInputField.text = string.Empty;
+    if (DatabaseManager.Instance != null && summary.characterId > 0)
+        DatabaseManager.Instance.Characters.DeleteCharacter(summary.characterId);
 
-            if (_closeSlotsButton != null)
-                _closeSlotsButton.gameObject.SetActive(false);
-
-            UpdateSlotButtonsVisuals(slotsInteractable: false);
-
-            if (_hideSlotsWhileNaming && CanHideSlotsSafely())
-            {
-                SetActiveSafe(_slotsContainer, false);
-            }
-
-            SetActiveSafe(_nameInputSubContainer, true);
-
-            if (_nicknameInputField != null)
-                _nicknameInputField.ActivateInputField();
-        }
-    }
+    await RefreshSlotsDataAsync();
+}
     private void OnClickCancelNameInput()
     {
         if (_isStartingGame) return;

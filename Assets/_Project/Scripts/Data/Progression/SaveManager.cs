@@ -151,6 +151,10 @@ public class SaveManager : MonoBehaviour
             _hasActiveSession = true;
             _isLoadingFromDisk = false;
 
+            if (DatabaseManager.Instance != null)
+                DatabaseManager.Instance.Characters.CreateCharacter(_currentRun.player.nickname, _currentRun);
+
+
             await BinarySaveService.SaveSlotAsync(_activeSlotIndex, _currentRun);
             await LoadSceneWithFadeAsync(_introSetupSceneName);
         }
@@ -172,6 +176,8 @@ public class SaveManager : MonoBehaviour
         _currentRun.player.statAgilidad = Mathf.Clamp(agilidadLevel, 1, 10);
 
         await BinarySaveService.SaveSlotAsync(_activeSlotIndex, _currentRun);
+
+        DatabaseManager.Instance.Characters.SaveProgress(_currentRun);
     }
     /// <summary>
     /// Carga la partida guardada del slot seleccionado y transiciona directamente a su escena guardada.
@@ -201,6 +207,7 @@ public class SaveManager : MonoBehaviour
 
             await LoadSceneWithFadeAsync(targetScene);
         }
+
         catch (Exception ex)
         {
             GameLogger.LogError($"Error al cargar partida del Slot {slotIndex + 1}: {ex.Message}");
@@ -222,6 +229,9 @@ public class SaveManager : MonoBehaviour
         {
             CollectCurrentGameData(overrideSceneName);
             await BinarySaveService.SaveSlotAsync(_activeSlotIndex, _currentRun);
+
+            DatabaseManager.Instance.Characters.SaveProgress(_currentRun);
+
         }
         catch (Exception ex)
         {
@@ -276,6 +286,7 @@ public class SaveManager : MonoBehaviour
         try
         {
             await BinarySaveService.SaveSlotAsync(_activeSlotIndex, _currentRun);
+            DatabaseManager.Instance.Characters.SaveProgress(_currentRun);
         }
         finally
         {
@@ -327,52 +338,90 @@ public class SaveManager : MonoBehaviour
     }
     public async Task HandlePermadeathAsync()
     {
+        if (_currentRun != null && DatabaseManager.Instance != null)
+        {
+            CollectCurrentGameData();
+            int finalScore = CalculateFinalScore(false);
+            Vector3 deathPos = GameManager.Instance != null && GameManager.Instance.Player != null
+                ? GameManager.Instance.Player.transform.position
+                : Vector3.zero;
+
+            DatabaseManager.Instance.Characters.FinishRunLose(
+                _currentRun.player.characterId,
+                finalScore,
+                _currentRun.player.playTimeSeconds,
+                SceneManager.GetActiveScene().name,
+                deathPos
+            );
+        }
+
         int slotToDelete = _activeSlotIndex;
         _hasActiveSession = false;
         _activeSlotIndex = -1;
         _currentRun = null;
 
         if (slotToDelete >= 0)
-        {
             BinarySaveService.DeleteSlotSave(slotToDelete);
-        }
 
         await Task.CompletedTask;
     }
     public async Task HandleVictoryAsync()
     {
+        if (_currentRun != null && DatabaseManager.Instance != null)
+        {
+            CollectCurrentGameData();
+            int finalScore = CalculateFinalScore(true);
+
+            DatabaseManager.Instance.Characters.FinishRunWin(
+                _currentRun.player.characterId,
+                finalScore,
+                _currentRun.player.playTimeSeconds
+            );
+        }
+
         int slotToDelete = _activeSlotIndex;
         _hasActiveSession = false;
         _activeSlotIndex = -1;
         _currentRun = null;
 
         if (slotToDelete >= 0)
-        {
             BinarySaveService.DeleteSlotSave(slotToDelete);
-        }
 
         await Task.CompletedTask;
     }
-    public async void ReturnToMainMenu()
+
+    public int CalculateFinalScore(bool isVictory)
     {
-        if (_isTransitioningScene) return;
-
-        try
+        int totalKills = 0;
+        if (_currentRun != null && _currentRun.world != null)
         {
-            if (_hasActiveSession && _currentRun != null)
-            {
-                await AutoSaveRunAsync();
-            }
+            if (_currentRun.world.stage1?.stateKillRecords != null)
+                foreach (var k in _currentRun.world.stage1.stateKillRecords) totalKills += k.count;
 
-            _hasActiveSession = false;
-            Time.timeScale = 1f;
-            await LoadSceneWithFadeAsync(_mainMenuSceneName);
+            if (_currentRun.world.stage2?.stateKillRecords != null)
+                foreach (var k in _currentRun.world.stage2.stateKillRecords) totalKills += k.count;
         }
-        catch (Exception ex)
-        {
-            GameLogger.LogError($"Error al regresar al menú principal: {ex.Message}");
-        }
+
+        int currentState = StateManager.Instance != null ? StateManager.Instance.CurrentState : 0;
+        int livesBonus = _currentRun != null ? _currentRun.player.remainingLives * 250 : 0;
+        int victoryBonus = isVictory ? 1000 : 0;
+
+        int rawScore = (totalKills * 150) + (currentState * 200) + livesBonus + victoryBonus;
+        return Mathf.Max(100, rawScore);
     }
+
+    public async Task ContinueFromCloudAsync(int slotIndex, string saveJsonFromDb)
+    {
+        if (string.IsNullOrWhiteSpace(saveJsonFromDb)) return;
+
+        GameSaveContainer cloudRun = JsonUtility.FromJson<GameSaveContainer>(saveJsonFromDb);
+        if (cloudRun == null) return;
+
+        cloudRun.player.slotIndex = slotIndex;
+        await BinarySaveService.SaveSlotAsync(slotIndex, cloudRun);
+        await ContinueSavedGameAsync(slotIndex);
+    }
+
     private async Task LoadSceneWithFadeAsync(string sceneName)
     {
         if (_isTransitioningScene) return;
